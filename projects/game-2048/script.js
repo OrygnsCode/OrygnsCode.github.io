@@ -19,12 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
     const swipeThreshold = 30;
 
-    // Use a fixed gap for JS calculations to ensure consistency.
-    // This MUST visually align with the 'gap' and 'padding' used by the CSS for #game-board.
-    // Your CSS uses `clamp(5px, 2vmin, 12px)`. For many screens, 12px will be the gap.
-    // Let's assume the effective spacing unit (gap or padding component) is this.
-    const JS_SPACING_UNIT = 12; 
     let cellSize = 0;
+    let cellGapFromCSS = 0; 
+    let firstCellOffsetX = 0; 
+    let firstCellOffsetY = 0;
     let newlyAddedTileInfo = null;
 
     // --- 1. GAME INITIALIZATION ---
@@ -41,39 +39,51 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDimensions() {
         if (!gameBoardElement) {
             console.error("!!! calculateDimensions: gameBoardElement not found!");
-            cellSize = 80; return; // Fallback
-        }
-        
-        // Get computed style to find the actual padding of the game board
-        const boardStyle = getComputedStyle(gameBoardElement);
-        const boardPaddingValue = parseFloat(boardStyle.paddingTop); // Assuming padding is uniform
-
-        if (isNaN(boardPaddingValue)) {
-            console.warn("Could not parse paddingTop from #game-board. Using JS_SPACING_UNIT as fallback for padding offset.");
-            // If padding can't be read, our tile positions might be off from the background grid if it's deeply padded.
-            // However, tiles are positioned relative to the content-box, so 0,0 is fine if there's no *extra* offset needed.
+            cellSize = 80; cellGapFromCSS = 10; firstCellOffsetX = 10; firstCellOffsetY = 10;
+            return;
         }
 
-        // clientWidth is the width of the content area (inside CSS padding of #game-board)
-        const boardContentWidth = gameBoardElement.clientWidth; 
-        
-        // cellSize is based on the contentWidth minus total gaps between cells, divided by grid size
-        cellSize = (boardContentWidth - (gridSize - 1) * JS_SPACING_UNIT) / gridSize;
+        const firstBgCell = gameBoardElement.querySelector('.grid-cell');
+        if (!firstBgCell) {
+            console.error("!!! calculateDimensions: .grid-cell for measurement not found! Ensure createBackgroundGrid ran and CSS is loaded.");
+            // Fallback if no background cells to measure (e.g. CSS issue)
+            const boardStyle = getComputedStyle(gameBoardElement);
+            const boardClientWidth = gameBoardElement.clientWidth;
+            let computedGapFallback = parseFloat(boardStyle.gap);
+            if(isNaN(computedGapFallback)) computedGapFallback = 10;
+            cellGapFromCSS = computedGapFallback;
+            cellSize = (boardClientWidth - (gridSize - 1) * cellGapFromCSS) / gridSize;
+            firstCellOffsetX = parseFloat(boardStyle.paddingLeft) || cellGapFromCSS; // Fallback for offset
+            firstCellOffsetY = parseFloat(boardStyle.paddingTop) || cellGapFromCSS;  // Fallback for offset
+            console.warn("Using fallback dimension calculations due to missing .grid-cell for measurement.");
+        } else {
+            const boardStyle = getComputedStyle(gameBoardElement);
+            let computedGap = parseFloat(boardStyle.gap);
+            if (isNaN(computedGap)) {
+                console.warn("Could not parse 'gap' from CSS. Using fallback 10px for cellGapFromCSS.");
+                const vminValue = Math.min(window.innerWidth, window.innerHeight) / 100;
+                computedGap = Math.max(5, Math.min(2 * vminValue, 12));
+            }
+            cellGapFromCSS = computedGap;
+            cellSize = firstBgCell.offsetWidth; 
+            firstCellOffsetX = firstBgCell.offsetLeft;
+            firstCellOffsetY = firstBgCell.offsetTop;
+        }
 
-        console.log(`DIMENSIONS: BoardContentWidth=${boardContentWidth}px, JS_SPACING_UNIT (for gap)=${JS_SPACING_UNIT}px, Calculated CellSize=${cellSize}px`);
+        console.log(`DIMENSIONS: FirstCell OffsetX=${firstCellOffsetX}px, OffsetY=${firstCellOffsetY}px, CellGap (CSS)=${cellGapFromCSS}px, CellSize (from bg cell)=${cellSize}px`);
         
         if (isNaN(cellSize) || cellSize <= 0) {
-            console.error("!!! Calculated cellSize is invalid! Value:", cellSize, "Using fallback 80px.");
-            cellSize = 80;
+            console.error("!!! Calculated cellSize from .grid-cell is invalid! Value:", cellSize, "Using fallback 80px.");
+            cellSize = 80; 
         }
+        if (isNaN(firstCellOffsetX)) { console.warn("firstCellOffsetX is NaN, using fallback 10"); firstCellOffsetX = 10; }
+        if (isNaN(firstCellOffsetY)) { console.warn("firstCellOffsetY is NaN, using fallback 10"); firstCellOffsetY = 10; }
+        if (isNaN(cellGapFromCSS)) { console.warn("cellGapFromCSS is NaN, using fallback 10"); cellGapFromCSS = 10; }
     }
-
+    
     function createBackgroundGrid() {
         if (!gameBoardElement) { console.error("!!! createBackgroundGrid: gameBoardElement not found!"); return; }
-        // Clear only previous background cells, not all children, to preserve overlays
-        const existingBgCells = gameBoardElement.querySelectorAll('.grid-cell');
-        existingBgCells.forEach(cell => cell.remove());
-
+        gameBoardElement.innerHTML = ''; 
         for (let i = 0; i < gridSize * gridSize; i++) {
             const cell = document.createElement('div');
             cell.classList.add('grid-cell');
@@ -89,33 +99,35 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;
         updateScoreDisplay();
 
-        createBackgroundGrid(); // Create static background cells first
-        calculateDimensions();  // Then calculate sizes
+        createBackgroundGrid(); 
         
-        initializeBoardArray();
-        addRandomTile(true); 
-        addRandomTile(true);
-        
-        renderBoard(true); // isInitialRender = true
+        requestAnimationFrame(() => { // Ensure DOM is ready for measurements
+            calculateDimensions();  
+            
+            initializeBoardArray();
+            addRandomTile(true); 
+            addRandomTile(true);
+            
+            renderBoard(true); 
 
-        if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
-        if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
-        console.log("INIT: Game started. Initial logical board:", JSON.parse(JSON.stringify(board)));
+            if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
+            if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
+            console.log("INIT: Game started. Initial logical board:", JSON.parse(JSON.stringify(board)));
+        });
     }
 
     // --- 2. RENDERING THE BOARD ---
     function renderBoard(isInitialRender = false) {
         if (!gameBoardElement) { console.error("!!! RENDER: gameBoardElement not found!"); return; }
-        if (cellSize <= 0 || isNaN(cellSize)) {
-            console.error("!!! RENDER: cellSize invalid (" + cellSize + "), cannot render tiles.");
+        if (cellSize <= 0 || isNaN(cellSize) || isNaN(cellGapFromCSS) || isNaN(firstCellOffsetX) || isNaN(firstCellOffsetY)) {
+            console.error("!!! RENDER: Critical dimensions invalid. cellSize:", cellSize, "cellGap:", cellGapFromCSS, `offsets:(${firstCellOffsetX},${firstCellOffsetY})`);
             return; 
         }
 
-        // Remove previous *numbered* tiles only. Background .grid-cell divs (children of #game-board) remain.
         const existingNumberedTiles = gameBoardElement.querySelectorAll('.tile:not(.grid-cell)');
         existingNumberedTiles.forEach(tile => tile.remove());
 
-        // console.log("RENDER: Drawing board. Logical data:", JSON.parse(JSON.stringify(board))); // Verbose
+        // console.log("RENDER: Drawing board. Logical data:", JSON.parse(JSON.stringify(board)));
 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
@@ -130,29 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     tileElement.style.width = `${cellSize}px`;
                     tileElement.style.height = `${cellSize}px`;
                     
-                    // Tiles are positioned absolutely relative to #game-board's content box.
-                    // The CSS grid on #game-board lays out the .grid-cell background.
-                    // These calculations should align the .tile divs over the .grid-cell divs.
-                    const topPosition = r * (cellSize + JS_SPACING_UNIT);
-                    const leftPosition = c * (cellSize + JS_SPACING_UNIT);
-                    tileElement.style.top = `${topPosition}px`;
-                    tileElement.style.left = `${leftPosition}px`;
+                    tileElement.style.top = `${firstCellOffsetY + r * (cellSize + cellGapFromCSS)}px`;
+                    tileElement.style.left = `${firstCellOffsetX + c * (cellSize + cellGapFromCSS)}px`;
                     
                     gameBoardElement.appendChild(tileElement);
-                    // console.log(`RENDER: Placed tile ${tileValue} at [${r},${c}] -> CSS left: ${leftPosition}px, CSS top: ${topPosition}px, CSS width: ${cellSize}px`);
+                    // console.log(`RENDER: Placed tile ${tileValue} at [${r},${c}] -> left: ${tileElement.style.left}, top: ${tileElement.style.top}, width: ${tileElement.style.width}`);
 
-                    // Animation for new tiles
                     if (newlyAddedTileInfo && newlyAddedTileInfo.r === r && newlyAddedTileInfo.c === c && !isInitialRender) {
                         // console.log("RENDER: Applying 'tile-new' animation to tile at:", newlyAddedTileInfo);
-                        tileElement.classList.add('tile-new'); // CSS applies initial transform: scale(0), opacity: 0
-                        // Ensure browser picks up initial state before transitioning
+                        tileElement.classList.add('tile-new'); 
                         requestAnimationFrame(() => {
-                            tileElement.style.transform = 'scale(1)';
-                            tileElement.style.opacity = '1';
+                            requestAnimationFrame(() => { 
+                                tileElement.style.transform = 'scale(1)';
+                                tileElement.style.opacity = '1';
+                            });
                         });
                     } else { 
-                        // For initial tiles or moved/merged tiles (which are re-created in this render model)
-                        // Ensure they are fully visible immediately.
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     }
@@ -165,12 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateScoreDisplay() { if (scoreElement) scoreElement.textContent = score; }
 
     // --- 3. ADDING RANDOM TILES ---
-    function getEmptyCells() { /* ... (same as your last working version) ... */ 
+    function getEmptyCells() {
         const emptyCells = [];
         for (let r = 0; r < gridSize; r++) { for (let c = 0; c < gridSize; c++) { if (board[r][c] === 0) emptyCells.push({ r, c }); } }
         return emptyCells;
     }
-    function addRandomTile(isInitialSetup = false) { /* ... (same as your last working version, ensure it sets newlyAddedTileInfo if !isInitialSetup) ... */ 
+    function addRandomTile(isInitialSetup = false) {
         const emptyCells = getEmptyCells();
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -201,10 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('keydown', handleKeyPress);
-    function handleKeyPress(event) { /* ... (same as your last working version) ... */ 
+    function handleKeyPress(event) {
         if ((isGameOver && !hasWon) || (youWinMessageElement && !youWinMessageElement.classList.contains('hidden'))) return;
         let changed = false; 
-        let dir = "Unknown"; // Renamed to avoid conflict if direction was global (it wasn't, but good practice)
+        let dir = "Unknown";
         try {
             switch (event.key) {
                 case 'ArrowUp': dir = 'Up'; changed = moveTilesUp(); event.preventDefault(); break;
@@ -229,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         touchEndY = event.changedTouches[0].clientY;
         handleSwipe();
     }
-    function handleSwipe() { /* ... (same as your last working version, ensure 'changed' and 'direction' are locally scoped) ... */ 
+    function handleSwipe() {
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
         let internalChanged = false; 
@@ -251,20 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
         processMove(internalChanged, swipeDir);
     }
 
-
-    // --- 5. MOVEMENT LOGIC --- (These should be exactly your last working versions)
-    function processRowLeft(row) { /* ... (same as your last confirmed working version) ... */ 
+    // --- 5. MOVEMENT LOGIC ---
+    function processRowLeft(row) {
         let filteredRow = row.filter(val => val !== 0);
         for (let i = 0; i < filteredRow.length - 1; i++) {
             if (filteredRow[i] === filteredRow[i+1]) {
-                filteredRow[i] *= 2; score += filteredRow[i]; filteredRow.splice(i + 1, 1); 
+                filteredRow[i] *= 2; 
+                score += filteredRow[i]; 
+                filteredRow.splice(i + 1, 1); 
             }
         }
         const newRow = [];
         for (let i = 0; i < gridSize; i++) { newRow[i] = filteredRow[i] || 0; }
         return newRow;
     }
-    function moveTilesLeft() { /* ... (same as your last confirmed working version, ensure it returns boolean) ... */ 
+
+    function moveTilesLeft() { 
         let internalBoardChanged = false;
         try {
             for (let r = 0; r < gridSize; r++) {
@@ -274,9 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (JSON.stringify(newRow) !== originalRowJSON) internalBoardChanged = true;
             }
         } catch (e) { console.error("ERROR in moveTilesLeft:", e); internalBoardChanged = false; }
+        // console.log("MOVE_FUNC: moveTilesLeft returning:", internalBoardChanged);
         return internalBoardChanged;
     }
-    function moveTilesRight() { /* ... (same as your last confirmed working version, ensure it returns boolean) ... */ 
+
+    function moveTilesRight() { 
         let internalBoardChanged = false;
         try {
             for (let r = 0; r < gridSize; r++) {
@@ -288,12 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (JSON.stringify(newRow) !== originalRowJSON) internalBoardChanged = true;
             }
         } catch (e) { console.error("ERROR in moveTilesRight:", e); internalBoardChanged = false; }
+        // console.log("MOVE_FUNC: moveTilesRight returning:", internalBoardChanged);
         return internalBoardChanged;
     }
-    function transposeBoard(matrix) { /* ... (same as your last confirmed working version, with robust error check) ... */ 
+
+    function transposeBoard(matrix) {
         try {
-            if (!matrix || !matrix.length || !matrix[0] || !matrix[0].length || typeof matrix[0].map !== 'function') {
-                console.error("Error in transposeBoard: Invalid matrix received", JSON.parse(JSON.stringify(matrix)));
+            if (!matrix || matrix.length !== gridSize || !matrix[0] || matrix[0].length !== gridSize) {
+                console.error("Error in transposeBoard: Invalid matrix received for transpose", JSON.parse(JSON.stringify(matrix)));
                 const fallbackMatrix = [];
                 for(let r=0; r<gridSize; r++) fallbackMatrix.push(new Array(gridSize).fill(0));
                 return fallbackMatrix; 
@@ -307,7 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return fallbackMatrix; 
         }
     }
-    function moveTilesUp() { /* ... (same as your last confirmed working version, ensure it returns boolean) ... */ 
+
+    function moveTilesUp() { 
         let internalBoardChanged = false;
         try {
             let tempBoard = transposeBoard(board); 
@@ -319,9 +331,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (internalBoardChanged) { board = transposeBoard(tempBoard); }
         } catch (e) { console.error("ERROR in moveTilesUp:", e); internalBoardChanged = false; }
+        // console.log("MOVE_FUNC: moveTilesUp returning:", internalBoardChanged);
         return internalBoardChanged;
     }
-    function moveTilesDown() { /* ... (same as your last confirmed working version, ensure it returns boolean) ... */ 
+
+    function moveTilesDown() { 
         let internalBoardChanged = false;
         try {
             let tempBoard = transposeBoard(board); 
@@ -335,10 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (internalBoardChanged) { board = transposeBoard(tempBoard); }
         } catch (e) { console.error("ERROR in moveTilesDown:", e); internalBoardChanged = false; }
+        // console.log("MOVE_FUNC: moveTilesDown returning:", internalBoardChanged);
         return internalBoardChanged;
     }
 
-    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) --- (Same as your last working version)
+    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
     function checkWinCondition() {for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize;c++){if(board[r][c]===targetTile && !hasWon)return true;}}return false;}
     function showWinMessage() {hasWon=true;if(youWinMessageElement)youWinMessageElement.classList.remove('hidden');console.log("WIN: You Win message shown");}
     function canAnyTileMove() {if(getEmptyCells().length>0)return true;for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize-1;c++){if(board[r][c]!==0&&board[r][c]===board[r][c+1])return true;}}for(let c=0;c<gridSize;c++){for(let r=0;r<gridSize-1;r++){if(board[r][c]!==0&&board[r][c]===board[r+1][c])return true;}}return false;}
@@ -348,13 +363,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
-    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; /* Acknowledge win but allow play */ console.log("Keep playing selected.");});
+    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; console.log("Keep playing selected.");});
     if (newGameFromWinButton) newGameFromWinButton.addEventListener('click', startGame);
     
     window.addEventListener('resize', () => {
         console.log("Window resized event triggered. Recalculating dimensions.");
-        calculateDimensions();
-        renderBoard(true); 
+        requestAnimationFrame(() => { 
+            calculateDimensions();
+            renderBoard(true); 
+        });
     });
 
     startGame(); 
