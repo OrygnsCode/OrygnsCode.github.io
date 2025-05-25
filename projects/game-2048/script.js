@@ -7,27 +7,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreElement = document.getElementById('final-score');
     const tryAgainButton = document.getElementById('try-again-button');
 
-    // Win Message elements (assuming HTML and CSS for these are done from a potential previous step)
     const youWinMessageElement = document.getElementById('you-win-message');
     const keepPlayingButton = document.getElementById('keep-playing-button');
     const newGameFromWinButton = document.getElementById('new-game-from-win-button');
 
     const gridSize = 4;
     const targetTile = 2048; 
-    let board = []; 
+    let board = []; // Logical board (data)
+    let visualTiles = []; // Array to hold references to the DOM tile elements
     let score = 0;
     let isGameOver = false;
     let hasWon = false;
 
-    // --- Touch Input Variables ---
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
-    const swipeThreshold = 30; // Minimum distance for a swipe
+    const swipeThreshold = 30; 
 
     // --- 1. GAME INITIALIZATION ---
-    function initializeBoardArray() { /* ... (same as before) ... */ 
+    function initializeBoardArray() {
         board = []; 
         for (let r = 0; r < gridSize; r++) {
             board[r] = []; 
@@ -37,15 +36,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // NEW: Function to create the persistent visual tile elements
+    function createVisualGrid() {
+        gameBoardElement.innerHTML = ''; // Clear board element once at the start
+        visualTiles = []; // Reset visual tiles array
+        for (let r = 0; r < gridSize; r++) {
+            visualTiles[r] = [];
+            for (let c = 0; c < gridSize; c++) {
+                const tileElement = document.createElement('div');
+                tileElement.classList.add('tile'); // Base style for all tile slots
+                gameBoardElement.appendChild(tileElement);
+                visualTiles[r][c] = tileElement; // Store reference
+            }
+        }
+    }
+
     function startGame() {
         console.log("Starting new game...");
         isGameOver = false;
         hasWon = false; 
         score = 0;
+        
+        if (visualTiles.length === 0) { // Create visual grid only once or if it's not there
+            createVisualGrid();
+        }
+        
         initializeBoardArray(); 
         
-        addRandomTile(); 
-        addRandomTile(); 
+        addRandomTile(true); // Pass true for isInitialSetup for potential animation control
+        addRandomTile(true);
         
         renderBoard(); 
         updateScoreDisplay();
@@ -54,30 +73,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 2. RENDERING THE BOARD ---
-    function renderBoard() { /* ... (same as before) ... */ 
-        gameBoardElement.innerHTML = ''; 
+    // MODIFIED: renderBoard now updates persistent tile elements
+    function renderBoard(animateNewTileInfo = null) {
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tileValue = board[r][c];
-                const tileElement = document.createElement('div');
-                tileElement.classList.add('tile'); 
-                
+                const tileElement = visualTiles[r][c]; // Get the persistent DOM element
+
+                // Reset classes, keeping only 'tile'
+                tileElement.className = 'tile'; 
+                tileElement.textContent = '';
+
                 if (tileValue !== 0) {
                     tileElement.textContent = tileValue;
                     tileElement.classList.add(`tile-${tileValue}`); 
                     if (tileValue > 2048) { 
                         tileElement.classList.add('tile-super');
                     }
+
+                    // If this tile was just added, animate it
+                    if (animateNewTileInfo && animateNewTileInfo.r === r && animateNewTileInfo.c === c) {
+                        tileElement.classList.add('tile-new');
+                        // Remove the animation class after animation completes to allow re-triggering
+                        setTimeout(() => {
+                            tileElement.classList.remove('tile-new');
+                        }, 200); // Match CSS animation duration
+                    }
                 }
-                gameBoardElement.appendChild(tileElement);
             }
         }
+        // console.log("Board rendered by updating existing tile elements.");
     }
+
     function updateScoreDisplay() { /* ... (same as before) ... */ 
         if (scoreElement) scoreElement.textContent = score;
     }
 
     // --- 3. ADDING RANDOM TILES ---
+    // MODIFIED: addRandomTile now triggers renderBoard with info about the new tile
     function getEmptyCells() { /* ... (same as before) ... */ 
         const emptyCells = [];
         for (let r = 0; r < gridSize; r++) {
@@ -89,22 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return emptyCells;
     }
-    function addRandomTile() { /* ... (same as before) ... */ 
+
+    function addRandomTile(isInitialSetup = false) {
         const emptyCells = getEmptyCells();
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            board[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
+            const newValue = Math.random() < 0.9 ? 2 : 4;
+            board[randomCell.r][randomCell.c] = newValue;
+            
+            // If not initial setup, specifically re-render with animation info for this new tile
+            if (!isInitialSetup) {
+                renderBoard({ r: randomCell.r, c: randomCell.c, value: newValue });
+            }
         }
     }
 
     // --- 4. HANDLING PLAYER INPUT ---
-    // Keyboard Input
     document.addEventListener('keydown', handleKeyPress);
 
-    function handleKeyPress(event) {
+    function handleKeyPress(event) { /* ... (same as before, calls processMove) ... */ 
         if (isGameOver && !hasWon) return; 
         if (youWinMessageElement && !youWinMessageElement.classList.contains('hidden')) return;
-
 
         let boardChanged = false; 
         switch (event.key) {
@@ -117,70 +155,53 @@ document.addEventListener('DOMContentLoaded', () => {
         processMove(boardChanged);
     }
 
-    // Touch Input Listeners
+    // Touch Input Listeners (same as before)
     gameBoardElement.addEventListener('touchstart', handleTouchStart, { passive: false });
     gameBoardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
     gameBoardElement.addEventListener('touchend', handleTouchEnd, { passive: false });
 
-    function handleTouchStart(event) {
-        // event.preventDefault(); // Prevent default only if a game move is certain or to prevent scroll
+    function handleTouchStart(event) { /* ... (same as before) ... */ 
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
-        console.log("Touch start:", touchStartX, touchStartY);
     }
-
-    function handleTouchMove(event) {
-        // We prevent default scrolling if the touch is on the game board
-        // This helps ensure swipes are captured without moving the page.
+    function handleTouchMove(event) { /* ... (same as before) ... */ 
         event.preventDefault();
     }
-
-    function handleTouchEnd(event) {
+    function handleTouchEnd(event) { /* ... (same as before, calls handleSwipe) ... */ 
         if (isGameOver && !hasWon) return;
         if (youWinMessageElement && !youWinMessageElement.classList.contains('hidden')) return;
-
         touchEndX = event.changedTouches[0].clientX;
         touchEndY = event.changedTouches[0].clientY;
-        console.log("Touch end:", touchEndX, touchEndY);
-
         handleSwipe();
     }
-
-    function handleSwipe() {
+    function handleSwipe() { /* ... (same as before, calls processMove) ... */ 
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
         let boardChanged = false;
-
-        // Determine if swipe is more horizontal or vertical
-        if (Math.abs(deltaX) > Math.abs(deltaY)) { // Horizontal swipe
-            if (Math.abs(deltaX) > swipeThreshold) { // Check if it meets threshold
-                if (deltaX > 0) {
-                    console.log("Swipe Right");
-                    boardChanged = moveTilesRight();
-                } else {
-                    console.log("Swipe Left");
-                    boardChanged = moveTilesLeft();
-                }
+        if (Math.abs(deltaX) > Math.abs(deltaY)) { 
+            if (Math.abs(deltaX) > swipeThreshold) { 
+                if (deltaX > 0) { boardChanged = moveTilesRight(); } 
+                else { boardChanged = moveTilesLeft(); }
             }
-        } else { // Vertical swipe
-            if (Math.abs(deltaY) > swipeThreshold) { // Check if it meets threshold
-                if (deltaY > 0) {
-                    console.log("Swipe Down");
-                    boardChanged = moveTilesDown();
-                } else {
-                    console.log("Swipe Up");
-                    boardChanged = moveTilesUp();
-                }
+        } else { 
+            if (Math.abs(deltaY) > swipeThreshold) { 
+                if (deltaY > 0) { boardChanged = moveTilesDown(); } 
+                else { boardChanged = moveTilesUp(); }
             }
         }
         processMove(boardChanged);
     }
     
-    // Common logic after a move (keyboard or swipe)
     function processMove(boardChanged) {
         if (boardChanged) {
-            addRandomTile();    
-            renderBoard();      
+            // Add random tile (which now calls renderBoard with animation hint for the new tile)
+            addRandomTile(); 
+            // If addRandomTile doesn't render, or if other tiles moved, render all here.
+            // For now, addRandomTile will trigger a targeted render for the new tile.
+            // We still need a general render for moved/merged tiles if we don't do it selectively.
+            // Let's call renderBoard() here to update all other tiles that might have moved/merged,
+            // but without animation hints for them yet.
+            renderBoard(); // This will redraw all tiles based on current board data.
             updateScoreDisplay(); 
             
             if (!hasWon) { 
@@ -189,15 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     return; 
                 }
             }
-            
             if (checkGameOver()) { 
                 endGame();
             }
         }
     }
 
-
-    // --- 5. MOVEMENT LOGIC ---
+    // --- 5. MOVEMENT LOGIC --- (All movement functions are the same as before)
     function processRowLeft(row) { /* ... (same as before) ... */ 
         let filteredRow = row.filter(val => val !== 0);
         for (let i = 0; i < filteredRow.length - 1; i++) {
@@ -286,8 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return boardChanged;
     }
 
-    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
-    function checkWinCondition() { /* ... (same as before, assuming it was added previously) ... */ 
+    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) --- (All same as before)
+    function checkWinCondition() { /* ... (same as before) ... */ 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 if (board[r][c] === targetTile) {
@@ -328,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(gameOverMessageElement) gameOverMessageElement.classList.remove('hidden');
     }
 
-    // --- Event Listeners for Buttons ---
+    // --- Event Listeners for Buttons --- (All same as before)
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
     if (keepPlayingButton) {
