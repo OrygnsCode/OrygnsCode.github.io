@@ -2,17 +2,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameBoardElement = document.getElementById('game-board');
     const scoreElement = document.getElementById('score');
     const newGameButton = document.getElementById('new-game-button');
+    
     const gameOverMessageElement = document.getElementById('game-over-message');
     const finalScoreElement = document.getElementById('final-score');
     const tryAgainButton = document.getElementById('try-again-button');
 
+    // Win Message elements (assuming HTML and CSS for these are done from a potential previous step)
+    const youWinMessageElement = document.getElementById('you-win-message');
+    const keepPlayingButton = document.getElementById('keep-playing-button');
+    const newGameFromWinButton = document.getElementById('new-game-from-win-button');
+
     const gridSize = 4;
+    const targetTile = 2048; 
     let board = []; 
     let score = 0;
     let isGameOver = false;
+    let hasWon = false;
+
+    // --- Touch Input Variables ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    const swipeThreshold = 30; // Minimum distance for a swipe
 
     // --- 1. GAME INITIALIZATION ---
-    function initializeBoardArray() {
+    function initializeBoardArray() { /* ... (same as before) ... */ 
         board = []; 
         for (let r = 0; r < gridSize; r++) {
             board[r] = []; 
@@ -25,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startGame() {
         console.log("Starting new game...");
         isGameOver = false;
+        hasWon = false; 
         score = 0;
         initializeBoardArray(); 
         
@@ -34,10 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBoard(); 
         updateScoreDisplay();
         if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden'); 
+        if (youWinMessageElement) youWinMessageElement.classList.add('hidden'); 
     }
 
     // --- 2. RENDERING THE BOARD ---
-    function renderBoard() {
+    function renderBoard() { /* ... (same as before) ... */ 
         gameBoardElement.innerHTML = ''; 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
@@ -56,13 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
-    function updateScoreDisplay() {
+    function updateScoreDisplay() { /* ... (same as before) ... */ 
         if (scoreElement) scoreElement.textContent = score;
     }
 
     // --- 3. ADDING RANDOM TILES ---
-    function getEmptyCells() {
+    function getEmptyCells() { /* ... (same as before) ... */ 
         const emptyCells = [];
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
@@ -73,8 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return emptyCells;
     }
-
-    function addRandomTile() {
+    function addRandomTile() { /* ... (same as before) ... */ 
         const emptyCells = getEmptyCells();
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -83,37 +98,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 4. HANDLING PLAYER INPUT ---
+    // Keyboard Input
     document.addEventListener('keydown', handleKeyPress);
 
     function handleKeyPress(event) {
-        if (isGameOver) return; 
+        if (isGameOver && !hasWon) return; 
+        if (youWinMessageElement && !youWinMessageElement.classList.contains('hidden')) return;
+
 
         let boardChanged = false; 
         switch (event.key) {
-            case 'ArrowUp':
-                boardChanged = moveTilesUp(); 
-                event.preventDefault(); 
-                break;
-            case 'ArrowDown':
-                boardChanged = moveTilesDown(); 
-                event.preventDefault();
-                break;
-            case 'ArrowLeft':
-                boardChanged = moveTilesLeft(); 
-                event.preventDefault();
-                break;
-            case 'ArrowRight':
-                boardChanged = moveTilesRight(); 
-                event.preventDefault();
-                break;
-            default:
-                return; 
+            case 'ArrowUp': boardChanged = moveTilesUp(); event.preventDefault(); break;
+            case 'ArrowDown': boardChanged = moveTilesDown(); event.preventDefault(); break;
+            case 'ArrowLeft': boardChanged = moveTilesLeft(); event.preventDefault(); break;
+            case 'ArrowRight': boardChanged = moveTilesRight(); event.preventDefault(); break;
+            default: return; 
         }
+        processMove(boardChanged);
+    }
 
+    // Touch Input Listeners
+    gameBoardElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    gameBoardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    gameBoardElement.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    function handleTouchStart(event) {
+        // event.preventDefault(); // Prevent default only if a game move is certain or to prevent scroll
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+        console.log("Touch start:", touchStartX, touchStartY);
+    }
+
+    function handleTouchMove(event) {
+        // We prevent default scrolling if the touch is on the game board
+        // This helps ensure swipes are captured without moving the page.
+        event.preventDefault();
+    }
+
+    function handleTouchEnd(event) {
+        if (isGameOver && !hasWon) return;
+        if (youWinMessageElement && !youWinMessageElement.classList.contains('hidden')) return;
+
+        touchEndX = event.changedTouches[0].clientX;
+        touchEndY = event.changedTouches[0].clientY;
+        console.log("Touch end:", touchEndX, touchEndY);
+
+        handleSwipe();
+    }
+
+    function handleSwipe() {
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        let boardChanged = false;
+
+        // Determine if swipe is more horizontal or vertical
+        if (Math.abs(deltaX) > Math.abs(deltaY)) { // Horizontal swipe
+            if (Math.abs(deltaX) > swipeThreshold) { // Check if it meets threshold
+                if (deltaX > 0) {
+                    console.log("Swipe Right");
+                    boardChanged = moveTilesRight();
+                } else {
+                    console.log("Swipe Left");
+                    boardChanged = moveTilesLeft();
+                }
+            }
+        } else { // Vertical swipe
+            if (Math.abs(deltaY) > swipeThreshold) { // Check if it meets threshold
+                if (deltaY > 0) {
+                    console.log("Swipe Down");
+                    boardChanged = moveTilesDown();
+                } else {
+                    console.log("Swipe Up");
+                    boardChanged = moveTilesUp();
+                }
+            }
+        }
+        processMove(boardChanged);
+    }
+    
+    // Common logic after a move (keyboard or swipe)
+    function processMove(boardChanged) {
         if (boardChanged) {
             addRandomTile();    
             renderBoard();      
             updateScoreDisplay(); 
+            
+            if (!hasWon) { 
+                if (checkWinCondition()) {
+                    showWinMessage();
+                    return; 
+                }
+            }
             
             if (checkGameOver()) { 
                 endGame();
@@ -121,8 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // --- 5. MOVEMENT LOGIC ---
-    function processRowLeft(row) {
+    function processRowLeft(row) { /* ... (same as before) ... */ 
         let filteredRow = row.filter(val => val !== 0);
         for (let i = 0; i < filteredRow.length - 1; i++) {
             if (filteredRow[i] === filteredRow[i+1]) {
@@ -137,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return newRow;
     }
-
     function moveTilesLeft() { /* ... (same as before) ... */ 
         let boardChanged = false;
         for (let r = 0; r < gridSize; r++) {
@@ -176,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return newMatrix;
     }
-    function moveTilesUp() { /* ... (same as before, without internal console logs unless needed for specific up/down debug) ... */
+    function moveTilesUp() { /* ... (same as before) ... */ 
         let boardChanged = false;
         let tempBoard = transposeBoard(board); 
         for (let r = 0; r < gridSize; r++) { 
@@ -192,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return boardChanged;
     }
-    function moveTilesDown() { /* ... (same as before, without internal console logs unless needed for specific up/down debug) ... */
+    function moveTilesDown() { /* ... (same as before) ... */ 
         let boardChanged = false;
         let tempBoard = transposeBoard(board); 
         for (let r = 0; r < gridSize; r++) { 
@@ -211,70 +286,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return boardChanged;
     }
 
-    // --- 6. GAME OVER LOGIC ---
-    function canAnyTileMove() {
-        console.log("Checking canAnyTileMove...");
-        // 1. Check for empty cells
-        if (getEmptyCells().length > 0) {
-            console.log("canAnyTileMove: Found empty cells. Returning true (moves possible).");
-            return true; 
+    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
+    function checkWinCondition() { /* ... (same as before, assuming it was added previously) ... */ 
+        for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+                if (board[r][c] === targetTile) {
+                    console.log("Win condition met: 2048 tile reached!");
+                    return true;
+                }
+            }
         }
-
-        // 2. Check for possible horizontal merges (only if no empty cells)
+        return false;
+    }
+    function showWinMessage() { /* ... (same as before) ... */ 
+        hasWon = true; 
+        if (youWinMessageElement) {
+            youWinMessageElement.classList.remove('hidden');
+        }
+    }
+    function canAnyTileMove() { /* ... (same as before) ... */ 
+        if (getEmptyCells().length > 0) return true; 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize - 1; c++) {
-                // Check if current tile is not zero AND matches the one to its right
-                if (board[r][c] !== 0 && board[r][c] === board[r][c + 1]) {
-                    console.log(`canAnyTileMove: Horizontal merge possible at [${r},${c}] and [${r},${c+1}] with value ${board[r][c]}. Returning true.`);
-                    return true; 
-                }
+                if (board[r][c] !== 0 && board[r][c] === board[r][c + 1]) return true; 
             }
         }
-
-        // 3. Check for possible vertical merges (only if no empty cells and no horizontal merges)
-        for (let c = 0; c < gridSize; c++) { // Iterate through columns first
-            for (let r = 0; r < gridSize - 1; r++) { // Iterate through rows
-                // Check if current tile is not zero AND matches the one below it
-                if (board[r][c] !== 0 && board[r][c] === board[r + 1][c]) {
-                    console.log(`canAnyTileMove: Vertical merge possible at [${r},${c}] and [${r+1},${c}] with value ${board[r][c]}. Returning true.`);
-                    return true; 
-                }
+        for (let c = 0; c < gridSize; c++) { 
+            for (let r = 0; r < gridSize - 1; r++) { 
+                if (board[r][c] !== 0 && board[r][c] === board[r + 1][c]) return true; 
             }
         }
-
-        console.log("canAnyTileMove: No empty cells and no possible merges. Returning false (no moves possible).");
         return false; 
     }
-
-    function checkGameOver() {
-        if (!canAnyTileMove()) {
-            console.log("checkGameOver: No moves possible, game is over.");
-            return true; // Game is over
-        }
-        console.log("checkGameOver: Moves still possible.");
-        return false; // Game is not over
+    function checkGameOver() { /* ... (same as before) ... */ 
+        if (!canAnyTileMove()) return true; 
+        return false; 
     } 
-
-    function endGame() {
+    function endGame() { /* ... (same as before) ... */ 
         isGameOver = true; 
-        console.log("endGame called! Final Score:", score); // Check if this function is called
-        if(finalScoreElement) {
-            finalScoreElement.textContent = score;
-            console.log("Final score element updated.");
-        } else {
-            console.error("finalScoreElement not found!");
-        }
-        if(gameOverMessageElement) {
-            gameOverMessageElement.classList.remove('hidden');
-            console.log("Game over message displayed.");
-        } else {
-            console.error("gameOverMessageElement not found!");
-        }
+        if(finalScoreElement) finalScoreElement.textContent = score;
+        if(gameOverMessageElement) gameOverMessageElement.classList.remove('hidden');
     }
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
+    if (keepPlayingButton) {
+        keepPlayingButton.addEventListener('click', () => {
+            if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
+            isGameOver = false; 
+        });
+    }
+    if (newGameFromWinButton) {
+        newGameFromWinButton.addEventListener('click', startGame);
+    }
 
     // --- Initial Game Start ---
     startGame();
