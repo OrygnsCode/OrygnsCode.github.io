@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderBoard();      
             updateScoreDisplay(); 
             
-            if (checkGameOver()) { // Check for game over after a successful move
+            if (checkGameOver()) { 
                 endGame();
             }
         }
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return newRow;
     }
 
-    function moveTilesLeft() {
+    function moveTilesLeft() { /* ... (same as before) ... */ 
         let boardChanged = false;
         for (let r = 0; r < gridSize; r++) {
             const originalRow = [...board[r]]; 
@@ -150,8 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return boardChanged;
     }
-
-    function moveTilesRight() {
+    function moveTilesRight() { /* ... (same as before) ... */ 
         let boardChanged = false;
         for (let r = 0; r < gridSize; r++) {
             const originalRow = [...board[r]];
@@ -165,8 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return boardChanged;
     }
-
-    function transposeBoard(matrix) {
+    function transposeBoard(matrix) { /* ... (same as before) ... */ 
         const rows = matrix.length;
         const cols = matrix[0].length;
         const newMatrix = [];
@@ -178,8 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return newMatrix;
     }
-
-    function moveTilesUp() {
+    function moveTilesUp() { /* ... (same as before, without internal console logs unless needed for specific up/down debug) ... */
         let boardChanged = false;
         let tempBoard = transposeBoard(board); 
         for (let r = 0; r < gridSize; r++) { 
@@ -195,8 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return boardChanged;
     }
-
-    function moveTilesDown() {
+    function moveTilesDown() { /* ... (same as before, without internal console logs unless needed for specific up/down debug) ... */
         let boardChanged = false;
         let tempBoard = transposeBoard(board); 
         for (let r = 0; r < gridSize; r++) { 
@@ -217,44 +213,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 6. GAME OVER LOGIC ---
     function canAnyTileMove() {
-        // Check for empty cells
+        console.log("Checking canAnyTileMove...");
+        // 1. Check for empty cells
         if (getEmptyCells().length > 0) {
-            return true; // Moves are possible if there are empty cells
+            console.log("canAnyTileMove: Found empty cells. Returning true (moves possible).");
+            return true; 
         }
 
-        // Check for possible horizontal merges
+        // 2. Check for possible horizontal merges (only if no empty cells)
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize - 1; c++) {
-                if (board[r][c] === board[r][c+1]) {
-                    return true; // Horizontal merge possible
+                // Check if current tile is not zero AND matches the one to its right
+                if (board[r][c] !== 0 && board[r][c] === board[r][c + 1]) {
+                    console.log(`canAnyTileMove: Horizontal merge possible at [${r},${c}] and [${r},${c+1}] with value ${board[r][c]}. Returning true.`);
+                    return true; 
                 }
             }
         }
 
-        // Check for possible vertical merges
-        for (let c = 0; c < gridSize; c++) {
-            for (let r = 0; r < gridSize - 1; r++) {
-                if (board[r][c] === board[r+1][c]) {
-                    return true; // Vertical merge possible
+        // 3. Check for possible vertical merges (only if no empty cells and no horizontal merges)
+        for (let c = 0; c < gridSize; c++) { // Iterate through columns first
+            for (let r = 0; r < gridSize - 1; r++) { // Iterate through rows
+                // Check if current tile is not zero AND matches the one below it
+                if (board[r][c] !== 0 && board[r][c] === board[r + 1][c]) {
+                    console.log(`canAnyTileMove: Vertical merge possible at [${r},${c}] and [${r+1},${c}] with value ${board[r][c]}. Returning true.`);
+                    return true; 
                 }
             }
         }
-        return false; // No empty cells and no possible merges
+
+        console.log("canAnyTileMove: No empty cells and no possible merges. Returning false (no moves possible).");
+        return false; 
     }
 
     function checkGameOver() {
         if (!canAnyTileMove()) {
-            isGameOver = true; // Set the game over flag
-            return true;       // Signal that game is over
+            console.log("checkGameOver: No moves possible, game is over.");
+            return true; // Game is over
         }
-        return false;          // Game is not over
+        console.log("checkGameOver: Moves still possible.");
+        return false; // Game is not over
     } 
 
     function endGame() {
-        console.log("Game Over! Final Score:", score);
-        isGameOver = true; // Ensure flag is set
-        if(finalScoreElement) finalScoreElement.textContent = score;
-        if(gameOverMessageElement) gameOverMessageElement.classList.remove('hidden'); // Show game over message
+        isGameOver = true; 
+        console.log("endGame called! Final Score:", score); // Check if this function is called
+        if(finalScoreElement) {
+            finalScoreElement.textContent = score;
+            console.log("Final score element updated.");
+        } else {
+            console.error("finalScoreElement not found!");
+        }
+        if(gameOverMessageElement) {
+            gameOverMessageElement.classList.remove('hidden');
+            console.log("Game over message displayed.");
+        } else {
+            console.error("gameOverMessageElement not found!");
+        }
     }
 
     // --- Event Listeners for Buttons ---
