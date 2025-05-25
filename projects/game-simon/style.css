@@ -1,0 +1,172 @@
+body {
+    font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+    background-color: #2c3e50; /* Dark blue-grey background */
+    color: #ecf0f1; /* Light text color */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 40px); /* Full height minus padding */
+    box-sizing: border-box;
+    user-select: none; /* Prevent text selection on game elements */
+}
+
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#simon-machine {
+    width: 90vmin; /* Responsive size based on smaller viewport dimension */
+    height: 90vmin;
+    max-width: 450px; /* Max size */
+    max-height: 450px;
+    background-color: #1a1a1a; /* Dark base for the machine */
+    border-radius: 50%; /* Makes it circular */
+    position: relative; /* For positioning buttons and console inside */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7), 
+                inset 0 0 10px rgba(255, 255, 255, 0.1);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px; /* Creates the dividing lines between buttons */
+    padding: 10px; /* Padding around the buttons from the edge */
+    box-sizing: border-box;
+}
+
+.simon-button {
+    opacity: 0.7; /* Normal dimmed state */
+    cursor: pointer;
+    transition: opacity 0.1s ease-in-out, transform 0.05s ease-in-out;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* Slight inner shadow for depth */
+}
+
+.simon-button:hover {
+    opacity: 0.85;
+}
+
+/* Active state for when button lights up or is pressed by player */
+.simon-button.active {
+    opacity: 1;
+    transform: scale(0.97); /* Simulates being pressed down */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.7), 0 0 20px var(--glow-color, white); /* var(--glow-color) will be set by individual button active states */
+}
+
+/* Specific button colors and quadrant shapes */
+#green {
+    background-color: #00a74a; /* Simon Green */
+    border-top-left-radius: 100%; /* Makes it a quarter circle */
+    --glow-color: #32ff7e;
+}
+#red {
+    background-color: #9f0f17; /* Simon Red */
+    border-top-right-radius: 100%;
+    --glow-color: #ff4d4d;
+}
+#yellow {
+    background-color: #cca707; /* Simon Yellow */
+    border-bottom-left-radius: 100%;
+    --glow-color: #fff200;
+}
+#blue {
+    background-color: #094a8f; /* Simon Blue */
+    border-bottom-right-radius: 100%;
+    --glow-color: #3797ff;
+}
+
+.center-console {
+    position: absolute;
+    width: 40%; /* Percentage of #simon-machine size */
+    height: 40%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #333333; /* Darker center */
+    border-radius: 50%; /* Circular console */
+    border: 5px solid #1a1a1a; /* Border matching machine body */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    z-index: 10; /* Ensure it's above the button grid gaps */
+}
+
+.game-title {
+    font-family: 'Arial Black', Gadget, sans-serif; /* Bolder, classic game font */
+    font-size: clamp(1.2em, 5vmin, 1.8em); /* Responsive */
+    color: #dfe6e9;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.score-display {
+    font-size: clamp(0.8em, 3.5vmin, 1.1em);
+    color: #bdc3c7; /* Light grey */
+    background-color: #2c3e50; /* Match page background */
+    padding: 3px 8px;
+    border-radius: 3px;
+    min-width: 60px;
+    text-align: center;
+}
+
+#score {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+#start-button {
+    font-size: clamp(0.8em, 3.5vmin, 1em);
+    padding: 6px 12px;
+    background-color: #e74c3c; /* Reddish start button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
+    margin-top: 5px;
+}
+
+#start-button:hover {
+    background-color: #c0392b; /* Darker red */
+}
+
+#message-display {
+    margin-top: 8px;
+    font-size: clamp(0.7em, 3vmin, 0.9em);
+    color: #f1c40f; /* Yellow for messages */
+    min-height: 1.2em; /* Reserve space */
+    font-weight: bold;
+}
+
+.hidden { /* Utility class, though not used in initial HTML */
+    display: none !important;
+}
+
+footer {
+    margin-top: 30px;
+    font-size: 0.9em;
+}
+
+footer a {
+    color: #bdc3c7;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
