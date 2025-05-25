@@ -9,8 +9,12 @@
 <body>
     <header>
         <h1>2048</h1>
-        <div class="score-container">
-            Score: <span id="score">0</span>
+        <div class="scores-header-container">
+            <div class="score-container current-score">
+                Score: <span id="score">0</span>
+            </div>
+            <div class="score-container best-score">
+                Best: <span id="high-score">0</span> </div>
         </div>
     </header>
     
@@ -27,6 +31,7 @@
         <div id="game-over-message" class="hidden">
             <h2>Game Over!</h2>
             <p class="final-score-paragraph">Your final score: <span id="final-score">0</span></p>
+            <p class="high-score-game-over-paragraph">Best: <span id="game-over-high-score">0</span></p>
             <button id="try-again-button">Try Again</button>
             <p class="back-to-home-link-container">
                 <a href="../../index.html">Back to OrygnsCode Home</a>
