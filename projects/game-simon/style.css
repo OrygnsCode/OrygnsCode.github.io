@@ -27,191 +27,180 @@ time, mark, audio, video {
     user-select: none;
 }
 
-html {
+html{
     background-image: url('https://github.com/Em-Ant/fcc-course/raw/master/front-end_cert/projects/advanced/04-simon-game/images/retina_wood.png');
-    height: 100%; 
+    height: 100%; /* Ensures body min-height 100vh works as expected */
 }
 
+/* MODIFIED body for layout */
 body {
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Arial', sans-serif; /* Fallback font */
     margin: 0;
-    padding: 0; 
+    padding: 0; /* Let content determine padding or use padding on specific sections */
     display: flex;
     flex-direction: column;
-    align-items: center; 
-    justify-content: center; /* Vertically center .wrap if body is full height */
-    min-height: 100vh; 
+    align-items: center; /* Horizontally center direct children like .wrap and footer */
+    min-height: 100vh;   /* Body takes at least full viewport height */
     box-sizing: border-box; 
 }
 
-.inline {
+.inline{
     display: inline-block;
 }
 
-.push { /* These are the colored button quadrants */
-    position: relative; /* For potential z-indexing or pseudo-elements if needed */
-    width: 200px;   /* Content width */
-    height: 200px;  /* Content height */
-    background-color: grey; /* Fallback, will be overridden by specific color classes */
-    border: 12px solid #333; /* This IS the black gap between quadrants */
-    box-sizing: content-box; /* Default: width/height are for content, border adds to total size */
-                             /* So total occupied space by one .push is 224px x 224px */
+.push{
+    position: relative;
+    width:200px;
+    height:200px;
+    background-color : grey;
+    border: 12px solid #333;
+    /* Default box-sizing is content-box, so total size is 224x224 */
 }
 
-.rw { /* Row wrapper for buttons */
-    display: flex; /* Makes .push elements sit side-by-side */
-    /* The negative margin is a common trick to make borders overlap perfectly for the cross shape */
-    /* It should typically be negative half of the border width if precise overlap is desired,
-       or related to how box model and line heights interact.
-       Given the original CSS had -4px, let's test with that.
-       It's trying to compensate for the small space a line-break between divs might create
-       if the .rw divs were display:block. Since they are flex children, this might be less critical
-       or need adjustment.
+.rw{
+    margin-bottom:-4px; /* Original value for border overlap */
+    display: flex; /* Ensures .push items align in a row if needed by their container */
+}
+
+.b-r{ border-bottom-right-radius : 100%; }
+.b-l{ border-bottom-left-radius : 100%; }
+.t-l{ border-top-left-radius : 100%; }
+.t-r{ border-top-right-radius : 100%; }
+
+.wrap{ /* Styles from your provided CSS */
+    width: 472px;
+    height:472px;
+    border-radius:100%;
+    position: relative; 
+    text-align: center; /* For inline-block children like .wrap-in IF it behaves as such */
+    /* margin:auto; -- This will be handled by body flex if it's a direct child and body centers items */
+    margin-top: 10vh; /* Adjusted from 'top: 10vh' to work better with flex flow */
+    margin-bottom: 30px; /* Space before footer */
+    background-color:#333;
+    box-shadow: 0px 0px 12px #222;
+    flex-shrink: 0; /* Prevent .wrap from shrinking if body content gets crowded */
+}
+
+.wrap-in{ /* Styles from your provided CSS */
+    position: relative;
+    top:12px;  /* This offset plus .push borders creates the machine's outer rim look */
+    /* To center .wrap-in if it's not automatically filling .wrap (e.g. if .wrap had padding) */
+    /* For this specific HTML, .wrap-in contains two .rw divs, each with two .push divs.
+       Each .push is 200px content + 24px border = 224px total width/height.
+       Two .push elements in a .rw will be 448px wide. Two .rw stack to 448px tall.
+       So .wrap-in effectively becomes a 448x448 block.
+       With .wrap at 472x472, the 12px top offset and an implicit 12px left offset (due to .wrap text-align:center and .wrap-in's content) centers the 448x448 block.
     */
-    margin-bottom: -4px; /* From original CSS - may need adjustment */
+    /* To be more explicit for centering the 448x448 block within the 472x472 .wrap: */
+    /* This might not be needed if text-align on .wrap centers .wrap-in correctly,
+       or if .wrap-in is made block and given margin:auto.
+       Given the fixed sizes, top:12px and an effective left:12px (from (472-448)/2) is the goal.
+       Let's ensure .wrap-in is centered if its children define its size.
+    */
+    display: inline-block; /* To respect text-align: center on .wrap */
+    vertical-align: top; /* If needed with inline-block */
+
 }
-
-/* Quadrant Shapes - These apply the rounded corners */
-.t-l { border-top-left-radius: 100%; }
-.t-r { border-top-right-radius: 100%; }
-.b-l { border-bottom-left-radius: 100%; }
-.b-r { border-bottom-right-radius: 100%; }
-
-
-.wrap { /* This is the main circular Simon body */
-    width: 472px;  /* (200 content + 12 border L + 12 border R)*2 = 448 for button block. 472-448=24. So 12px "rim" on each side */
-    height: 472px;
-    border-radius: 50%; /* Circular */
-    position: relative; /* For .center to be absolute inside it */
-    background-color: #333; /* This provides the base color for borders/gaps */
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.7), inset 0px 0px 10px rgba(0,0,0,0.5); /* 3D effect */
-    display: flex; /* To center .wrap-in */
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0; /* Add some vertical margin, horizontal centering by body's align-items */
-    flex-shrink: 0; /* Prevent it from shrinking */
-}
-
-.wrap-in { /* This holds the two .rw rows */
-    position: relative; /* It is already centered by .wrap's flex properties */
-    /* Its size should be exactly that of the 2x2 button grid including their borders that make the lines */
-    /* Each .push is 224x224 total. Two rows/cols means 448x448. */
-    width: 448px; 
-    height: 448px;
-    display: flex;
-    flex-direction: column; /* Stack the .rw divs */
-    /* No top/left offset needed if centered by parent .wrap's flex */
-}
-
-.center { /* Center Console */
-    width: 220px;
-    height: 220px;
-    position: absolute;
-    border-radius: 100%;
-    top: 50%;
-    left: 50%;
-    /* Total diameter with border: 220 + 2*12 = 244. Half is 122. */
-    margin-top: -122px; 
-    margin-left: -122px;
-    background-color: #ECE7EE;
-    border: 12px solid #333; /* Dark border matching the lines */
+.center{ /* Styles from your provided CSS */
+    width:220px;
+    height:220px;
+    position : absolute;
+    border-radius:100%;
+    top:50%;
+    left:50%;
+    margin: -122px 0 0 -122px; /* Correct for 220 + 2*12 border */
+    background-color:#ECE7EE;
+    border: 12px solid #333;
     z-index: 10;
+    /* Added display:flex and properties for better internal centering */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    box-shadow: 0px 3px 8px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.3); /* 3D effect */
 }
 
-.brand { font-family: 'Alfa Slab One', cursive; color : #222; font-size: 3.2em; margin-top : 35px; }
-.brand .small { font-size : 0.3em; position : relative; top : -20px; }
-.count {
+.brand{ font-family: 'Alfa Slab One', cursive; color : #222; font-size: 3.2em; margin-top : 35px; }
+.brand .small{ font-size : 0.3em; position : relative; top : -20px; }
+.count{
     font-family: 'VT323', monospace; color : #DC0D29; padding : 0px; font-size : 2em;
     width : 50px; background-color: #32050C; position:relative; border : 4px solid #222;
     border-radius : 10px; margin:auto; line-height: 1.1em;
 }
-.round-btn {
+.round-btn{
     width : 20px; height : 20px; position: relative; background-color : yellow; 
-    border-radius : 50%; border : 4px solid #444; box-shadow : 0px 2px 3px #222;
+    border-radius : 100%; border : 4px solid #444; box-shadow : 0px 2px 3px #222;
     margin:auto; top : -5px;
 }
-.round-btn:active { box-shadow : 0 1px 1px #292929; top : -4px; }
-.clickable { pointer-events : auto; cursor:pointer; }
-.unclickable { pointer-events:none; }
-.led {
-    width: 6px; height: 6px; background-color: #32050C; border-radius : 50%;
-    position: absolute; left: 0; right: 0; margin : auto; border: 2px solid #222;
+.round-btn:active{ box-shadow : 0 1px 1px #292929; top : -4px; }
+.clickable{ pointer-events : auto; cursor:pointer; }
+.unclickable{ pointer-events:none; }
+.led{
+    width:6px; height:6px; background-color: #32050C; border-radius : 100%;
+    position: absolute; left:0; right: 0; margin : auto; border: 2px solid #222;
     top: -18px;
 }
-.led-on { background-color:#DC0D29; }
-.led-off { color:#430710; }
-.label { color : #222; font-family : 'Oswald',Arial,sans; font-size:0.7em; margin-top:5px; text-align:center; }
-.display { width : 60px; position:relative; text-align:center; }
-.btn-box { width : 50px; position:relative; }
-.sw-slot { 
-    height: 20px; width: 40px; background-color : #222; position:relative;
-    top: 5px; border-radius: 2px; cursor: pointer;
+.led-on{ background-color:#DC0D29; }
+.led-off{ color:#430710; }
+.label{ color : #222; font-family : 'Oswald',Arial,sans; font-size:0.7em; margin-top:5px; text-align:center; }
+.display{ width : 60px; position:relative; text-align:center; }
+.btn-box{ width : 50px; position:relative; }
+.sw-slot{ 
+    height:20px; width:40px; background-color : #222; position:relative;
+    top:5px; border-radius:2px; cursor: pointer;
 }
-.switch { 
-    height: 16px; width: 16px; border-radius: 4px; background-color : #3193DE; 
+.switch{ 
+    height:16px; width: 16px; border-radius:4px; background-color : #3193DE; 
     position:relative; border : 2px solid #333;
-    left: 2px; 
+    left: 2px; /* Default for OFF */
     transition: left 0.2s ease-in-out;
 }
-.sw-on { left: 20px; }
-.rw.bot { 
-    margin-top: 10px; /* This positions the OFF/ON switch row inside .center */
+.sw-on{ left:20px; }
+.rw.bot{ 
+    margin-top: 10px; /* Your original value */
+    /* To ensure it doesn't get pushed out of .center if content is too tall */
+    flex-shrink: 0; 
 }
-.full-red { background-color : #FC0102; }
+.full-red{ background-color : #FC0102; }
 
-/* Quadrant Button Colors from your CSS */
-.green.push { background-color : #00a74a; } /* Target .push specifically */
-.red.push { background-color : #9f0f17; }
-.yellow.push { background-color : #cca707; }
-.blue.push { background-color : #094a8f; }
+.red{ background-color : #9f0f17; }
+.green{ background-color : #00a74a; }
+.yellow{ background-color : #cca707; }
+.blue{ background-color : #094a8f; }
 
-/* Lit up quadrant button colors */
-.yellow.light { background-color : #fed93f; }
-.blue.light { background-color : #1c8cff; }
-.red.light { background-color : #ff4c4c; }
-.green.light { background-color : #13ff7c; }
+.yellow.light{ background-color : #fed93f; }
+.blue.light{ background-color : #1c8cff; }
+.red.light{ background-color : #ff4c4c; }
+.green.light{ background-color : #13ff7c; }
 
-/* Scaling for Mobile */
-@media screen and (max-width: 472px){ /* Trigger when screen is smaller than wrap */
+@media screen and (max-width: 500px){
     .wrap {
-        transform: scale(0.8); /* Example scale, adjust as needed */
-        transform-origin: center center;
-        margin-top: 2vh; /* Adjust vertical margin for scaled version */
-        margin-bottom: 2vh;
-    }
-}
-@media screen and (max-width: 350px){ /* Even smaller screens */
-    .wrap {
-        transform: scale(0.65);
-        margin-top: 1vh;
-        margin-bottom: 1vh;
+        top: 40px; /* From your original media query */
+        transform: scale(0.6);
+        transform-origin: 0 0; 
+        left: 50%;
+        margin-left: -142px; /* Your original centering for scaled element */
+        margin-top: 0; /* Override previous margin-top for this specific case */
+        margin-bottom: 20px; /* Ensure space for footer on small screens */
     }
 }
 
-
+/* MODIFIED FOOTER STYLING FOR POSITION AND COLOR */
 footer {
     text-align: center;
-    margin-top: auto; 
-    padding: 20px 0; 
     width: 100%; 
-    color: #000000; 
-    flex-shrink: 0;
-    position: relative; 
-    z-index: 5; 
+    margin-top: auto; /* This pushes the footer to the bottom of the flex body */
+    padding: 20px 0;  /* Add some top/bottom padding to the footer itself */
+    color: #000000;   /* Black text as requested */
+    flex-shrink: 0;   /* Prevent footer from shrinking if body content is short */
 }
 
 footer a {
-    color: #000000; 
+    color: #000000; /* Black link text */
     text-decoration: none;
 }
 
 footer a:hover {
     text-decoration: underline;
-    color: #333333; 
+    color: #333333; /* Optional: Darker grey on hover */
 }
