@@ -80,8 +80,7 @@ function resetGame() {
 
   // The first platform is always the same
   // x + w has to match paddingX
-  platforms = [{ x: 50, w: 50 }]; // Initial platform fixed width
-  // Generate subsequent platforms with dynamic width
+  platforms = [{ x: 50, w: 50 }];
   generatePlatform();
   generatePlatform();
   generatePlatform();
@@ -126,13 +125,11 @@ function generateTree() {
   trees.push({ x, color });
 }
 
-// MODIFIED generatePlatform function STARTS HERE
 function generatePlatform() {
   const minimumGap = 40;
   const maximumGap = 200;
-  // Base width parameters for platforms before score-based scaling
-  const basePlatformMinimumWidth = 20;
-  const basePlatformMaximumWidth = 100;
+  const minimumWidth = 20;
+  const maximumWidth = 100;
 
   // X coordinate of the right edge of the furthest platform
   const lastPlatform = platforms[platforms.length - 1];
@@ -142,39 +139,11 @@ function generatePlatform() {
     furthestX +
     minimumGap +
     Math.floor(Math.random() * (maximumGap - minimumGap));
-
-  // Calculate the "original beginning size" for this platform's width, before scaling.
-  const originalGeneratedWidth =
-    basePlatformMinimumWidth +
-    Math.floor(Math.random() * (basePlatformMaximumWidth - basePlatformMinimumWidth));
-
-  let widthMultiplier;
-
-  if (score < 50) {
-    // For scores 0-49:
-    // Width decreases from 100% of originalGeneratedWidth (at score 0)
-    // towards 50% of originalGeneratedWidth (as score approaches 50).
-    widthMultiplier = 1.0 - (score / 50.0) * 0.5;
-  } else if (score < 100) {
-    // For scores 50-99:
-    // Width decreases from 50% of originalGeneratedWidth (at score 50)
-    // towards 20% of originalGeneratedWidth (as score approaches 100).
-    widthMultiplier = 0.5 - ((score - 50.0) / 50.0) * (0.5 - 0.2);
-  } else {
-    // For scores 100 and above:
-    // Width is fixed at 10% of originalGeneratedWidth.
-    widthMultiplier = 0.1;
-  }
-
-  // Calculate the final width for the new platform.
-  let w = originalGeneratedWidth * widthMultiplier;
-
-  // Optional: ensure a minimum absolute width, e.g., w = Math.max(w, 2);
-  // Current logic respects "10% of beginning size", so 10% of basePlatformMinimumWidth (2px) is possible.
+  const w =
+    minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
 
   platforms.push({ x, w });
 }
-// MODIFIED generatePlatform function ENDS HERE
 
 resetGame();
 
@@ -187,20 +156,42 @@ window.addEventListener("keydown", function (event) {
   }
 });
 
-window.addEventListener("mousedown", function (event) {
-  if (phase == "waiting") {
-    lastTimestamp = undefined;
-    introductionElement.style.opacity = 0;
-    phase = "stretching";
-    window.requestAnimationFrame(animate);
-  }
+// Combined handlers for press (mousedown/touchstart)
+function gamePressHandler() {
+    if (phase == "waiting") {
+        lastTimestamp = undefined;
+        introductionElement.style.opacity = 0;
+        phase = "stretching";
+        window.requestAnimationFrame(animate);
+    }
+}
+
+// Combined handlers for release (mouseup/touchend)
+function gameReleaseHandler() {
+    if (phase == "stretching") {
+        phase = "turning";
+    }
+}
+
+// Mouse Listeners
+window.addEventListener("mousedown", gamePressHandler);
+window.addEventListener("mouseup", gameReleaseHandler);
+
+// Touch Listeners
+window.addEventListener("touchstart", function(event) {
+    // Prevent default touch actions like scrolling or zooming if the game is in a state
+    // where touch is meant for game interaction (stretching the stick).
+    if (phase == "waiting" || phase == "stretching") {
+        event.preventDefault();
+    }
+    gamePressHandler(); // Use the same logic as mousedown
+}, { passive: false }); // Explicitly set passive to false because we call preventDefault
+
+window.addEventListener("touchend", function(event) {
+    // No need to preventDefault for touchend in this game's logic
+    gameReleaseHandler(); // Use the same logic as mouseup
 });
 
-window.addEventListener("mouseup", function (event) {
-  if (phase == "stretching") {
-    phase = "turning";
-  }
-});
 
 window.addEventListener("resize", function (event) {
   canvas.width = window.innerWidth;
@@ -242,7 +233,7 @@ function animate(timestamp) {
             setTimeout(() => (perfectElement.style.opacity = 0), 1000);
           }
 
-          generatePlatform(); // Generate new platform with potentially new width
+          generatePlatform();
           generateTree();
           generateTree();
         }
@@ -275,7 +266,7 @@ function animate(timestamp) {
     case "transitioning": {
       sceneOffset += (timestamp - lastTimestamp) / transitioningSpeed;
 
-      const [nextPlatform] = thePlatformTheStickHits(); // This might need to use the current platform index if sticks array grows
+      const [nextPlatform] = thePlatformTheStickHits();
       if (sceneOffset > nextPlatform.x + nextPlatform.w - paddingX) {
         // Add the next step
         sticks.push({
