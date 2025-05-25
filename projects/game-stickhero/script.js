@@ -1,52 +1,61 @@
+
 // Extend the base functionality of JavaScript
 Array.prototype.last = function () {
   return this[this.length - 1];
 };
 
-// A sinus function that accepts degrees instead of radians
+// A sinus function that acceps degrees instead of radians
 Math.sinus = function (degree) {
   return Math.sin((degree / 180) * Math.PI);
 };
 
 // Game data
 let phase = "waiting"; // waiting | stretching | turning | walking | transitioning | falling
-let lastTimestamp; 
+let lastTimestamp; // The timestamp of the previous requestAnimationFrame cycle
 
-let heroX; 
-let heroY; 
-let sceneOffset; 
+let heroX; // Changes when moving forward
+let heroY; // Only changes when falling
+let sceneOffset; // Moves the whole game
 
 let platforms = [];
 let sticks = [];
 let trees = [];
 
+// Todo: Save high score to localStorage (?)
+
 let score = 0;
 
 // Configuration
-const canvasDefaultWidth = 375; 
-const canvasDefaultHeight = 375; 
+const canvasWidth = 375;
+const canvasHeight = 375;
 const platformHeight = 100;
-const heroDistanceFromEdge = 10; 
-const paddingX = 100; // This is the X position on the default canvas where the hero should be when waiting
+const heroDistanceFromEdge = 10; // While waiting
+const paddingX = 100; // The waiting position of the hero in from the original canvas size
 const perfectAreaSize = 10;
+
+// The background moves slower than the hero
 const backgroundSpeedMultiplier = 0.2;
+
 const hill1BaseHeight = 100;
 const hill1Amplitude = 10;
 const hill1Stretch = 1;
 const hill2BaseHeight = 70;
 const hill2Amplitude = 20;
 const hill2Stretch = 0.5;
-const stretchingSpeed = 4; 
-const turningSpeed = 4; 
+
+const stretchingSpeed = 4; // Milliseconds it takes to draw a pixel
+const turningSpeed = 4; // Milliseconds it takes to turn a degree
 const walkingSpeed = 4;
 const transitioningSpeed = 2;
 const fallingSpeed = 2;
-const heroWidth = 17;
-const heroHeight = 30;
+
+const heroWidth = 17; // 24
+const heroHeight = 30; // 40
 
 const canvas = document.getElementById("game");
-canvas.width = window.innerWidth;
+canvas.width = window.innerWidth; // Make the Canvas full screen
 canvas.height = window.innerHeight;
+
 const ctx = canvas.getContext("2d");
 
 const introductionElement = document.getElementById("introduction");
@@ -57,10 +66,12 @@ const scoreElement = document.getElementById("score");
 // Initialize layout
 resetGame();
 
+// Resets game variables and layouts but does not start the game (game starts on keypress)
 function resetGame() {
+  // Reset game progress
   phase = "waiting";
   lastTimestamp = undefined;
-  sceneOffset = 0; 
+  sceneOffset = 0;
   score = 0;
 
   introductionElement.style.opacity = 1;
@@ -68,9 +79,9 @@ function resetGame() {
   restartButton.style.display = "none";
   scoreElement.innerText = score;
 
-  // The first platform's right edge should align with paddingX for the hero's waiting spot
-  platforms = [{ x: paddingX - 50, w: 50 }]; 
-  
+  // The first platform is always the same
+  // x + w has to match paddingX
+  platforms = [{ x: 50, w: 50 }];
   generatePlatform();
   generatePlatform();
   generatePlatform();
@@ -79,24 +90,39 @@ function resetGame() {
   sticks = [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }];
 
   trees = [];
-  for(let i = 0; i < 10; i++) { 
-    generateTree();
-  }
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
+  generateTree();
 
   heroX = platforms[0].x + platforms[0].w - heroDistanceFromEdge;
-  heroY = 0; 
+  heroY = 0;
 
-  draw(); 
+  draw();
 }
 
 function generateTree() {
   const minimumGap = 30;
   const maximumGap = 150;
-  const lastTree = trees.last();
+
+  // X coordinate of the right edge of the furthest tree
+  const lastTree = trees[trees.length - 1];
   let furthestX = lastTree ? lastTree.x : 0;
-  const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
+
+  const x =
+    furthestX +
+    minimumGap +
+    Math.floor(Math.random() * (maximumGap - minimumGap));
+
   const treeColors = ["#6D8821", "#8FAC34", "#98B333"];
-  const color = treeColors[Math.floor(Math.random() * treeColors.length)];
+  const color = treeColors[Math.floor(Math.random() * 3)];
+
   trees.push({ x, color });
 }
 
@@ -105,19 +131,32 @@ function generatePlatform() {
   const maximumGap = 200;
   const minimumWidth = 20;
   const maximumWidth = 100;
-  const lastPlatform = platforms.last();
+
+  // X coordinate of the right edge of the furthest platform
+  const lastPlatform = platforms[platforms.length - 1];
   let furthestX = lastPlatform.x + lastPlatform.w;
-  const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
-  const w = minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
+
+  const x =
+    furthestX +
+    minimumGap +
+    Math.floor(Math.random() * (maximumGap - minimumGap));
+  const w =
+    minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
+
   platforms.push({ x, w });
 }
 
+resetGame();
+
+// If space was pressed restart the game
 window.addEventListener("keydown", function (event) {
-  if (event.key == " ") { 
+  if (event.key == " ") {
     event.preventDefault();
     resetGame();
+    return;
   }
 });
+
 window.addEventListener("mousedown", function (event) {
   if (phase == "waiting") {
     lastTimestamp = undefined;
@@ -126,70 +165,75 @@ window.addEventListener("mousedown", function (event) {
     window.requestAnimationFrame(animate);
   }
 });
+
 window.addEventListener("mouseup", function (event) {
   if (phase == "stretching") {
     phase = "turning";
   }
 });
+
 window.addEventListener("resize", function (event) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  draw(); 
-});
-restartButton.addEventListener("click", function (event) {
-  event.preventDefault(); 
-  resetGame();
+  draw();
 });
 
+window.requestAnimationFrame(animate);
+
+// The main game loop
 function animate(timestamp) {
   if (!lastTimestamp) {
     lastTimestamp = timestamp;
     window.requestAnimationFrame(animate);
     return;
   }
-  let deltaTime = timestamp - lastTimestamp;
 
   switch (phase) {
     case "waiting":
-      return; 
+      return; // Stop the loop
     case "stretching": {
-      sticks.last().length += deltaTime / stretchingSpeed;
+      sticks.last().length += (timestamp - lastTimestamp) / stretchingSpeed;
       break;
     }
     case "turning": {
-      sticks.last().rotation += deltaTime / turningSpeed;
+      sticks.last().rotation += (timestamp - lastTimestamp) / turningSpeed;
+
       if (sticks.last().rotation > 90) {
         sticks.last().rotation = 90;
+
         const [nextPlatform, perfectHit] = thePlatformTheStickHits();
         if (nextPlatform) {
+          // Increase score
           score += perfectHit ? 2 : 1;
           scoreElement.innerText = score;
+
           if (perfectHit) {
             perfectElement.style.opacity = 1;
-            perfectElement.style.transform = 'translateY(-10px)';
-            setTimeout(() => {
-                perfectElement.style.opacity = 0;
-                perfectElement.style.transform = 'translateY(0px)';
-            }, 1000);
+            setTimeout(() => (perfectElement.style.opacity = 0), 1000);
           }
+
           generatePlatform();
-          generateTree(); 
+          generateTree();
           generateTree();
         }
+
         phase = "walking";
       }
       break;
     }
     case "walking": {
-      heroX += deltaTime / walkingSpeed;
+      heroX += (timestamp - lastTimestamp) / walkingSpeed;
+
       const [nextPlatform] = thePlatformTheStickHits();
       if (nextPlatform) {
+        // If hero will reach another platform then limit it's position at it's edge
         const maxHeroX = nextPlatform.x + nextPlatform.w - heroDistanceFromEdge;
         if (heroX > maxHeroX) {
           heroX = maxHeroX;
           phase = "transitioning";
         }
       } else {
+        // If hero won't reach another platform then limit it's position at the end of the pole
         const maxHeroX = sticks.last().x + sticks.last().length + heroWidth;
         if (heroX > maxHeroX) {
           heroX = maxHeroX;
@@ -199,121 +243,110 @@ function animate(timestamp) {
       break;
     }
     case "transitioning": {
-      // Calculate the target platform the hero has just landed on.
-      // The current stick is sticks.last(). It started on platforms[sticks.length - 2]
-      // and landed (or tried to land) on platforms[sticks.length - 1].
-      const landedPlatformIndex = sticks.length -1; // This is the index of the platform the hero is on
-      const landedPlatform = platforms[landedPlatformIndex];
+      sceneOffset += (timestamp - lastTimestamp) / transitioningSpeed;
 
-      if (!landedPlatform) {
-          console.error("Transitioning phase: landedPlatform is undefined.");
-          resetGame(); return;
-      }
-      
-      // The amount to scroll: make the landedPlatform's right edge appear at paddingX
-      const targetXForLandedPlatformEdge = landedPlatform.x + landedPlatform.w;
-      const desiredSceneOffset = targetXForLandedPlatformEdge - paddingX;
-
-      // Move sceneOffset towards desiredSceneOffset
-      let Tspeed = deltaTime / transitioningSpeed;
-      if (sceneOffset < desiredSceneOffset) {
-          sceneOffset += Tspeed;
-          if (sceneOffset >= desiredSceneOffset) {
-              sceneOffset = desiredSceneOffset; // Snap to exact position
-          }
-      } else if (sceneOffset > desiredSceneOffset) { // Should not happen if always moving right
-          sceneOffset -= Tspeed; 
-          if (sceneOffset <= desiredSceneOffset) {
-              sceneOffset = desiredSceneOffset;
-          }
-      }
-      
-      // Check if transition is complete
-      if (sceneOffset === desiredSceneOffset) {
-        // Add new stick starting from the edge of the platform the hero is now on
+      const [nextPlatform] = thePlatformTheStickHits();
+      if (sceneOffset > nextPlatform.x + nextPlatform.w - paddingX) {
+        // Add the next step
         sticks.push({
-          x: landedPlatform.x + landedPlatform.w,
+          x: nextPlatform.x + nextPlatform.w,
           length: 0,
           rotation: 0
         });
-        
-        // Update heroX to the start of the new stick path (relative to new world coordinates)
-        heroX = landedPlatform.x + landedPlatform.w - heroDistanceFromEdge;
-        heroY = 0; 
-
         phase = "waiting";
       }
       break;
     }
     case "falling": {
-      if (sticks.last().rotation < 180) {
-        sticks.last().rotation += deltaTime / turningSpeed;
-      }
-      heroY += deltaTime / fallingSpeed;
-      const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasDefaultHeight) / 2; 
+      if (sticks.last().rotation < 180)
+        sticks.last().rotation += (timestamp - lastTimestamp) / turningSpeed;
+
+      heroY += (timestamp - lastTimestamp) / fallingSpeed;
+      const maxHeroY =
+        platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
       if (heroY > maxHeroY) {
         restartButton.style.display = "block";
-        return; 
+        return;
       }
       break;
     }
     default:
-      throw Error("Wrong phase: " + phase);
+      throw Error("Wrong phase");
   }
 
   draw();
   window.requestAnimationFrame(animate);
+
   lastTimestamp = timestamp;
 }
 
+// Returns the platform the stick hit (if it didn't hit any stick then return undefined)
 function thePlatformTheStickHits() {
-  if (!sticks.length || sticks.last().rotation !== 90) { // Added !sticks.length check
-    // If called at a weird time, or if stick isn't flat, assume no hit.
-    return [undefined, false]; 
-  }
+  if (sticks.last().rotation != 90)
+    throw Error(`Stick is ${sticks.last().rotation}°`);
   const stickFarX = sticks.last().x + sticks.last().length;
+
   const platformTheStickHits = platforms.find(
     (platform) => platform.x < stickFarX && stickFarX < platform.x + platform.w
   );
+
+  // If the stick hits the perfect area
   if (
     platformTheStickHits &&
-    platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 < stickFarX &&
-    stickFarX < platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2
-  ) {
+    platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 <
+      stickFarX &&
+    stickFarX <
+      platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2
+  )
     return [platformTheStickHits, true];
-  }
+
   return [platformTheStickHits, false];
 }
 
 function draw() {
   ctx.save();
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
   drawBackground();
+
+  // Center main canvas area to the middle of the screen
   ctx.translate(
-    (window.innerWidth - canvasDefaultWidth) / 2 - sceneOffset,
-    (window.innerHeight - canvasDefaultHeight) / 2
+    (window.innerWidth - canvasWidth) / 2 - sceneOffset,
+    (window.innerHeight - canvasHeight) / 2
   );
+
+  // Draw scene
   drawPlatforms();
-  drawSticks(); 
-  drawHero();   
+  drawHero();
+  drawSticks();
+
+  // Restore transformation
   ctx.restore();
 }
 
+restartButton.addEventListener("click", function (event) {
+  event.preventDefault();
+  resetGame();
+  restartButton.style.display = "none";
+});
+
 function drawPlatforms() {
   platforms.forEach(({ x, w }) => {
+    // Draw platform
     ctx.fillStyle = "black";
     ctx.fillRect(
       x,
-      canvasDefaultHeight - platformHeight, 
+      canvasHeight - platformHeight,
       w,
-      platformHeight + (window.innerHeight - canvasDefaultHeight) / 2 
+      platformHeight + (window.innerHeight - canvasHeight) / 2
     );
-    // Only draw perfect area if sticks array exists and its last element has an x value
-    if (sticks.length > 0 && sticks.last() && typeof sticks.last().x !== 'undefined' && sticks.last().x < x) { 
+
+    // Draw perfect area only if hero did not yet reach the platform
+    if (sticks.last().x < x) {
       ctx.fillStyle = "red";
       ctx.fillRect(
         x + w / 2 - perfectAreaSize / 2,
-        canvasDefaultHeight - platformHeight,
+        canvasHeight - platformHeight,
         perfectAreaSize,
         perfectAreaSize
       );
@@ -321,13 +354,160 @@ function drawPlatforms() {
   });
 }
 
-function drawHero() { /* ... (Keep as you provided) ... */ }
-function drawRoundedRect(x, y, width, height, radius) { /* ... (Keep as you provided) ... */ }
-function drawSticks() { /* ... (Keep as you provided) ... */ }
-function drawBackground() { /* ... (Keep as you provided) ... */ }
-function drawHill(baseHeight, amplitude, stretch, color) { /* ... (Keep as you provided) ... */ }
-function drawTree(x, color) { /* ... (Keep as you provided) ... */ }
-function getHillY(windowX, baseHeight, amplitude, stretch) { /* ... (Keep as you provided) ... */ }
-function getTreeY(treeX, baseHeight, amplitude) { /* ... (Keep as you provided) ... */ }
+function drawHero() {
+  ctx.save();
+  ctx.fillStyle = "black";
+  ctx.translate(
+    heroX - heroWidth / 2,
+    heroY + canvasHeight - platformHeight - heroHeight / 2
+  );
 
-window.requestAnimationFrame(animate);
+  // Body
+  drawRoundedRect(
+    -heroWidth / 2,
+    -heroHeight / 2,
+    heroWidth,
+    heroHeight - 4,
+    5
+  );
+
+  // Legs
+  const legDistance = 5;
+  ctx.beginPath();
+  ctx.arc(legDistance, 11.5, 3, 0, Math.PI * 2, false);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-legDistance, 11.5, 3, 0, Math.PI * 2, false);
+  ctx.fill();
+
+  // Eye
+  ctx.beginPath();
+  ctx.fillStyle = "white";
+  ctx.arc(5, -7, 3, 0, Math.PI * 2, false);
+  ctx.fill();
+
+  // Band
+  ctx.fillStyle = "red";
+  ctx.fillRect(-heroWidth / 2 - 1, -12, heroWidth + 2, 4.5);
+  ctx.beginPath();
+  ctx.moveTo(-9, -14.5);
+  ctx.lineTo(-17, -18.5);
+  ctx.lineTo(-14, -8.5);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-10, -10.5);
+  ctx.lineTo(-15, -3.5);
+  ctx.lineTo(-5, -7);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawRoundedRect(x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x, y + radius);
+  ctx.lineTo(x, y + height - radius);
+  ctx.arcTo(x, y + height, x + radius, y + height, radius);
+  ctx.lineTo(x + width - radius, y + height);
+  ctx.arcTo(x + width, y + height, x + width, y + height - radius, radius);
+  ctx.lineTo(x + width, y + radius);
+  ctx.arcTo(x + width, y, x + width - radius, y, radius);
+  ctx.lineTo(x + radius, y);
+  ctx.arcTo(x, y, x, y + radius, radius);
+  ctx.fill();
+}
+
+function drawSticks() {
+  sticks.forEach((stick) => {
+    ctx.save();
+
+    // Move the anchor point to the start of the stick and rotate
+    ctx.translate(stick.x, canvasHeight - platformHeight);
+    ctx.rotate((Math.PI / 180) * stick.rotation);
+
+    // Draw stick
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -stick.length);
+    ctx.stroke();
+
+    // Restore transformations
+    ctx.restore();
+  });
+}
+
+function drawBackground() {
+  // Draw sky
+  var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+  gradient.addColorStop(0, "#BBD691");
+  gradient.addColorStop(1, "#FEF1E1");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  // Draw hills
+  drawHill(hill1BaseHeight, hill1Amplitude, hill1Stretch, "#95C629");
+  drawHill(hill2BaseHeight, hill2Amplitude, hill2Stretch, "#659F1C");
+
+  // Draw trees
+  trees.forEach((tree) => drawTree(tree.x, tree.color));
+}
+
+// A hill is a shape under a stretched out sinus wave
+function drawHill(baseHeight, amplitude, stretch, color) {
+  ctx.beginPath();
+  ctx.moveTo(0, window.innerHeight);
+  ctx.lineTo(0, getHillY(0, baseHeight, amplitude, stretch));
+  for (let i = 0; i < window.innerWidth; i++) {
+    ctx.lineTo(i, getHillY(i, baseHeight, amplitude, stretch));
+  }
+  ctx.lineTo(window.innerWidth, window.innerHeight);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawTree(x, color) {
+  ctx.save();
+  ctx.translate(
+    (-sceneOffset * backgroundSpeedMultiplier + x) * hill1Stretch,
+    getTreeY(x, hill1BaseHeight, hill1Amplitude)
+  );
+
+  const treeTrunkHeight = 5;
+  const treeTrunkWidth = 2;
+  const treeCrownHeight = 25;
+  const treeCrownWidth = 10;
+
+  // Draw trunk
+  ctx.fillStyle = "#7D833C";
+  ctx.fillRect(
+    -treeTrunkWidth / 2,
+    -treeTrunkHeight,
+    treeTrunkWidth,
+    treeTrunkHeight
+  );
+
+  // Draw crown
+  ctx.beginPath();
+  ctx.moveTo(-treeCrownWidth / 2, -treeTrunkHeight);
+  ctx.lineTo(0, -(treeTrunkHeight + treeCrownHeight));
+  ctx.lineTo(treeCrownWidth / 2, -treeTrunkHeight);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function getHillY(windowX, baseHeight, amplitude, stretch) {
+  const sineBaseY = window.innerHeight - baseHeight;
+  return (
+    Math.sinus((sceneOffset * backgroundSpeedMultiplier + windowX) * stretch) *
+      amplitude +
+    sineBaseY
+  );
+}
+
+function getTreeY(x, baseHeight, amplitude) {
+  const sineBaseY = window.innerHeight - baseHeight;
+  return Math.sinus(x) * amplitude + sineBaseY;
+}
