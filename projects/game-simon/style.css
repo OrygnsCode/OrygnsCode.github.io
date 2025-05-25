@@ -31,19 +31,18 @@ time, mark, audio, video {
 
 html {
     background-image: url('https://github.com/Em-Ant/fcc-course/raw/master/front-end_cert/projects/advanced/04-simon-game/images/retina_wood.png');
-    height: 100%; /* Ensure html takes full height for body min-height to work well */
+    height: 100%; 
 }
 
 body {
-    font-family: 'Arial', sans-serif; /* Fallback font */
+    font-family: 'Arial', sans-serif; 
     margin: 0;
-    padding: 20px; /* Overall padding for the page */
+    padding: 20px; 
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* justify-content: center; -- We'll let .wrap handle its own vertical centering more explicitly */
-    min-height: 100vh; /* Make body at least full viewport height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    min-height: 100vh; 
+    box-sizing: border-box; 
 }
 
 .inline {
@@ -54,14 +53,13 @@ body {
     position: relative;
     width: 200px;
     height: 200px;
-    background-color: grey; /* Default, will be overridden by color classes */
-    border: 12px solid #333; /* This creates the black lines between quadrants */
-    box-sizing: border-box; /* Border is included in width/height */
+    background-color: grey; /* Default, overridden by color classes */
+    border: 12px solid #333; /* Creates black lines between quadrants */
+    box-sizing: border-box; 
 }
 
 .rw { /* Row wrapper for buttons */
-    /* margin-bottom:-4px; -- This can cause layout issues, let grid gap handle spacing */
-    display: flex; /* Use flex for the two buttons in a row */
+    display: flex; 
 }
 
 /* Quadrant Shapes */
@@ -75,56 +73,29 @@ body {
     width: 472px; 
     height: 472px;
     border-radius: 50%; /* Circular */
-    position: relative; /* Changed from absolute for simpler centering */
+    position: relative; 
     text-align: center;
-    margin-top: 5vh; /* Some margin from the top */
-    margin-bottom: 20px; /* Space above the footer */
-    margin-left: auto;  /* Auto margins for horizontal centering */
-    margin-right: auto; /* Auto margins for horizontal centering */
+    margin-top: 5vh; 
+    margin-bottom: 30px; /* Increased space for footer */
+    margin-left: auto;  
+    margin-right: auto; 
     background-color: #333; 
     box-shadow: 0px 0px 12px #222;
-    display: flex; /* For centering .wrap-in if needed, though .wrap-in is also relative */
+    display: flex; 
     justify-content: center;
     align-items: center;
+    padding: 12px; /* This will be the outer "black ring" before buttons */
+    box-sizing: border-box;
 }
 
 /* Inner wrapper for the quadrants */
 .wrap-in {
-    width: calc(100% - 24px); /* Account for .wrap's assumed effective border/padding of 12px on each side */
-    height: calc(100% - 24px);
+    width: 100%; /* Takes full width of .wrap's content box */
+    height: 100%; /* Takes full height of .wrap's content box */
     position: relative; 
-    /* Removed top/left, assuming .wrap's padding or direct placement of .push elements */
     display: flex;
-    flex-wrap: wrap; /* Allow rows to wrap */
-    justify-content: center;
-    align-items: center;
-}
-/* The .rw divs will stack. The .push divs are 200x200 with 12px border.
-   Total width for two .push divs = 200*2 = 400px.
-   .wrap is 472px. (472 - 400) / 2 = 36px total for borders/gaps.
-   Each .push has 12px border. So 24px border per .push.
-   If .push elements are direct children of .wrap-in, and .wrap-in is sized correctly, they should fit.
-   The original CSS implies the .push elements are almost touching due to negative margin on .rw.
-   Let's try making .wrap-in a grid for the .rw elements.
-*/
-
-.wrap-in { /* Revised to be a grid for the two .rw rows */
-    position: relative;
-    width: 424px; /* 2*200 (push width) + 2*12 (push border left/right on one side) - this assumes border-box */
-                 /* More simply: (200+24)*2 for full box, but they overlap.
-                    The .push divs have 12px border. Total width of a .push is 200+24=224.
-                    Two of them would be 448 if no overlap.
-                    The original .wrap is 472. The border of .wrap is implied by its bgcolor #333 and .push having its own border.
-                    The effective "gap" between quadrants is the .push border.
-                 */
-    height: 424px; /* (200+24 for top/bottom) */
-    display: flex;
-    flex-direction: column;
-}
-
-.rw {
-    display: flex; /* Make buttons in a row flex */
-    /* margin-bottom: -8px; -- Removed to avoid overlap if borders are not collapsing as expected */
+    flex-wrap: wrap; /* Quadrants will be 2x2 */
+    /* The gap between quadrants is handled by their own borders now */
 }
 
 /* Center Console */
@@ -135,61 +106,187 @@ body {
     border-radius: 100%; 
     top: 50%;
     left: 50%;
-    /* Margin to truly center it based on its own width/height AND its border */
     margin-top: -122px;  /* -(220/2 + 12 border) */
     margin-left: -122px; /* -(220/2 + 12 border) */
     background-color: #ECE7EE; 
     border: 12px solid #333; 
     z-index: 10; 
-    /* Add display flex to center its own content */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center content vertically */
+    justify-content: center; 
     box-sizing: border-box;
 }
 
-.brand { /* ... (same as before) ... */ }
-.brand .small { /* ... (same as before) ... */ }
-.count { /* ... (same as before) ... */ }
-.round-btn { /* ... (same as before) ... */ }
-.round-btn:active { /* ... (same as before) ... */ }
-.clickable { /* ... (same as before) ... */ }
-.unclickable { /* ... (same as before) ... */ }
-.led { /* ... (same as before) ... */ }
-.led-on { /* ... (same as before) ... */ }
-.led-off { /* ... (same as before) ... */ }
-.label { /* ... (same as before) ... */ }
-.display { /* ... (same as before) ... */ }
-.btn-box { /* ... (same as before) ... */ }
-.sw-slot { /* ... (same as before) ... */ }
-.switch { /* ... (same as before) ... */ }
-.sw-on { /* ... (same as before) ... */ }
-.rw.bot { /* ... (same as before) ... */ }
-.full-red { /* ... (same as before) ... */ }
-.red { /* ... (same as before) ... */ }
-.green { /* ... (same as before) ... */ }
-.yellow { /* ... (same as before) ... */ }
-.blue { /* ... (same as before) ... */ }
-.yellow.light { /* ... (same as before) ... */ }
-.blue.light { /* ... (same as before) ... */ }
-.red.light { /* ... (same as before) ... */ }
-.green.light { /* ... (same as before) ... */ }
+.brand {
+    font-family: 'Alfa Slab One', cursive;
+    color : #222;
+    font-size: 3.2em;
+    margin-top : 35px;
+}
+
+.brand .small {
+    font-size : 0.3em;
+    position : relative;
+    top : -20px;
+}
+
+.count {
+    font-family: 'VT323', monospace;
+    color : #DC0D29; 
+    padding : 0px;
+    font-size : 2em;
+    width : 50px;
+    background-color: #32050C; 
+    position:relative;
+    border : 4px solid #222;
+    border-radius : 10px;
+    margin:auto;
+    line-height: 1.2em; 
+}
+
+.round-btn {
+    width : 20px;
+    height : 20px;
+    position: relative;
+    background-color : yellow; 
+    border-radius : 100%;
+    border : 4px solid #444;
+    box-shadow : 0px 2px 3px #222;
+    margin:auto;
+    top : -5px;
+}
+
+.round-btn:active {
+    box-shadow : 0 1px 1px #292929;
+    top : -4px; 
+}
+
+.clickable {
+    pointer-events : auto;
+    cursor:pointer;
+}
+
+.unclickable {
+    pointer-events:none;
+}
+
+.led {
+    width:6px;
+    height:6px;
+    background-color: #32050C; 
+    border-radius : 100%;
+    position: absolute;
+    left:0;
+    right: 0;
+    margin : auto;
+    border: 2px solid #222;
+    top: -18px; 
+}
+
+.led-on {
+    background-color:#DC0D29; 
+}
+
+.led-off { 
+    color:#430710; 
+}
+
+.label {
+    color : #222;
+    font-family : 'Oswald',Arial,sans;
+    font-size:0.7em;
+    margin-top:5px;
+    text-align:center;
+}
+
+.display { 
+    width : 60px;
+    position:relative;
+    text-align:center;
+}
+
+.btn-box { 
+    width : 50px;
+    position:relative;
+}
+
+.sw-slot { 
+    height:20px;
+    width:40px;
+    background-color : #222;
+    position:relative;
+    top:5px;
+    border-radius:2px;
+    cursor: pointer;
+}
+
+.switch { 
+    height:16px;
+    width: 16px;
+    border-radius:4px;
+    background-color : #3193DE; 
+    position:relative;
+    border : 2px solid #333;
+    left: 2px; 
+    transition: left 0.2s ease-in-out;
+}
+
+.sw-on { 
+    left:20px; 
+}
+
+.rw.bot { 
+    margin-top: 10px;
+}
+.full-red { 
+    background-color : #FC0102;
+}
+
+/* Quadrant Button Colors */
+.red { 
+    background-color : #9f0f17; 
+}
+.green {
+    background-color : #00a74a; 
+}
+.yellow {
+    background-color : #cca707; 
+}
+.blue {
+    background-color : #094a8f; 
+}
+
+/* Lit up quadrant button colors */
+.yellow.light { background-color : #fed93f; }
+.blue.light { background-color : #1c8cff; }
+.red.light { background-color : #ff4c4c; }
+.green.light { background-color : #13ff7c; }
 
 /* Scaling for Mobile */
-@media screen and (max-width: 500px) { /* ... (same as before) ... */ }
+@media screen and (max-width: 500px) {
+    .wrap {
+        top: 40px;
+        transform: scale(0.6);
+        transform-origin: 0 0;
+        left: 50%;
+        margin-left: -142px; /* Approx -(472px * 0.6 / 2) */
+    }
+}
 
 /* Footer Styling */
 footer {
     text-align: center;
-    margin-top: 30px; /* Ensure space below the game */
-    padding-bottom: 20px; /* Padding at the very bottom of the page */
-    width: 100%; /* Make footer take full width for centering its content */
-    color: #ccc; /* Light color for text on dark wood background */
+    margin-top: 60px; /* Increased margin-top for more space */
+    padding-bottom: 20px; 
+    width: 100%; 
+    color: #ccc; 
+    position: relative; /* Added to ensure it's in the normal flow after absolute elements */
+    clear: both; /* Just in case of any floats, though not expected here */
 }
 
 footer a {
-    color: #eee; /* Lighter link color */
+    color: #eee; 
     text-decoration: none;
 }
 
