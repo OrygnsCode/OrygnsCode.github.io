@@ -3,19 +3,20 @@
 <head>
     <meta charset="utf-8">
     <title>Simon Game - OrygnsCode</title>
-    <link href="style.css" rel="stylesheet" type="text/css"> <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link href="https://fonts.googleapis.com/css?family=Orbitron:700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One|VT323|Oswald&display=swap" rel="stylesheet">
+
+
 </head>
 <body>
     <div class="wrap">
         <div class="wrap-in">
             <div class="rw">
-                <div class="t-l inline push red unclickable" id="red"></div>
-                <div class="t-r inline push green unclickable" id="green"></div>
-            </div>
+                <div class="t-l inline push green unclickable" id="3"></div> <div class="t-r inline push red but unclickable" id="2"></div>   </div>
             <div class="rw">
-                <div class="b-l inline push blue unclickable" id="blue"></div>
-                <div class="b-r inline push yellow unclickable" id="yellow"></div>
-            </div>
+                <div class="b-l inline push yellow unclickable" id="1"></div> <div class="b-r inline push blue but unclickable" id="0"></div>  </div>
         </div>
         <div class="center">
             <h1 class="brand">Simon<span class="small">®</span></h1>
@@ -28,7 +29,8 @@
                     <h3 class="label">START</h3>
                 </div>
                 <div class="btn-box inline">
-                    <div class="round-btn but clickable" id="mode"></div> <h3 class="label">STRICT</h3>
+                    <div class="round-btn but clickable" id="mode"></div>
+                    <h3 class="label">STRICT</h3>
                     <div class="led" id="mode-led"></div>
                 </div>
             </div>
@@ -43,9 +45,4 @@
     </div>
 
     <footer style="text-align: center; margin-top: 20px; position: relative; z-index: 100;">
-         <p><a href="../../index.html" style="color: #ccc; text-decoration: none;">Back to OrygnsCode Home</a></p> 
-    </footer>
-
-    <script src="script.js"></script>
-</body>
-</html>
+        <p><a href="../../index.html" style="color: #ccc; text-decoration: none;">Back to OrygnsCode Home</a></p>
