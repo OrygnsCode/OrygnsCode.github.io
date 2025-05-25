@@ -23,8 +23,9 @@ body {
 #simon-machine {
     width: 90vmin; 
     height: 90vmin;
-    max-width: 400px; 
-    max-height: 400px;
+    /* Increased max size by roughly 20% (from 400px to 480px) */
+    max-width: 480px; 
+    max-height: 480px;
     background-color: #282828; 
     border-radius: 50%; 
     position: relative; 
@@ -34,18 +35,19 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 8px; 
-    padding: 8px; 
+    /* Increased gap and padding */
+    gap: 10px; 
+    padding: 10px; 
     box-sizing: border-box;
-    border: 3px solid #1c1c1c; 
+    border: 4px solid #1c1c1c; /* Slightly thicker border */
 }
 
 .simon-button {
     opacity: 0.85; 
     cursor: pointer;
     transition: opacity 0.05s ease-in-out, transform 0.05s ease-in-out, box-shadow 0.1s ease-in-out;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    border: 2px solid rgba(0,0,0,0.3); 
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.35); /* Slightly deeper inset */
+    border: 2px solid rgba(0,0,0,0.4); 
 }
 
 .simon-button:hover {
@@ -56,49 +58,50 @@ body {
     opacity: 1;
     transform: scale(0.96) translateY(1px); 
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 
-                0 0 30px var(--glow-color, white),
-                0 0 10px var(--glow-color, white); 
+                0 0 35px var(--glow-color, white), /* Increased glow */
+                0 0 15px var(--glow-color, white); 
 }
 
 /* Color layout: Red (TL), Green (TR), Blue (BL), Yellow (BR) */
 #red.simon-button { 
-    background-color: #c0392b; /* Strong Red */
+    background-color: #c0392b; 
     border-top-left-radius: 100%; 
     --glow-color: #e74c3c;
-    grid-area: 1 / 1 / 2 / 2; /* Explicit grid placement: row-start / col-start / row-end / col-end */
+    grid-area: 1 / 1 / 2 / 2; 
 } 
 #green.simon-button {
-    background-color: #27ae60; /* Strong Green */
+    background-color: #27ae60; 
     border-top-right-radius: 100%;
     --glow-color: #2ecc71;
-    grid-area: 1 / 2 / 2 / 3; /* Top-Right */
+    grid-area: 1 / 2 / 2 / 3; 
 } 
 #blue.simon-button {
-    background-color: #2980b9; /* Strong Blue */
+    background-color: #2980b9; 
     border-bottom-left-radius: 100%;
     --glow-color: #3498db;
-    grid-area: 2 / 1 / 3 / 2; /* Bottom-Left */
+    grid-area: 2 / 1 / 3 / 2; 
 }   
 #yellow.simon-button {
-    background-color: #f1c40f; /* Strong Yellow */
+    background-color: #f1c40f; 
     border-bottom-right-radius: 100%;
     --glow-color: #f39c12; 
-    grid-area: 2 / 2 / 3 / 3; /* Bottom-Right */
+    grid-area: 2 / 2 / 3 / 3; 
 }
 
 .center-console {
     position: absolute;
-    width: 42%; 
-    height: 42%;
+    /* Adjusted size to prevent overlap with larger gaps/buttons */
+    width: 40%; 
+    height: 40%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #4a4a4a; 
     border-radius: 50%; 
-    border: 4px solid #333333; 
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.5), 
-                inset 0px 2px 3px rgba(255,255,255,0.2), 
-                inset 0px -2px 3px rgba(0,0,0,0.3);
+    border: 5px solid #333333; /* Slightly thicker border */
+    box-shadow: 0px 0px 18px rgba(0,0,0,0.55), 
+                inset 0px 2px 4px rgba(255,255,255,0.2), 
+                inset 0px -2px 4px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -110,9 +113,10 @@ body {
 
 .game-title {
     font-family: 'Orbitron', 'Arial Black', sans-serif;
-    font-size: clamp(1.3em, 6vmin, 2em); 
+    /* Adjusted clamp values for potentially larger console */
+    font-size: clamp(1.4em, 6.5vmin, 2.2em); 
     color: #1e1e1e; 
-    margin: 0 0 8px 0; 
+    margin: 0 0 10px 0; /* Increased bottom margin */
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 700;
@@ -123,20 +127,21 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px; 
+    gap: 4px; /* Slightly increased gap */
 }
 
 .score-display {
-    font-family: 'Orbitron', sans-serif; /* Using Orbitron here too for consistency */
-    font-size: clamp(0.7em, 3vmin, 1em); 
+    font-family: 'Orbitron', sans-serif; 
+    /* Adjusted clamp values */
+    font-size: clamp(0.8em, 3.8vmin, 1.3em); 
     color: #2ecc71; 
     background-color: #1a1a1a; 
-    padding: 4px 10px; 
+    padding: 5px 10px; /* Adjusted padding */
     border-radius: 3px;
-    min-width: 70px; 
+    min-width: 80px; /* Adjusted min-width */
     text-align: center;
     border: 1px solid #000;
-    box-shadow: inset 0 0 3px #000;
+    box-shadow: inset 0 0 4px #000; /* Deeper inset */
 }
 
 #score {
@@ -145,8 +150,9 @@ body {
 
 #start-button {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(0.8em, 3.5vmin, 1.1em); 
-    padding: 7px 15px; 
+    /* Adjusted clamp values */
+    font-size: clamp(0.9em, 3.8vmin, 1.2em); 
+    padding: 8px 18px; /* Adjusted padding */
     background-color: #c0392b; 
     color: #ecf0f1;
     border: 1px solid #a03020;
@@ -155,7 +161,7 @@ body {
     cursor: pointer;
     text-transform: uppercase;
     transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.1s ease;
-    margin-top: 8px; 
+    margin-top: 10px; /* Increased margin */
     font-weight: bold;
 }
 
@@ -168,8 +174,8 @@ body {
 }
 
 #message-display {
-    margin-top: 8px; 
-    font-size: clamp(0.7em, 3vmin, 0.9em); 
+    margin-top: 10px; 
+    font-size: clamp(0.75em, 3.3vmin, 1em); /* Adjusted clamp values */
     color: #f1c40f; 
     min-height: 1.1em; 
     font-weight: bold;
