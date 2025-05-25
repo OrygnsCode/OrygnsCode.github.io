@@ -1,4 +1,3 @@
-
 // Extend the base functionality of JavaScript
 Array.prototype.last = function () {
   return this[this.length - 1];
@@ -81,7 +80,8 @@ function resetGame() {
 
   // The first platform is always the same
   // x + w has to match paddingX
-  platforms = [{ x: 50, w: 50 }];
+  platforms = [{ x: 50, w: 50 }]; // Initial platform fixed width
+  // Generate subsequent platforms with dynamic width
   generatePlatform();
   generatePlatform();
   generatePlatform();
@@ -126,11 +126,13 @@ function generateTree() {
   trees.push({ x, color });
 }
 
+// MODIFIED generatePlatform function STARTS HERE
 function generatePlatform() {
   const minimumGap = 40;
   const maximumGap = 200;
-  const minimumWidth = 20;
-  const maximumWidth = 100;
+  // Base width parameters for platforms before score-based scaling
+  const basePlatformMinimumWidth = 20;
+  const basePlatformMaximumWidth = 100;
 
   // X coordinate of the right edge of the furthest platform
   const lastPlatform = platforms[platforms.length - 1];
@@ -140,11 +142,39 @@ function generatePlatform() {
     furthestX +
     minimumGap +
     Math.floor(Math.random() * (maximumGap - minimumGap));
-  const w =
-    minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
+
+  // Calculate the "original beginning size" for this platform's width, before scaling.
+  const originalGeneratedWidth =
+    basePlatformMinimumWidth +
+    Math.floor(Math.random() * (basePlatformMaximumWidth - basePlatformMinimumWidth));
+
+  let widthMultiplier;
+
+  if (score < 50) {
+    // For scores 0-49:
+    // Width decreases from 100% of originalGeneratedWidth (at score 0)
+    // towards 50% of originalGeneratedWidth (as score approaches 50).
+    widthMultiplier = 1.0 - (score / 50.0) * 0.5;
+  } else if (score < 100) {
+    // For scores 50-99:
+    // Width decreases from 50% of originalGeneratedWidth (at score 50)
+    // towards 20% of originalGeneratedWidth (as score approaches 100).
+    widthMultiplier = 0.5 - ((score - 50.0) / 50.0) * (0.5 - 0.2);
+  } else {
+    // For scores 100 and above:
+    // Width is fixed at 10% of originalGeneratedWidth.
+    widthMultiplier = 0.1;
+  }
+
+  // Calculate the final width for the new platform.
+  let w = originalGeneratedWidth * widthMultiplier;
+
+  // Optional: ensure a minimum absolute width, e.g., w = Math.max(w, 2);
+  // Current logic respects "10% of beginning size", so 10% of basePlatformMinimumWidth (2px) is possible.
 
   platforms.push({ x, w });
 }
+// MODIFIED generatePlatform function ENDS HERE
 
 resetGame();
 
@@ -212,7 +242,7 @@ function animate(timestamp) {
             setTimeout(() => (perfectElement.style.opacity = 0), 1000);
           }
 
-          generatePlatform();
+          generatePlatform(); // Generate new platform with potentially new width
           generateTree();
           generateTree();
         }
@@ -245,7 +275,7 @@ function animate(timestamp) {
     case "transitioning": {
       sceneOffset += (timestamp - lastTimestamp) / transitioningSpeed;
 
-      const [nextPlatform] = thePlatformTheStickHits();
+      const [nextPlatform] = thePlatformTheStickHits(); // This might need to use the current platform index if sticks array grows
       if (sceneOffset > nextPlatform.x + nextPlatform.w - paddingX) {
         // Add the next step
         sticks.push({
