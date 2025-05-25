@@ -1,32 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <title>Simon Game - OrygnsCode</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css?family=Orbitron:700&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet" type="text/css"> <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
 <body>
-    <div class="game-container">
-        <div id="simon-machine">
-            <div class="simon-button red" data-color="red" id="red"></div>         <div class="simon-button green" data-color="green" id="green"></div>   <div class="simon-button blue" data-color="blue" id="blue"></div>     <div class="simon-button yellow" data-color="yellow" id="yellow"></div> <div class="center-console">
-                <h1 class="game-title">SIMON</h1>
-                <div class="controls">
-                    <div class="score-display">
-                        Score: <span id="score">00</span>
-                    </div>
-                    <button id="start-button">Start</button>
+    <div class="wrap">
+        <div class="wrap-in">
+            <div class="rw">
+                <div class="t-l inline push red unclickable" id="red"></div>
+                <div class="t-r inline push green unclickable" id="green"></div>
+            </div>
+            <div class="rw">
+                <div class="b-l inline push blue unclickable" id="blue"></div>
+                <div class="b-r inline push yellow unclickable" id="yellow"></div>
+            </div>
+        </div>
+        <div class="center">
+            <h1 class="brand">Simon<span class="small">®</span></h1>
+            <div class="rw">
+                <div class="display inline">
+                    <h1 class="count led-off" id="count-display">--</h1> <h3 class="label">COUNT</h3>
                 </div>
-                <div id="message-display" class="message"></div>
+                <div class="btn-box inline">
+                    <div class="round-btn full-red but clickable" id="start"></div>
+                    <h3 class="label">START</h3>
+                </div>
+                <div class="btn-box inline">
+                    <div class="round-btn but clickable" id="mode"></div> <h3 class="label">STRICT</h3>
+                    <div class="led" id="mode-led"></div>
+                </div>
+            </div>
+            <div class="rw bot">
+                <h3 class="label inline">OFF</h3>
+                <div class="sw-slot inline">
+                    <div class="switch" id="pwr-sw"></div>
+                </div>
+                <h3 class="label inline">ON</h3>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p><a href="../../index.html">Back to OrygnsCode Home</a></p> 
+    <footer style="text-align: center; margin-top: 20px; position: relative; z-index: 100;">
+         <p><a href="../../index.html" style="color: #ccc; text-decoration: none;">Back to OrygnsCode Home</a></p> 
     </footer>
 
     <script src="script.js"></script>
-    </body>
+</body>
 </html>
