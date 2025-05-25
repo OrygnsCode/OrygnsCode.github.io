@@ -19,10 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
     const swipeThreshold = 30;
 
-    const JS_CELL_GAP = 12; // Matching a common value from your CSS clamp for gap/padding
     let cellSize = 0;
+    let cellGapFromCSS = 0;     // To store actual computed gap
+    let boardPaddingFromCSS = 0; // To store actual computed padding of the game board itself
     let newlyAddedTileInfo = null;
 
+    // --- 1. GAME INITIALIZATION ---
     function initializeBoardArray() {
         board = [];
         for (let r = 0; r < gridSize; r++) {
@@ -36,11 +38,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDimensions() {
         if (!gameBoardElement) {
             console.error("!!! calculateDimensions: gameBoardElement not found!");
-            cellSize = 80; return;
+            cellSize = 80; cellGapFromCSS = 10; boardPaddingFromCSS = 10; // Fallbacks
+            return;
         }
-        const boardClientWidth = gameBoardElement.clientWidth;
-        cellSize = (boardClientWidth - (gridSize - 1) * JS_CELL_GAP) / gridSize;
-        console.log(`DIMENSIONS: ClientWidth=${boardClientWidth}, JS_CELL_GAP=${JS_CELL_GAP}px, Calculated CellSize=${cellSize}px`);
+        const boardStyle = getComputedStyle(gameBoardElement);
+        const boardClientWidth = gameBoardElement.clientWidth; // Width INSIDE gameBoardElement's own CSS padding
+
+        let computedGap = parseFloat(boardStyle.gap);
+        let computedPadding = parseFloat(boardStyle.paddingTop); // Assuming padding is uniform (top, left, etc.)
+
+        if (isNaN(computedGap)) {
+            console.warn("Could not parse 'gap' from CSS. Using fallback 10px.");
+            computedGap = 10;
+        }
+        if (isNaN(computedPadding)) {
+            console.warn("Could not parse 'paddingTop' from CSS. Using fallback 10px.");
+            computedPadding = 10;
+        }
+        
+        cellGapFromCSS = computedGap;
+        boardPaddingFromCSS = computedPadding; 
+        
+        // cellSize is based on the clientWidth (area available for cells after parent's padding is accounted for)
+        // minus total gaps between cells, divided by grid size.
+        cellSize = (boardClientWidth - (gridSize - 1) * cellGapFromCSS) / gridSize;
+
+        console.log(`DIMENSIONS: ClientWidth=${boardClientWidth}px, BoardPadding=${boardPaddingFromCSS}px, CellGap=${cellGapFromCSS}px, Calculated CellSize=${cellSize}px`);
+        
         if (isNaN(cellSize) || cellSize <= 0) {
             console.error("!!! Calculated cellSize is invalid! Value:", cellSize, "Using fallback 80px.");
             cellSize = 80;
@@ -49,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createBackgroundGrid() {
         if (!gameBoardElement) { console.error("!!! createBackgroundGrid: gameBoardElement not found!"); return; }
-        gameBoardElement.innerHTML = ''; // Clear everything first (background + old numbered tiles)
+        // Clear previous background cells and numbered tiles to be safe before rebuilding structure
+        gameBoardElement.innerHTML = ''; 
         for (let i = 0; i < gridSize * gridSize; i++) {
             const cell = document.createElement('div');
             cell.classList.add('grid-cell');
@@ -63,38 +88,38 @@ document.addEventListener('DOMContentLoaded', () => {
         isGameOver = false;
         hasWon = false;
         score = 0;
-        updateScoreDisplay(); // Reset score display
+        updateScoreDisplay();
 
-        createBackgroundGrid(); // Create static background cells
-        calculateDimensions();  // Calculate cell sizes based on current board dimensions
+        createBackgroundGrid();
+        calculateDimensions(); 
         
         initializeBoardArray();
-        addRandomTile(true); // isInitialSetup = true
-        addRandomTile(true); // isInitialSetup = true
+        addRandomTile(true); 
+        addRandomTile(true);
         
-        renderBoard(true); // isInitialRender = true
+        renderBoard(true); 
 
         if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
         if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
         console.log("INIT: Game started. Initial logical board:", JSON.parse(JSON.stringify(board)));
     }
 
+    // --- 2. RENDERING THE BOARD ---
     function renderBoard(isInitialRender = false) {
         if (!gameBoardElement) { console.error("!!! RENDER: gameBoardElement not found!"); return; }
-        if (cellSize <= 0 || isNaN(cellSize)) {
-            console.error("!!! RENDER: cellSize invalid (" + cellSize + "), cannot render tiles. Recalculating...");
-            calculateDimensions(); // Try to recalculate
-            if (cellSize <= 0 || isNaN(cellSize)) { // If still invalid, abort render
-                 console.error("!!! RENDER: cellSize still invalid after recalculation. Aborting render.");
+        if (cellSize <= 0 || isNaN(cellSize) || isNaN(cellGapFromCSS) || isNaN(boardPaddingFromCSS)) {
+            console.error("!!! RENDER: Critical dimensions invalid. cellSize:", cellSize, "cellGap:", cellGapFromCSS, "boardPadding:", boardPaddingFromCSS, ". Recalculating...");
+            calculateDimensions();
+            if (cellSize <= 0 || isNaN(cellSize) || isNaN(cellGapFromCSS) || isNaN(boardPaddingFromCSS)) {
+                 console.error("!!! RENDER: Critical dimensions still invalid. Aborting render.");
                  return;
             }
         }
 
-        // Remove previous *numbered* tiles only. Background .grid-cell divs remain.
         const existingNumberedTiles = gameBoardElement.querySelectorAll('.tile:not(.grid-cell)');
         existingNumberedTiles.forEach(tile => tile.remove());
 
-        console.log("RENDER: Drawing board. Logical data:", JSON.parse(JSON.stringify(board)));
+        // console.log("RENDER: Drawing board. Logical data:", JSON.parse(JSON.stringify(board)));
 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
@@ -108,39 +133,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     tileElement.style.width = `${cellSize}px`;
                     tileElement.style.height = `${cellSize}px`;
-                    tileElement.style.top = `${r * (cellSize + JS_CELL_GAP)}px`;
-                    tileElement.style.left = `${c * (cellSize + JS_CELL_GAP)}px`;
+                    
+                    // Tiles are positioned absolutely within #game-board.
+                    // #game-board's CSS padding creates the outer border.
+                    // The .grid-cell elements are laid out by the grid within that padding.
+                    // The numbered .tile elements should align with these .grid-cell positions.
+                    // Their top-left is relative to the content box of #game-board (which starts after its padding).
+                    tileElement.style.top = `${r * (cellSize + cellGapFromCSS)}px`;
+                    tileElement.style.left = `${c * (cellSize + cellGapFromCSS)}px`;
                     
                     gameBoardElement.appendChild(tileElement);
-                    console.log(`RENDER: Placed tile ${tileValue} at [${r},${c}] -> left: ${tileElement.style.left}, top: ${tileElement.style.top}, width: ${tileElement.style.width}`);
+                    // console.log(`RENDER: Placed tile ${tileValue} at [${r},${c}] -> left: ${tileElement.style.left}, top: ${tileElement.style.top}, width: ${tileElement.style.width}`);
 
                     if (newlyAddedTileInfo && newlyAddedTileInfo.r === r && newlyAddedTileInfo.c === c && !isInitialRender) {
-                        console.log("RENDER: Applying 'tile-new' animation to tile at:", newlyAddedTileInfo);
-                        tileElement.classList.add('tile-new');
-                        // Force reflow to apply initial state before transition
-                        void tileElement.offsetWidth; 
-                        // Reset transform and opacity to allow transition to take effect from CSS
-                        tileElement.style.transform = 'scale(1)';
-                        tileElement.style.opacity = '1';
-                    } else if (isInitialRender && tileValue !== 0) {
-                        // For initial tiles, ensure they are fully visible without animation
+                        // console.log("RENDER: Applying 'tile-new' animation to tile at:", newlyAddedTileInfo);
+                        tileElement.classList.add('tile-new'); // CSS has transform: scale(0), opacity: 0
+                        requestAnimationFrame(() => { // Allow initial styles to apply
+                            requestAnimationFrame(() => { // Then trigger transition to final state
+                                tileElement.style.transform = 'scale(1)';
+                                tileElement.style.opacity = '1';
+                            });
+                        });
+                    } else { 
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     }
                 }
             }
         }
-        newlyAddedTileInfo = null; // Reset after processing
+        newlyAddedTileInfo = null; 
     }
 
     function updateScoreDisplay() { if (scoreElement) scoreElement.textContent = score; }
 
+    // --- 3. ADDING RANDOM TILES ---
     function getEmptyCells() {
         const emptyCells = [];
         for (let r = 0; r < gridSize; r++) { for (let c = 0; c < gridSize; c++) { if (board[r][c] === 0) emptyCells.push({ r, c }); } }
         return emptyCells;
     }
-
     function addRandomTile(isInitialSetup = false) {
         const emptyCells = getEmptyCells();
         if (emptyCells.length > 0) {
@@ -149,15 +180,16 @@ document.addEventListener('DOMContentLoaded', () => {
             board[randomCell.r][randomCell.c] = newValue;
             console.log(`LOGIC: Added tile ${newValue} at [${randomCell.r},${randomCell.c}] to board data.`);
             if (!isInitialSetup) {
-                newlyAddedTileInfo = { r: randomCell.r, c: randomCell.c }; // Mark for animation in next render
+                newlyAddedTileInfo = { r: randomCell.r, c: randomCell.c };
             }
         } else {
             console.log("LOGIC: No empty cells to add a random tile.");
         }
     }
     
-    function processMove(boardChanged, direction) {
-        console.log(`PROCESSMOVE: Received from ${direction}, boardChanged is: ${boardChanged} (Type: ${typeof boardChanged})`);
+    // --- 4. HANDLING PLAYER INPUT & MOVES ---
+    function processMove(boardChanged, direction) { 
+        console.log(`PROCESSMOVE: After ${direction} move, boardChanged is: ${boardChanged} (Type: ${typeof boardChanged})`);
         if (boardChanged === true) {
             console.log("PROCESSMOVE: Board changed. Adding new tile, re-rendering, updating score.");
             addRandomTile(); 
@@ -221,9 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
         processMove(changed, direction);
     }
 
-    // --- 5. MOVEMENT LOGIC (Ensure these explicitly return booleans) ---
+    // --- 5. MOVEMENT LOGIC ---
     function processRowLeft(row) {
-        let originalSum = row.reduce((acc, val) => acc + val, 0); // For change detection in simple way
         let filteredRow = row.filter(val => val !== 0);
         for (let i = 0; i < filteredRow.length - 1; i++) {
             if (filteredRow[i] === filteredRow[i+1]) {
@@ -249,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) { console.error("ERROR in moveTilesLeft:", e); internalBoardChanged = false; }
-        console.log("MOVE_FUNC: moveTilesLeft returning:", internalBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesLeft returning:", internalBoardChanged);
         return internalBoardChanged;
     }
 
@@ -267,17 +298,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) { console.error("ERROR in moveTilesRight:", e); internalBoardChanged = false; }
-        console.log("MOVE_FUNC: moveTilesRight returning:", internalBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesRight returning:", internalBoardChanged);
         return internalBoardChanged;
     }
 
     function transposeBoard(matrix) {
         try {
+            // Ensure matrix and matrix[0] exist before trying to get length
+            if (!matrix || !matrix.length || !matrix[0] || !matrix[0].length) {
+                console.error("Error in transposeBoard: Invalid matrix received", matrix);
+                const fallbackMatrix = [];
+                for(let r=0; r<gridSize; r++) fallbackMatrix.push(new Array(gridSize).fill(0));
+                return fallbackMatrix; 
+            }
             const newMatrix = matrix[0].map((col, i) => matrix.map(row => row[i]));
             return newMatrix;
         } catch (e) {
             console.error("ERROR in transposeBoard:", e, "Matrix was:", JSON.parse(JSON.stringify(matrix)));
-            // Fallback: return a clone or a new empty grid to avoid breaking further logic
             const fallbackMatrix = [];
             for(let r=0; r<gridSize; r++) fallbackMatrix.push(new Array(gridSize).fill(0));
             return fallbackMatrix; 
@@ -298,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (internalBoardChanged) { board = transposeBoard(tempBoard); }
         } catch (e) { console.error("ERROR in moveTilesUp:", e); internalBoardChanged = false; }
-        console.log("MOVE_FUNC: moveTilesUp returning:", internalBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesUp returning:", internalBoardChanged);
         return internalBoardChanged;
     }
 
@@ -318,27 +355,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (internalBoardChanged) { board = transposeBoard(tempBoard); }
         } catch (e) { console.error("ERROR in moveTilesDown:", e); internalBoardChanged = false; }
-        console.log("MOVE_FUNC: moveTilesDown returning:", internalBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesDown returning:", internalBoardChanged);
         return internalBoardChanged;
     }
 
     // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
-    function checkWinCondition() {for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize;c++){if(board[r][c]===targetTile)return true;}}return false;}
+    function checkWinCondition() {for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize;c++){if(board[r][c]===targetTile && !hasWon)return true;}}return false;} // Check hasWon here
     function showWinMessage() {hasWon=true;if(youWinMessageElement)youWinMessageElement.classList.remove('hidden');console.log("WIN: You Win message shown");}
-    function canAnyTileMove() {if(getEmptyCells().length>0)return true;for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize-1;c++){if(board[r][c]!==0&&board[r][c]===board[r][c+1])return true;}}for(let c=0;c<gridSize;c++){for(let r=0;r<gridSize-1;r++){if(board[r][c]!==0&&board[r][c]===board[r+1][c])return true;}}return false;}
-    function checkGameOver() {if(!canAnyTileMove()){console.log("GAMEOVER_CHECK: No moves possible.");return true;}return false;} 
+    function canAnyTileMove() {if(getEmptyCells().length>0)return true;for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize-1;c++){if(board[r][c]!==0&&board[r][c]===board[r][c+1])return true;}}for(let c=0;c<gridSize;c++){for(let r=0;r<gridSize-1;r++){if(board[r][c]!==0&&board[r][c]===board[r+1][c])return true;}}console.log("GAMEOVER_CHECK: No empty cells & no merges possible."); return false;}
+    function checkGameOver() {if(!canAnyTileMove()){console.log("GAMEOVER_CHECK: Game is over.");return true;}return false;} 
     function endGame() {isGameOver=true;if(finalScoreElement)finalScoreElement.textContent=score;if(gameOverMessageElement)gameOverMessageElement.classList.remove('hidden');console.log("GAMEOVER: Game Over message shown. Final Score:",score);}
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
-    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false;console.log("Keep playing selected.");});
+    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; /* allow play to continue */ console.log("Keep playing selected.");});
     if (newGameFromWinButton) newGameFromWinButton.addEventListener('click', startGame);
     
     window.addEventListener('resize', () => {
-        console.log("Window resized event triggered.");
+        console.log("Window resized event triggered. Recalculating dimensions.");
         calculateDimensions();
-        renderBoard(true); 
+        renderBoard(true); // Re-render based on new dimensions
     });
 
     startGame(); 
