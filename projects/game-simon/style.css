@@ -1,6 +1,6 @@
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #000000; /* Black background for the page */
+    background-color: #000000; /* Black background */
     color: #ffffff; /* Default white text */
     margin: 0;
     padding: 20px;
@@ -11,7 +11,6 @@ body {
     min-height: calc(100vh - 40px);
     box-sizing: border-box;
     user-select: none;
-    /* Spotlight effect underneath the machine */
     background-image: radial-gradient(circle at center, rgba(50, 50, 70, 0.4) 0%, rgba(0,0,0,0) 60%);
 }
 
@@ -26,28 +25,27 @@ body {
     height: 90vmin;
     max-width: 400px; 
     max-height: 400px;
-    background-color: #282828; /* Dark grey machine body */
+    background-color: #282828; 
     border-radius: 50%; 
     position: relative; 
-    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.6), /* Outer shadow for depth */
-                inset 0px 3px 5px rgba(255, 255, 255, 0.1), /* Inner top highlight */
-                inset 0px -3px 5px rgba(0, 0, 0, 0.4); /* Inner bottom shadow */
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.6), 
+                inset 0px 3px 5px rgba(255, 255, 255, 0.1), 
+                inset 0px -3px 5px rgba(0, 0, 0, 0.4);
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 8px; 
     padding: 8px; 
     box-sizing: border-box;
-    border: 3px solid #1c1c1c; /* Darker border for definition */
+    border: 3px solid #1c1c1c; 
 }
 
 .simon-button {
-    opacity: 0.85; /* Default button opacity */
+    opacity: 0.85; 
     cursor: pointer;
     transition: opacity 0.05s ease-in-out, transform 0.05s ease-in-out, box-shadow 0.1s ease-in-out;
-    /* Add a subtle inset shadow to make them look slightly rounded/pressable */
     box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    border: 2px solid rgba(0,0,0,0.3); /* Dark thin border for separation */
+    border: 2px solid rgba(0,0,0,0.3); 
 }
 
 .simon-button:hover {
@@ -56,56 +54,37 @@ body {
 
 .simon-button.active {
     opacity: 1;
-    transform: scale(0.96) translateY(1px); /* Simulates being pressed down deeper */
-    /* Brighter shadow when active to simulate light */
+    transform: scale(0.96) translateY(1px); 
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 
                 0 0 30px var(--glow-color, white),
                 0 0 10px var(--glow-color, white); 
 }
 
-/* Classic Simon Button Layout & Colors: */
-/* Top-Left: Green */
-#green { 
-    background-color: #00a74a; 
-    border-top-left-radius: 100%; 
-    --glow-color: #32ff7e;
-} 
-/* Top-Right: Red */
-#red { 
-    background-color: #9f0f17; 
-    border-top-right-radius: 100%;
-    --glow-color: #ff4d4d;
-} 
-/* Bottom-Left: Yellow (as per your description, classic is often yellow bottom-right, blue bottom-left) */
-/* Let's stick to your description: Red (TL), Green (TR), Blue (BL), Yellow (BR) */
-/* Okay, re-reading: "red (top left), green (top right), blue (bottom left), and yellow (bottom right)" */
-/* My previous button quadrant naming was different than the color IDs. Fixing: */
-
-/* Red (Top-Left) */
-#red.simon-button { /* More specific selector if needed */
-    background-color: #c0392b; /* A strong red */
+/* Color layout: Red (TL), Green (TR), Blue (BL), Yellow (BR) */
+#red.simon-button { 
+    background-color: #c0392b; /* Strong Red */
     border-top-left-radius: 100%; 
     --glow-color: #e74c3c;
+    grid-area: 1 / 1 / 2 / 2; /* Explicit grid placement: row-start / col-start / row-end / col-end */
 } 
-/* Green (Top-Right) */
 #green.simon-button {
-    background-color: #27ae60; /* A strong green */
+    background-color: #27ae60; /* Strong Green */
     border-top-right-radius: 100%;
     --glow-color: #2ecc71;
+    grid-area: 1 / 2 / 2 / 3; /* Top-Right */
 } 
-/* Blue (Bottom-Left) */
 #blue.simon-button {
-    background-color: #2980b9; /* A strong blue */
+    background-color: #2980b9; /* Strong Blue */
     border-bottom-left-radius: 100%;
     --glow-color: #3498db;
+    grid-area: 2 / 1 / 3 / 2; /* Bottom-Left */
 }   
-/* Yellow (Bottom-Right) */
 #yellow.simon-button {
-    background-color: #f1c40f; /* A strong yellow */
+    background-color: #f1c40f; /* Strong Yellow */
     border-bottom-right-radius: 100%;
-    --glow-color: #f39c12; /* Use a slightly deeper yellow/orange for glow */
+    --glow-color: #f39c12; 
+    grid-area: 2 / 2 / 3 / 3; /* Bottom-Right */
 }
-
 
 .center-console {
     position: absolute;
@@ -114,46 +93,43 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #4a4a4a; /* Raised gray circle */
+    background-color: #4a4a4a; 
     border-radius: 50%; 
     border: 4px solid #333333; 
     box-shadow: 0px 0px 15px rgba(0,0,0,0.5), 
-                inset 0px 2px 3px rgba(255,255,255,0.2), /* Inner top highlight */
-                inset 0px -2px 3px rgba(0,0,0,0.3); /* Inner bottom shadow */
+                inset 0px 2px 3px rgba(255,255,255,0.2), 
+                inset 0px -2px 3px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center content vertically */
+    justify-content: center; 
     padding: 8px; 
     box-sizing: border-box;
     z-index: 10; 
 }
 
 .game-title {
-    font-family: 'Orbitron', 'Arial Black', sans-serif; /* Futuristic/blocky font suggestion */
-    /* You might need to import Orbitron via Google Fonts in your HTML if you use it: */
-    /* <link href="https://fonts.googleapis.com/css?family=Orbitron:700" rel="stylesheet"> */
+    font-family: 'Orbitron', 'Arial Black', sans-serif;
     font-size: clamp(1.3em, 6vmin, 2em); 
-    color: #1e1e1e; /* Darker engraving-like text */
+    color: #1e1e1e; 
     margin: 0 0 8px 0; 
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 700;
-    text-shadow: 1px 1px 0px rgba(255,255,255,0.1); /* Slight highlight for engraved look */
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.1); 
 }
 
 .controls {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px; 
+    gap: 3px; 
 }
 
 .score-display {
-    font-family: 'Segment7', 'Orbitron', sans-serif; /* Digital-like font */
-    /* You might need to import Segment7 or find a similar digital font */
-    font-size: clamp(0.9em, 4vmin, 1.2em); 
-    color: #2ecc71; /* Greenish digital text */
+    font-family: 'Orbitron', sans-serif; /* Using Orbitron here too for consistency */
+    font-size: clamp(0.7em, 3vmin, 1em); 
+    color: #2ecc71; 
     background-color: #1a1a1a; 
     padding: 4px 10px; 
     border-radius: 3px;
@@ -164,14 +140,14 @@ body {
 }
 
 #score {
-    font-weight: normal; /* Let font handle boldness */
+    font-weight: normal; 
 }
 
 #start-button {
     font-family: 'Orbitron', sans-serif;
     font-size: clamp(0.8em, 3.5vmin, 1.1em); 
     padding: 7px 15px; 
-    background-color: #c0392b; /* Deeper red */
+    background-color: #c0392b; 
     color: #ecf0f1;
     border: 1px solid #a03020;
     box-shadow: 0 2px 0 #7f2010, inset 0 1px 1px rgba(255,255,255,0.2);
@@ -184,13 +160,12 @@ body {
 }
 
 #start-button:hover {
-    background-color: #e74c3c; /* Brighter red */
+    background-color: #e74c3c; 
 }
 #start-button:active {
     transform: translateY(1px);
     box-shadow: 0 1px 0 #7f2010, inset 0 1px 1px rgba(255,255,255,0.2);
 }
-
 
 #message-display {
     margin-top: 8px; 
@@ -206,12 +181,12 @@ body {
 }
 
 footer { 
-    margin-top: 40px; /* More space from game */
+    margin-top: 40px; 
     font-size: 0.9em;
-    color: #7f8c8d; /* Muted footer text */
+    color: #7f8c8d; 
 }
 footer a { 
-    color: #95a5a6; /* Muted link color */
+    color: #95a5a6; 
     text-decoration: none; 
 }
 footer a:hover { text-decoration: underline; }
