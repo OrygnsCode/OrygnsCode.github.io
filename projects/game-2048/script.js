@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameBoardElement.appendChild(tileElement);
             }
         }
-        console.log("Board rendered with current tile values.");
+        // console.log("Board rendered."); // Can be noisy, uncomment if debugging render
     }
 
     function updateScoreDisplay() {
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
             board[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
-            console.log(`Added tile ${board[randomCell.r][randomCell.c]} at row ${randomCell.r}, col ${randomCell.c}`);
+            // console.log(`Added tile ${board[randomCell.r][randomCell.c]} at row ${randomCell.r}, col ${randomCell.c}`);
         }
     }
 
@@ -94,23 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let boardChanged = false; 
         switch (event.key) {
             case 'ArrowUp':
-                console.log("Key pressed: ArrowUp");
                 boardChanged = moveTilesUp(); 
                 event.preventDefault(); 
                 break;
             case 'ArrowDown':
-                console.log("Key pressed: ArrowDown");
                 boardChanged = moveTilesDown(); 
                 event.preventDefault();
                 break;
             case 'ArrowLeft':
-                console.log("Key pressed: ArrowLeft");
                 boardChanged = moveTilesLeft(); 
                 event.preventDefault();
                 break;
             case 'ArrowRight':
-                console.log("Key pressed: ArrowRight");
-                boardChanged = moveTilesRight(); // Call our new function
+                boardChanged = moveTilesRight(); 
                 event.preventDefault();
                 break;
             default:
@@ -126,13 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
             //     endGame();
             // }
         } else {
-            console.log("No change in board after key press (or move not implemented yet for this direction).");
+            // console.log("No change in board after key press.");
         }
     }
 
     // --- 5. MOVEMENT LOGIC ---
 
-    // Helper function to process a single row for moving left (used by moveTilesLeft and moveTilesRight)
+    // Helper function to process a single row for moving left (used by all movement functions via transforms)
     function processRowLeft(row) {
         let filteredRow = row.filter(val => val !== 0);
         
@@ -162,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 boardChanged = true;
             }
         }
-        if (boardChanged) console.log("Tiles moved/merged left.");
+        // if (boardChanged) console.log("Tiles moved/merged left.");
         return boardChanged;
     }
 
@@ -170,25 +166,79 @@ document.addEventListener('DOMContentLoaded', () => {
         let boardChanged = false;
         for (let r = 0; r < gridSize; r++) {
             const originalRow = [...board[r]];
-            
-            // To move right: reverse the row, process left, then reverse back
             const reversedRow = [...originalRow].reverse();
-            const processedReversedRow = processRowLeft(reversedRow); // processRowLeft handles scoring
+            const processedReversedRow = processRowLeft(reversedRow); 
             const newRow = processedReversedRow.reverse();
-            
             board[r] = newRow;
 
             if (!originalRow.every((val, index) => val === newRow[index])) {
                 boardChanged = true;
             }
         }
-        if (boardChanged) console.log("Tiles moved/merged right.");
+        // if (boardChanged) console.log("Tiles moved/merged right.");
         return boardChanged;
     }
 
-    // Placeholders for other movement functions
-    function moveTilesUp() { console.log("Attempting to move UP - Not implemented yet"); return false; }
-    function moveTilesDown() { console.log("Attempting to move DOWN - Not implemented yet"); return false; }
+    // Helper function to transpose the board (swap rows and columns)
+    function transposeBoard(matrix) {
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        const newMatrix = [];
+        for (let j = 0; j < cols; j++) {
+            newMatrix[j] = [];
+            for (let i = 0; i < rows; i++) {
+                newMatrix[j][i] = matrix[i][j];
+            }
+        }
+        return newMatrix;
+    }
+
+    function moveTilesUp() {
+        let boardChanged = false;
+        let tempBoard = transposeBoard(board); // Treat columns as rows
+
+        for (let r = 0; r < gridSize; r++) { // Iterate through these "new rows" (original columns)
+            const originalColAsRow = [...tempBoard[r]];
+            const newColAsRow = processRowLeft([...originalColAsRow]); // Process left (which is "up" for original board)
+            tempBoard[r] = newColAsRow;
+
+            if (!originalColAsRow.every((val, index) => val === newColAsRow[index])) {
+                boardChanged = true;
+            }
+        }
+
+        if (boardChanged) {
+            board = transposeBoard(tempBoard); // Transpose back to original orientation
+            // console.log("Tiles moved/merged up.");
+        }
+        return boardChanged;
+    }
+
+    function moveTilesDown() {
+        let boardChanged = false;
+        let tempBoard = transposeBoard(board); // Treat columns as rows
+
+        for (let r = 0; r < gridSize; r++) { // Iterate through these "new rows" (original columns)
+            const originalColAsRow = [...tempBoard[r]];
+            
+            // To move "down" on original board, it's like moving "right" on these transposed rows
+            const reversedColAsRow = [...originalColAsRow].reverse();
+            const processedReversedColAsRow = processRowLeft(reversedColAsRow);
+            const newColAsRow = processedReversedColAsRow.reverse();
+            
+            tempBoard[r] = newColAsRow;
+
+            if (!originalColAsRow.every((val, index) => val === newColAsRow[index])) {
+                boardChanged = true;
+            }
+        }
+
+        if (boardChanged) {
+            board = transposeBoard(tempBoard); // Transpose back
+            // console.log("Tiles moved/merged down.");
+        }
+        return boardChanged;
+    }
 
 
     // --- 6. GAME OVER LOGIC (Placeholders) ---
