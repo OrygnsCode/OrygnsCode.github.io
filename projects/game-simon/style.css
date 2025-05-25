@@ -35,10 +35,11 @@ html {
 body {
     font-family: 'Arial', sans-serif; 
     margin: 0;
-    padding: 20px 0; /* Consistent vertical padding, horizontal handled by align-items */
+    padding: 0; 
     display: flex;
     flex-direction: column;
     align-items: center; 
+    justify-content: flex-start; 
     min-height: 100vh; 
     box-sizing: border-box; 
 }
@@ -49,16 +50,16 @@ body {
 
 .push { 
     position: relative;
-    width:200px;
-    height:200px;
-    background-color : grey;
-    border: 12px solid #333; 
-    box-sizing: border-box; /* Ensure border is within the 200x200 */
+    width:200px; /* Content width */
+    height:200px; /* Content height */
+    background-color : grey; /* Fallback, will be overridden by color classes */
+    border: 12px solid #333; /* This IS the black gap between quadrants */
+    /* Default box-sizing is content-box, so total size is 224x224 */
 }
 
 .rw { 
     display: flex; 
-    /* margin-bottom:-16px; -- Let's try without this first, rely on borders and wrap sizing */
+    margin-bottom:-4px; /* From original CSS to pull rows together over borders */
 }
 
 .b-r { border-bottom-right-radius : 100%; }
@@ -66,42 +67,71 @@ body {
 .t-l { border-top-left-radius : 100%; }
 .t-r { border-top-right-radius : 100%; }
 
-.wrap { 
-    width: 424px;  /* 2 * (200px width with border-box) */
-    height: 424px; /* 2 * (200px height with border-box) */
+.wrap { /* Main Simon body - should be size of two .push elements including their borders */
+    width: 448px;  /* 200 (content) + 12 (border) + 200 (content) + 12 (border) = 424. Wait, this is wrong.
+                       Each .push is 224px wide. Two side by side without overlap = 448px.
+                       The -4px margin on .rw handles overlap.
+                       The original .wrap width was 472px. This implied an outer rim.
+                       Let's set .wrap to the size of the button assembly, which is 2 * 200 (content) + 2 * 12 (inner borders) = 424px.
+                       The outer 12px border of .push elements will form the edge.
+                       So, .wrap should be 424px.
+                    */
+    width: 424px;  /* 200px (push1 content) + 200px (push2 content) + 12px (middle border from push1 right) + 12px (middle border from push2 left) -- No, this is wrong.
+                       The .push divs' own borders create the separating lines.
+                       If .wrap-in contains two .rw, each .rw contains two .push.
+                       .push has width 200px + 12px border. So one .push is 224px wide if content-box.
+                       Two .push side-by-side, if their borders are meant to be the separators, means the total width of the colored area + separators is complex.
+
+                       Let's use the original CSS .wrap dimensions and ensure .wrap-in and .push work within it.
+                       The original .wrap: 472x472. .push: 200x200 with 12px border.
+                       This means the effective size of a .push is 224x224.
+                       Two .push in a row: 448px.
+                       (472 - 448) / 2 = 12px. This is the offset for .wrap-in if .wrap is the container.
+                    */
+    width: 472px;
+    height: 472px;
     border-radius:50%;
     position: relative;
-    margin-top: 5vh; 
+    margin-top: calc(10vh - 20px); /* Body has 20px top padding, this adjusts to effectively be 10vh from viewport top */
     margin-bottom: 30px; 
-    background-color:#333; /* This will form the visual "gap" if wrap-in is slightly smaller or if push borders are exact */
+    background-color:#333; /* This is the machine's main body color, visible as borders/gaps */
     box-shadow: 0px 0px 12px #222;
-    display: flex; 
+    display: flex; /* Use flex to center .wrap-in if needed */
     justify-content: center;
     align-items: center;
-    /* No padding here if .push borders create the outer machine rim against .wrap-in */
-    /* Or, if .wrap makes the outer rim, .wrap-in should be smaller and centered */
+    /* padding: 0; -- Explicitly no padding on .wrap, spacing handled by .wrap-in and .push borders */
 }
 
-.wrap-in { 
+.wrap-in { /* This holds the two .rw rows */
     position: relative;
-    width: 400px; /* 2 * 200px content width of .push (if .push border is 0) */
-                  /* If .push is 200x200 including its border, then this should be 400. */
-                  /* The .push elements' borders (12px) will create the lines. */
-    height: 400px;
+    /* If .wrap is 472px and .push elements (200px content + 12px border = 224px total)
+       form a 2x2 grid that is 448x448, then .wrap-in can be this size.
+       The top:12px, left:12px in original CSS was to position this 448x448 block
+       within the 472x472 .wrap, creating a 12px rim from .wrap's background.
+       Let .wrap be the 472px circle. .wrap-in holds the button rows.
+       The borders of .push create the inner lines.
+    */
+    width: 448px;  /* 2 * (200 content + 12 border left + 12 border right) is WRONG for adjacent.
+                      It's 200 (content1) + 12 (border1_R) + 12 (border2_L) + 200 (content2) = 424 for content + inner gaps.
+                      The outer half of borders of .push make the outer rim.
+                      So the "colored part + inner gaps" is 424x424.
+                      The full .push is 224x224. So 2x2 is 448x448 if no overlap.
+                      The -4px margin on .rw is key to how the original author handled border collapse/overlap.
+                   */
+    height: 448px;
     display: flex;
     flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
+    /* No top/left offset here, .wrap will provide the 12px "rim" via its background if this is sized correctly. */
 }
-.center {
+
+.center { /* Center Console */
     width:220px;
     height:220px;
     position : absolute;
     border-radius:100%;
     top:50%;
     left:50%;
-    /* (220 width + 2*12 border = 244 total) / 2 = 122 */
-    margin: -122px 0 0 -122px; 
+    margin: -122px 0 0 -122px; /* Correct for centering 220px element + 12px border = 244px total diameter */
     background-color:#ECE7EE;
     border: 12px solid #333;
     z-index: 10; 
@@ -111,6 +141,10 @@ body {
     justify-content: center;
     box-sizing: border-box;
 }
+
+/* ... (rest of the CSS for .brand, .count, .round-btn, .led, .label, etc. remains IDENTICAL to what you provided in message #79 / my response #80) ... */
+/* ... (color classes .red, .green, .yellow, .blue and .light versions also identical) ... */
+/* ... (media query also identical) ... */
 
 .brand { font-family: 'Alfa Slab One', cursive; color : #222; font-size: 3.2em; margin-top : 35px; }
 .brand .small { font-size : 0.3em; position : relative; top : -20px; }
@@ -149,12 +183,12 @@ body {
 }
 .sw-on { left: 20px; }
 .rw.bot { 
-    margin-top: 15px; /* Increased to push switch further down from buttons */
-    position: relative; /* To ensure it's within the .center flow */
-    z-index: 11; /* Above quadrants if somehow overlapping */
+    margin-top: 15px; /* Increased margin to move switch down further */
+    position: relative; 
+    z-index: 11; 
 }
-.rw.bot * { /* Target children of .rw.bot to reduce their size if needed */
-     /* font-size: 0.9em; */ /* Uncomment if OFF/ON labels are too big */
+.rw.bot * { 
+     /* font-size: 0.9em; */ 
 }
 .full-red { background-color : #FC0102; }
 
@@ -173,7 +207,7 @@ body {
         margin-top: 20px;
         margin-bottom: 20px;
         transform: scale(0.6);
-        transform-origin: center center;
+        transform-origin: center center; 
     }
 }
 
