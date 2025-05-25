@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tryAgainButton = document.getElementById('try-again-button');
 
     const gridSize = 4;
-    let board = []; // 2D array representing the game board values
+    let board = []; 
     let score = 0;
     let isGameOver = false;
 
@@ -36,10 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden'); 
     }
 
-    // --- 2. RENDERING THE BOARD (Drawing tiles on the page) ---
+    // --- 2. RENDERING THE BOARD ---
     function renderBoard() {
         gameBoardElement.innerHTML = ''; 
-
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tileValue = board[r][c];
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameBoardElement.appendChild(tileElement);
             }
         }
-        // console.log("Board rendered."); // Can be noisy, uncomment if debugging render
+        // console.log("Board rendered."); 
     }
 
     function updateScoreDisplay() {
@@ -85,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. HANDLING PLAYER INPUT (Keyboard) ---
+    // --- 4. HANDLING PLAYER INPUT ---
     document.addEventListener('keydown', handleKeyPress);
 
     function handleKeyPress(event) {
@@ -94,18 +93,22 @@ document.addEventListener('DOMContentLoaded', () => {
         let boardChanged = false; 
         switch (event.key) {
             case 'ArrowUp':
+                console.log("Key pressed: ArrowUp"); // Should see this
                 boardChanged = moveTilesUp(); 
                 event.preventDefault(); 
                 break;
             case 'ArrowDown':
+                console.log("Key pressed: ArrowDown"); // Should see this
                 boardChanged = moveTilesDown(); 
                 event.preventDefault();
                 break;
             case 'ArrowLeft':
+                // console.log("Key pressed: ArrowLeft"); // Already working, so console log can be optional
                 boardChanged = moveTilesLeft(); 
                 event.preventDefault();
                 break;
             case 'ArrowRight':
+                // console.log("Key pressed: ArrowRight"); // Already working
                 boardChanged = moveTilesRight(); 
                 event.preventDefault();
                 break;
@@ -114,24 +117,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (boardChanged) {
+            console.log("Board changed after move, adding random tile and re-rendering.");
             addRandomTile();    
             renderBoard();      
             updateScoreDisplay(); 
-            
-            // if (checkGameOver()) { // We will implement this later
-            //     endGame();
-            // }
+            // if (checkGameOver()) { endGame(); }
         } else {
-            // console.log("No change in board after key press.");
+            console.log("No change in board after key press or move not fully implemented for this direction.");
         }
     }
 
     // --- 5. MOVEMENT LOGIC ---
-
-    // Helper function to process a single row for moving left (used by all movement functions via transforms)
     function processRowLeft(row) {
         let filteredRow = row.filter(val => val !== 0);
-        
         for (let i = 0; i < filteredRow.length - 1; i++) {
             if (filteredRow[i] === filteredRow[i+1]) {
                 filteredRow[i] *= 2; 
@@ -139,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 filteredRow.splice(i + 1, 1); 
             }
         }
-        
         const newRow = [];
         for (let i = 0; i < gridSize; i++) {
             newRow[i] = filteredRow[i] || 0; 
@@ -153,12 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalRow = [...board[r]]; 
             const newRow = processRowLeft([...board[r]]); 
             board[r] = newRow; 
-
             if (!originalRow.every((val, index) => val === newRow[index])) {
                 boardChanged = true;
             }
         }
-        // if (boardChanged) console.log("Tiles moved/merged left.");
         return boardChanged;
     }
 
@@ -170,16 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const processedReversedRow = processRowLeft(reversedRow); 
             const newRow = processedReversedRow.reverse();
             board[r] = newRow;
-
             if (!originalRow.every((val, index) => val === newRow[index])) {
                 boardChanged = true;
             }
         }
-        // if (boardChanged) console.log("Tiles moved/merged right.");
         return boardChanged;
     }
 
-    // Helper function to transpose the board (swap rows and columns)
     function transposeBoard(matrix) {
         const rows = matrix.length;
         const cols = matrix[0].length;
@@ -194,66 +186,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function moveTilesUp() {
+        console.log("moveTilesUp called. Initial board:", JSON.parse(JSON.stringify(board)));
         let boardChanged = false;
-        let tempBoard = transposeBoard(board); // Treat columns as rows
+        let tempBoard = transposeBoard(board); 
+        console.log("Transposed board for UP:", JSON.parse(JSON.stringify(tempBoard)));
 
-        for (let r = 0; r < gridSize; r++) { // Iterate through these "new rows" (original columns)
-            const originalColAsRow = [...tempBoard[r]];
-            const newColAsRow = processRowLeft([...originalColAsRow]); // Process left (which is "up" for original board)
-            tempBoard[r] = newColAsRow;
+        for (let r = 0; r < gridSize; r++) { 
+            const originalColAsRow = [...tempBoard[r]]; // This is a copy of the column (now a row)
+            const newColAsRow = processRowLeft([...originalColAsRow]); // Process it (slide/merge "left")
+            tempBoard[r] = newColAsRow; // Update the row in the transposed board
+            console.log(`UP: Col ${r} (as row) original: [${originalColAsRow.join(',')}] -> new: [${newColAsRow.join(',')}]`);
 
             if (!originalColAsRow.every((val, index) => val === newColAsRow[index])) {
                 boardChanged = true;
+                console.log(`UP: Col ${r} changed.`);
             }
         }
 
         if (boardChanged) {
-            board = transposeBoard(tempBoard); // Transpose back to original orientation
-            // console.log("Tiles moved/merged up.");
+            board = transposeBoard(tempBoard); 
+            console.log("UP: Board changed, final board:", JSON.parse(JSON.stringify(board)));
+        } else {
+            console.log("UP: No changes to board according to logic.");
         }
         return boardChanged;
     }
 
     function moveTilesDown() {
+        console.log("moveTilesDown called. Initial board:", JSON.parse(JSON.stringify(board)));
         let boardChanged = false;
-        let tempBoard = transposeBoard(board); // Treat columns as rows
+        let tempBoard = transposeBoard(board); 
+        console.log("Transposed board for DOWN:", JSON.parse(JSON.stringify(tempBoard)));
 
-        for (let r = 0; r < gridSize; r++) { // Iterate through these "new rows" (original columns)
+        for (let r = 0; r < gridSize; r++) { 
             const originalColAsRow = [...tempBoard[r]];
             
-            // To move "down" on original board, it's like moving "right" on these transposed rows
             const reversedColAsRow = [...originalColAsRow].reverse();
+            console.log(`DOWN: Col ${r} (as row) original: [${originalColAsRow.join(',')}], reversed for processing: [${reversedColAsRow.join(',')}]`);
             const processedReversedColAsRow = processRowLeft(reversedColAsRow);
             const newColAsRow = processedReversedColAsRow.reverse();
-            
             tempBoard[r] = newColAsRow;
+            console.log(`DOWN: Col ${r} (as row) processed: [${processedReversedColAsRow.join(',')}], final newColAsRow: [${newColAsRow.join(',')}]`);
+
 
             if (!originalColAsRow.every((val, index) => val === newColAsRow[index])) {
                 boardChanged = true;
+                console.log(`DOWN: Col ${r} changed.`);
             }
         }
 
         if (boardChanged) {
-            board = transposeBoard(tempBoard); // Transpose back
-            // console.log("Tiles moved/merged down.");
+            board = transposeBoard(tempBoard); 
+            console.log("DOWN: Board changed, final board:", JSON.parse(JSON.stringify(board)));
+        } else {
+            console.log("DOWN: No changes to board according to logic.");
         }
         return boardChanged;
     }
 
-
     // --- 6. GAME OVER LOGIC (Placeholders) ---
     // function checkGameOver() { /* To be implemented */ return false; } 
-    // function endGame() {
-    //     isGameOver = true;
-    //     if(finalScoreElement) finalScoreElement.textContent = score;
-    //     if(gameOverMessageElement) gameOverMessageElement.classList.remove('hidden');
-    //     console.log("Game Over! Final Score:", score);
-    // }
+    // function endGame() { /* To be implemented */ }
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
 
-    // --- Initial Game Start when the page loads ---
+    // --- Initial Game Start ---
     startGame();
 });
