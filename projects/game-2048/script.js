@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. GAME INITIALIZATION ---
     function initializeBoardArray() {
-        board = []; // Reset the board array
+        board = []; 
         for (let r = 0; r < gridSize; r++) {
-            board[r] = []; // Create a new row
+            board[r] = []; 
             for (let c = 0; c < gridSize; c++) {
-                board[r][c] = 0; // Initialize all cells to 0 (empty)
+                board[r][c] = 0; 
             }
         }
     }
@@ -26,25 +26,25 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Starting new game...");
         isGameOver = false;
         score = 0;
-        initializeBoardArray(); // Set up the internal 2D array for the board
+        initializeBoardArray(); 
         
-        addRandomTile(); // Add the first random tile
-        addRandomTile(); // Add the second random tile
+        addRandomTile(); 
+        addRandomTile(); 
         
-        renderBoard(); // Draw the board and tiles onto the HTML page
+        renderBoard(); 
         updateScoreDisplay();
-        if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden'); // Hide game over message
+        if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden'); 
     }
 
     // --- 2. RENDERING THE BOARD (Drawing tiles on the page) ---
     function renderBoard() {
-        gameBoardElement.innerHTML = ''; // Clear any existing tiles from the board element
+        gameBoardElement.innerHTML = ''; 
 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tileValue = board[r][c];
                 const tileElement = document.createElement('div');
-                tileElement.classList.add('tile'); // Base class for styling all cells/tiles
+                tileElement.classList.add('tile'); 
                 
                 if (tileValue !== 0) {
                     tileElement.textContent = tileValue;
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         tileElement.classList.add('tile-super');
                     }
                 }
-                // Empty cells will just have the default .tile background
                 gameBoardElement.appendChild(tileElement);
             }
         }
@@ -106,12 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'ArrowLeft':
                 console.log("Key pressed: ArrowLeft");
-                boardChanged = moveTilesLeft(); // Call our new function
+                boardChanged = moveTilesLeft(); 
                 event.preventDefault();
                 break;
             case 'ArrowRight':
                 console.log("Key pressed: ArrowRight");
-                boardChanged = moveTilesRight(); 
+                boardChanged = moveTilesRight(); // Call our new function
                 event.preventDefault();
                 break;
             default:
@@ -127,29 +126,24 @@ document.addEventListener('DOMContentLoaded', () => {
             //     endGame();
             // }
         } else {
-            console.log("No change in board after key press (or move not implemented yet).");
+            console.log("No change in board after key press (or move not implemented yet for this direction).");
         }
     }
 
     // --- 5. MOVEMENT LOGIC ---
 
-    // Helper function to process a single row for moving left
+    // Helper function to process a single row for moving left (used by moveTilesLeft and moveTilesRight)
     function processRowLeft(row) {
-        // 1. Filter out zeros (slide tiles left)
         let filteredRow = row.filter(val => val !== 0);
         
-        // 2. Combine adjacent identical tiles
         for (let i = 0; i < filteredRow.length - 1; i++) {
             if (filteredRow[i] === filteredRow[i+1]) {
                 filteredRow[i] *= 2; 
                 score += filteredRow[i]; 
-                filteredRow.splice(i + 1, 1); // Remove the merged tile (effectively setting to 0 and it will be filtered)
+                filteredRow.splice(i + 1, 1); 
             }
         }
-        // The previous splice() means we don't need to filter out zeros again here explicitly for this simple left merge
-        // as it directly modifies filteredRow.
         
-        // 4. Pad with zeros to the right to make it gridSize length
         const newRow = [];
         for (let i = 0; i < gridSize; i++) {
             newRow[i] = filteredRow[i] || 0; 
@@ -161,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let boardChanged = false;
         for (let r = 0; r < gridSize; r++) {
             const originalRow = [...board[r]]; 
-            const newRow = processRowLeft([...board[r]]); // Pass a copy of the row to processRowLeft
+            const newRow = processRowLeft([...board[r]]); 
             board[r] = newRow; 
 
             if (!originalRow.every((val, index) => val === newRow[index])) {
@@ -172,10 +166,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return boardChanged;
     }
 
+    function moveTilesRight() {
+        let boardChanged = false;
+        for (let r = 0; r < gridSize; r++) {
+            const originalRow = [...board[r]];
+            
+            // To move right: reverse the row, process left, then reverse back
+            const reversedRow = [...originalRow].reverse();
+            const processedReversedRow = processRowLeft(reversedRow); // processRowLeft handles scoring
+            const newRow = processedReversedRow.reverse();
+            
+            board[r] = newRow;
+
+            if (!originalRow.every((val, index) => val === newRow[index])) {
+                boardChanged = true;
+            }
+        }
+        if (boardChanged) console.log("Tiles moved/merged right.");
+        return boardChanged;
+    }
+
     // Placeholders for other movement functions
     function moveTilesUp() { console.log("Attempting to move UP - Not implemented yet"); return false; }
     function moveTilesDown() { console.log("Attempting to move DOWN - Not implemented yet"); return false; }
-    function moveTilesRight() { console.log("Attempting to move RIGHT - Not implemented yet"); return false; }
 
 
     // --- 6. GAME OVER LOGIC (Placeholders) ---
