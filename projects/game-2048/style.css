@@ -15,50 +15,45 @@ body {
 
 header { 
     margin-bottom: 15px;
-    width: 100%; /* Allow header to take width for scores container */
-    max-width: 500px; /* Match instructions width for consistency */
+    width: 100%; 
+    max-width: 500px; 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 header h1 { 
     font-size: clamp(2.5em, 8vw, 4em); 
-    margin: 0.2em 0 0.3em 0; /* Adjusted bottom margin */
+    margin: 0.2em 0 0.3em 0; 
     color: #776e65; 
 }
 
-/* NEW: Container for score and best score in header */
 .scores-header-container {
     display: flex;
-    justify-content: center; /* Center the score boxes */
-    gap: 10px; /* Space between score and best score */
+    justify-content: center; 
+    gap: 10px; 
     margin-bottom: 10px;
     width: 100%;
 }
 
-.score-container { /* This now styles both current and best score boxes in header */
-    font-size: clamp(1em, 3.5vw, 1.5em); /* Slightly adjusted clamp for better fit */
+.score-container { 
+    font-size: clamp(1em, 3.5vw, 1.5em); 
     background-color: #bbada0;
-    padding: 8px 15px; /* Adjusted padding */
+    padding: 8px 15px; 
     border-radius: 3px;
     color: white;
-    min-width: 90px; /* Adjusted min-width */
+    min-width: 90px; 
     box-sizing: border-box;
 }
-/* We can add specific styling if needed for .current-score vs .best-score */
 .score-container.best-score {
     /* Optional: slightly different background or styling for best score */
-    /* background-color: #cdc1b4; */ 
-    /* color: #776e65; */
 }
 
-#score, #high-score { /* Target the span elements for the numbers */
+#score, #high-score { 
     font-weight: bold;
-    display: block; /* Make span take its own line or use flex in parent */
-    font-size: 1.2em; /* Make number slightly larger than "Score:" / "Best:" text */
+    display: block; 
+    font-size: 1.2em; 
     margin-top: 2px;
 }
-
 
 #instructions { margin-bottom: 15px; max-width: 500px; font-size: clamp(0.8em, 2.5vw, 1em); }
 
@@ -79,11 +74,36 @@ header h1 {
 }
 
 #game-board-container { display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 10px; }
-#game-board { /* ... (Keep this section exactly as in response #53) ... */ }
-.grid-cell { /* ... (Keep this section exactly as in response #53) ... */ }
-.tile { /* ... (Keep this section exactly as in response #53, ensure transitions are present) ... */ }
+#game-board {
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    grid-template-rows: repeat(4, 1fr);
+    width: 90vmin; height: 90vmin;
+    max-width: 450px; max-height: 450px;
+    background-color: #bbada0; 
+    border-radius: 6px;
+    gap: clamp(5px, 2vmin, 12px);
+    padding: clamp(5px, 2vmin, 12px); 
+    box-sizing: border-box;
+    position: relative; 
+}
 
-/* Tile value styles .tile.tile-2 ... .tile.tile-super (Keep these exactly as in response #53) */
+.grid-cell {
+    background-color: rgba(238, 228, 218, 0.35); 
+    border-radius: 3px;
+}
+
+.tile {
+    position: absolute; 
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; border-radius: 3px; box-sizing: border-box;
+    color: #776e65; font-size: clamp(1.2em, 5vmin, 2.5em); 
+    transition: left 0.1s ease-out, top 0.1s ease-out, 
+                transform 0.1s ease-out, background-color 0.1s ease-out, 
+                color 0.1s ease-out, opacity 0.1s ease-out;
+    user-select: none; 
+}
+
 .tile.tile-2 { background-color: #eee4da; color: #776e65; }
 .tile.tile-4 { background-color: #ede0c8; color: #776e65; }
 .tile.tile-8 { background-color: #f2b179; color: #f9f6f2; }
@@ -101,7 +121,6 @@ header h1 {
 .tile-merged { animation: pop 0.2s ease-in-out; z-index: 20; }
 @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-/* Game Over and You Win message styles */
 #game-over-message, #you-win-message {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -115,21 +134,20 @@ header h1 {
 }
 #you-win-message h2 { color: #f9f6f2; text-shadow: 1px 1px 2px #776e65; }
 
-/* Styles for "Your final score: X" paragraph on Game Over screen */
 #game-over-message .final-score-paragraph {
     font-size: clamp(1.3em, 4.5vw, 1.9em); 
     color: #776e65; 
-    margin: 10px 0 5px 0; /* Reduced bottom margin */
+    margin: 10px 0 5px 0; 
 }
 
-/* NEW: Styles for "Best: X" paragraph on Game Over screen */
+/* MODIFIED font-size for "Best: X" paragraph on Game Over screen */
 #game-over-message .high-score-game-over-paragraph {
-    font-size: clamp(1.1em, 3.8vw, 1.6em); /* Slightly smaller than final score */
+    font-size: clamp(1.2em, 4.2vw, 1.75em); /* Adjusted to be larger */
     color: #776e65;
-    margin: 5px 0 15px 0; /* Margin top 5px, bottom 15px */
+    margin: 5px 0 15px 0; 
 }
 
-#you-win-message p { /* For "You've reached the 2048 tile!" text */
+#you-win-message p { 
     font-size: clamp(1.3em, 4.5vw, 1.9em); color: #f9f6f2; margin: 10px 0 15px 0; 
     text-shadow: 1px 1px 1px #776e65;
 }
@@ -140,7 +158,6 @@ header h1 {
 }
 #game-over-message .back-to-home-link-container a, 
 #you-win-message .back-to-home-link-container a {
-    /* These are already styled like buttons from response #55 */
     display: inline-block; padding: 10px 20px; font-size: clamp(0.9em, 3vw, 1.1em); 
     background-color: #8f7a66; color: white; border: none; border-radius: 5px; 
     cursor: pointer; text-decoration: none; transition: background-color 0.2s ease; 
