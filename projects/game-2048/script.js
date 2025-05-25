@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGameFromWinButton = document.getElementById('new-game-from-win-button');
 
     const gridSize = 4;
-    const targetTileValue = 2048; // Renamed from targetTile for clarity
-    let board = []; // Will now store Tile objects or null
+    const targetTileValue = 2048;
+    let board = []; 
     let score = 0;
     let isGameOver = false;
     let hasWon = false;
@@ -20,25 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const swipeThreshold = 30;
 
     let cellSize = 0;
-    let cellGapFromCSS = 0;
-    let firstCellOffsetX = 0;
+    let cellGapFromCSS = 0; 
+    let firstCellOffsetX = 0; 
     let firstCellOffsetY = 0;
+    let newlyAddedTileInfo = null; 
+    let tileIdCounter = 1; 
 
-    let tileIdCounter = 1; // To give each tile a unique ID for tracking its DOM element
-
-    // Tile DOM elements will be stored in a map: { tileId: tileElement }
-    let tileElements = {}; 
-
-    // --- Tile Object ---
+    // --- Tile Object Definition ---
     function Tile(position, value) {
         this.r = position.r;
         this.c = position.c;
         this.value = value;
-        this.id = tileIdCounter++; // Unique ID for this tile instance
-
-        this.previousR = null; // Previous row for animation
-        this.previousC = null; // Previous col for animation
-        this.mergedFrom = null; // Array of Tile objects that merged into this one
+        this.id = tileIdCounter++;
+        this.previousR = null; 
+        this.previousC = null; 
+        this.mergedFrom = null; 
+        this.justAppeared = false; 
+        this.wasMergedThisTurn = false;
     }
 
     Tile.prototype.savePosition = function() {
@@ -57,355 +55,390 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let r = 0; r < gridSize; r++) {
             board[r] = [];
             for (let c = 0; c < gridSize; c++) {
-                board[r][c] = null; // Store null for empty, or Tile objects
+                board[r][c] = null; // Initialize with null for empty cells
             }
         }
+        console.log("INIT: Logical board array initialized with nulls.");
     }
 
-    function calculateDimensions() { /* ... (Keep your last working version from response #53) ... */ }
-    function createBackgroundGrid() { /* ... (Keep your last working version from response #53) ... */ }
+    function calculateDimensions() {
+        // ... (Keep the version from response #53 - no changes here for this fix) ...
+        if (!gameBoardElement) {
+            console.error("!!! calculateDimensions: gameBoardElement not found!");
+            cellSize = 80; cellGapFromCSS = 10; firstCellOffsetX = 10; firstCellOffsetY = 10;
+            return;
+        }
+        const firstBgCell = gameBoardElement.querySelector('.grid-cell');
+        if (!firstBgCell) {
+            console.error("!!! calculateDimensions: .grid-cell for measurement not found! Ensure createBackgroundGrid ran and CSS is loaded.");
+            const boardStyleFallback = getComputedStyle(gameBoardElement);
+            const boardClientWidthFallback = gameBoardElement.clientWidth;
+            let computedGapFallback = parseFloat(boardStyleFallback.gap);
+            if(isNaN(computedGapFallback)) computedGapFallback = 10;
+            cellGapFromCSS = computedGapFallback;
+            cellSize = (boardClientWidthFallback - (gridSize - 1) * cellGapFromCSS) / gridSize;
+            firstCellOffsetX = parseFloat(boardStyleFallback.paddingLeft) || cellGapFromCSS; 
+            firstCellOffsetY = parseFloat(boardStyleFallback.paddingTop) || cellGapFromCSS;  
+            console.warn("Using fallback dimension calculations due to missing .grid-cell for measurement.");
+        } else {
+            const boardStyle = getComputedStyle(gameBoardElement);
+            let computedGap = parseFloat(boardStyle.gap);
+            if (isNaN(computedGap)) {
+                console.warn("Could not parse 'gap' from CSS. Using fallback 10px for cellGapFromCSS.");
+                const vminValue = Math.min(window.innerWidth, window.innerHeight) / 100;
+                computedGap = Math.max(5, Math.min(2 * vminValue, 12));
+            }
+            cellGapFromCSS = computedGap;
+            cellSize = firstBgCell.offsetWidth; 
+            firstCellOffsetX = firstBgCell.offsetLeft;
+            firstCellOffsetY = firstBgCell.offsetTop;
+        }
+        console.log(`DIMENSIONS: FirstCell OffsetX=${firstCellOffsetX}px, OffsetY=${firstCellOffsetY}px, CellGap (CSS)=${cellGapFromCSS}px, CellSize (from bg cell)=${cellSize}px`);
+        if (isNaN(cellSize) || cellSize <= 0) {
+            console.error("!!! Calculated cellSize from .grid-cell is invalid! Value:", cellSize, "Using fallback 80px.");
+            cellSize = 80; 
+        }
+        if (isNaN(firstCellOffsetX)) { console.warn("firstCellOffsetX is NaN, using fallback 10"); firstCellOffsetX = 10; }
+        if (isNaN(firstCellOffsetY)) { console.warn("firstCellOffsetY is NaN, using fallback 10"); firstCellOffsetY = 10; }
+        if (isNaN(cellGapFromCSS)) { console.warn("cellGapFromCSS is NaN, using fallback 10"); cellGapFromCSS = 10; }
+    }
+    
+    function createBackgroundGrid() {
+        // ... (Keep the version from response #53) ...
+        if (!gameBoardElement) { console.error("!!! createBackgroundGrid: gameBoardElement not found!"); return; }
+        gameBoardElement.innerHTML = ''; 
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            gameBoardElement.appendChild(cell);
+        }
+        console.log("INIT: Background grid cells created.");
+    }
 
     function startGame() {
         console.log("INIT: Starting new game...");
         isGameOver = false;
         hasWon = false;
         score = 0;
-        tileIdCounter = 1; // Reset tile ID counter
+        tileIdCounter = 1; 
         updateScoreDisplay();
-
-        // Clear existing tile DOM elements from previous game
-        Object.values(tileElements).forEach(el => el.remove());
+        Object.values(tileElements).forEach(el => { if(el && el.remove) el.remove(); }); // Clear old DOM tiles
         tileElements = {};
 
-        if (gameBoardElement.querySelectorAll('.grid-cell').length === 0) {
-            createBackgroundGrid();
-        }
+        createBackgroundGrid(); 
         
         requestAnimationFrame(() => {
-            calculateDimensions();
-            initializeBoardArray();
-            addStartTiles(); // Uses the new addRandomTile which creates Tile objects
-            actuate(); // New function to handle all DOM updates
+            calculateDimensions();  
+            initializeBoardArray(); // IMPORTANT: Initializes board with nulls
+            addStartTiles();       // Now calls the more robust addRandomTile
+            actuate();             // Update display
 
             if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
             if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
-            console.log("INIT: Game started.");
+            console.log("INIT: Game started. Initial logical board:", JSON.parse(JSON.stringify(board.map(row => row.map(t => t ? t.value : null )))));
         });
     }
 
-    function addStartTiles() {
-        for (let i = 0; i < 2; i++) {
-            addRandomTile();
-        }
-    }
-
-    // --- 2. RENDERING / ACTUATION (Major Changes) ---
+    // --- 2. RENDERING / ACTUATION (Using actuate structure) ---
     function actuate() {
-        // This function will now be responsible for updating the DOM based on the 'board' state
-        // It will create, move, update, and remove tile DOM elements.
-        console.log("ACTUATE: Updating display. Score:", score);
+        // console.log("ACTUATE: Updating display. Score:", score); // Can be verbose
         updateScoreDisplay();
 
-        // Clear "merged" and "new" flags from logical tiles for next render pass
+        // Clear "merged" and "new" flags from logical tiles
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tile = board[r][c];
                 if (tile) {
-                    tile.mergedFrom = null; 
-                    // tile.savePosition(); // Position is already current before actuate if prepareTiles was called
+                    tile.mergedFrom = null;
+                    // tile.savePosition(); // This should be done before a move calculation starts
                 }
             }
         }
 
+        // Create/Update/Move tile DOM elements
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
-                const logicalTile = board[r][c]; // This is a Tile object or null
-                
+                const logicalTile = board[r][c];
                 if (logicalTile) {
                     let tileElement = tileElements[logicalTile.id];
 
-                    if (!tileElement) { // New tile, create its DOM element
+                    if (!tileElement) { // Tile is new to the DOM
                         tileElement = document.createElement('div');
                         tileElement.classList.add('tile');
-                        // Position will be set based on previousR/C first if it's a slide, then new R/C
-                        // For brand new tiles, previousR/C will be null, so position directly
                         tileElement.style.width = `${cellSize}px`;
                         tileElement.style.height = `${cellSize}px`;
                         
-                        // Initial position for new tiles (they will animate from here or from scale 0)
+                        // For new tiles, position them at their spot, animation class will handle appearance
                         tileElement.style.left = `${firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS)}px`;
                         tileElement.style.top = `${firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS)}px`;
                         
                         gameBoardElement.appendChild(tileElement);
                         tileElements[logicalTile.id] = tileElement;
-                        tileElement.classList.add('tile-new'); // Add new class for appear animation
+                        // console.log(`ACTUATE: Created DOM for new tile ID ${logicalTile.id}`);
                     }
                     
-                    // Update common properties (value and color class)
+                    // Update value and appearance class
                     tileElement.textContent = logicalTile.value;
-                    tileElement.className = 'tile'; // Reset classes
+                    tileElement.className = 'tile'; // Reset classes then add specific ones
                     tileElement.classList.add(`tile-${logicalTile.value}`);
                     if (logicalTile.value > 2048) tileElement.classList.add('tile-super');
 
-                    // Apply new class if it was marked as newly added by addRandomTile
-                    // The 'tile-new' class itself should handle initial state (scale(0)) and animation via CSS
+                    // Handle animations
                     if (logicalTile.justAppeared) {
-                        tileElement.classList.add('tile-new');
-                        // Ensure transition by forcing reflow and then setting final state
-                        requestAnimationFrame(() => {
-                           tileElement.style.transform = 'scale(1)';
-                           tileElement.style.opacity = '1';
+                        tileElement.classList.add('tile-new'); // CSS has transform: scale(0), opacity: 0;
+                        requestAnimationFrame(() => { // Allow initial state to apply
+                            tileElement.style.transform = 'scale(1)';
+                            tileElement.style.opacity = '1';
                         });
-                        logicalTile.justAppeared = false; // Clear flag
+                        logicalTile.justAppeared = false; 
+                    } else if (logicalTile.previousR !== null && logicalTile.previousC !== null && (logicalTile.previousR !== logicalTile.r || logicalTile.previousC !== logicalTile.c)) {
+                        // Tile moved - CSS transition on left/top will handle slide
+                        // (This part needs previous position to be set BEFORE logical move for proper from/to slide)
+                        // For now, just ensuring it snaps to the new correct position.
+                        // The "previousR/C" would be set in prepareTilesForMove()
+                         console.log(`ACTUATE: Tile ${logicalTile.id} moved to ${logicalTile.r},${logicalTile.c}. Current DOM left/top might not reflect old pos for slide yet.`);
+                    } else if (logicalTile.wasMergedThisTurn) {
+                        tileElement.classList.add('tile-merged');
+                        setTimeout(() => { if(tileElement) tileElement.classList.remove('tile-merged'); }, 200);
+                        logicalTile.wasMergedThisTurn = false;
                     } else {
-                        // Ensure normal state for existing tiles if they didn't have tile-new
+                         // Ensure normal state for existing tiles if no specific animation
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     }
                     
-                    // Update position (CSS transition will make it slide)
-                    // This should be the target position. The "from" position is implicitly its current DOM position.
+                    // ALWAYS set the final position (CSS transition will animate if different and if element persisted)
                     const targetLeft = firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS);
                     const targetTop = firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS);
-
-                    // Check if position actually changed to avoid unnecessary style updates
-                    if (tileElement.style.left !== `${targetLeft}px` || tileElement.style.top !== `${targetTop}px`) {
-                        tileElement.style.left = `${targetLeft}px`;
-                        tileElement.style.top = `${targetTop}px`;
-                    }
-
+                    tileElement.style.left = `${targetLeft}px`;
+                    tileElement.style.top = `${targetTop}px`;
                 }
             }
         }
 
-        // Clean up DOM elements for tiles that no longer exist in the logical board
-        // (This is important for merged tiles that get removed from the logical board)
+        // Clean up DOM elements for tiles that are no longer in the logical board
         for (const tileId in tileElements) {
-            let found = false;
+            let foundInBoard = false;
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
                     if (board[r][c] && board[r][c].id == tileId) {
-                        found = true;
+                        foundInBoard = true;
                         break;
                     }
                 }
-                if (found) break;
+                if (foundInBoard) break;
             }
-            if (!found) {
-                tileElements[tileId].remove();
-                delete tileElements[tileId];
-                console.log(`ACTUATE: Removed DOM for tile ID ${tileId}`);
-            }
-        }
-
-        // Handle merged tile animation (pop)
-        // This requires the `mergedFrom` property on the logical Tile object to be set by movement logic
-        // For simplicity, this part is not fully implemented here yet, as it requires movement functions
-        // to return more detailed info or for Tile objects to carry more state about merging.
-        // We will add a class to the tile that 'grew'.
-        for (let r = 0; r < gridSize; r++) {
-            for (let c = 0; c < gridSize; c++) {
-                const logicalTile = board[r][c];
-                if (logicalTile && logicalTile.wasMergedThisTurn) { // Assume 'wasMergedThisTurn' flag is set by move logic
-                    const tileElement = tileElements[logicalTile.id];
-                    if (tileElement) {
-                        tileElement.classList.add('tile-merged');
-                        setTimeout(() => tileElement.classList.remove('tile-merged'), 200); // Duration of pop animation
-                    }
-                    logicalTile.wasMergedThisTurn = false; // Reset flag
+            if (!foundInBoard) {
+                if (tileElements[tileId] && tileElements[tileId].remove) {
+                    tileElements[tileId].remove();
                 }
+                delete tileElements[tileId];
+                // console.log(`ACTUATE: Removed DOM for tile ID ${tileId}`);
             }
         }
-
-        console.log("ACTUATE: Display updated.");
+        // console.log("ACTUATE: Display updated.");
     }
+
 
     function updateScoreDisplay() { if (scoreElement) scoreElement.textContent = score; }
 
     // --- 3. ADDING RANDOM TILES ---
-    function getEmptyCells() { /* ... (same as before) ... */ }
+    // MODIFIED getEmptyCells to be more robust
+    function getEmptyCells() {
+        const localEmptyCells = [];
+        try {
+            if (!board || board.length !== gridSize) {
+                console.error("!!! getEmptyCells: 'board' is not initialized correctly or has wrong number of rows. Board:", board);
+                return []; 
+            }
+            for (let r = 0; r < gridSize; r++) {
+                if (!board[r] || board[r].length !== gridSize) {
+                    console.error(`!!! getEmptyCells: 'board[${r}]' is not initialized correctly or has wrong number of columns. Row:`, board[r]);
+                    return []; // Critical error with board structure
+                }
+                for (let c = 0; c < gridSize; c++) {
+                    if (board[r][c] === null) { // Check for null (empty cell)
+                        localEmptyCells.push({ r, c });
+                    }
+                }
+            }
+            // console.log("getEmptyCells: Found:", localEmptyCells);
+            return localEmptyCells;
+        } catch (e) {
+            console.error("!!! CRITICAL ERROR inside getEmptyCells:", e);
+            console.error("Board state at time of error in getEmptyCells:", JSON.parse(JSON.stringify(board)));
+            return []; 
+        }
+    }
 
-    function addRandomTile() { // Removed isInitialSetup, actuate handles new tile animation
+    function addRandomTile() { // No more isInitialSetup needed here
         const emptyCells = getEmptyCells();
+        if (emptyCells === undefined) { // Should not happen with new getEmptyCells
+            console.error("!!! addRandomTile: getEmptyCells returned undefined! This is a bug.");
+            return; 
+        }
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
             const value = Math.random() < 0.9 ? 2 : 4;
             const newTile = new Tile({ r: randomCell.r, c: randomCell.c }, value);
             newTile.justAppeared = true; // Flag for actuate to animate
-            board[randomCell.r][randomCell.c] = newTile; // Place Tile object on board
+            board[randomCell.r][randomCell.c] = newTile;
             console.log(`LOGIC: Added new Tile object (${value}) at [${randomCell.r},${randomCell.c}]`);
         } else {
             console.log("LOGIC: No empty cells to add a random tile.");
         }
     }
     
+    function addStartTiles() { // Helper for startGame
+        addRandomTile();
+        addRandomTile();
+    }
+
     // --- 4. HANDLING PLAYER INPUT & MOVES ---
-    // MODIFIED: processMove now just calls actuate and game state checks
     function processMove(boardChanged, direction) { 
-        console.log(`PROCESSMOVE: After ${direction} move, boardChanged is: ${boardChanged}`);
+        // console.log(`PROCESSMOVE: After ${direction} move, boardChanged is: ${boardChanged} (Type: ${typeof boardChanged})`);
         if (boardChanged === true) {
-            console.log("PROCESSMOVE: Board changed. Adding new tile, actuating, checking game state.");
+            // console.log("PROCESSMOVE: Board changed. Adding new tile, actuating, checking game state.");
             addRandomTile(); 
-            actuate(); // Central function to update visuals
-            
+            actuate();   
+            // updateScoreDisplay(); // actuate calls this
             if (!hasWon && checkWinCondition()) { showWinMessage(); return; }
             if (!hasWon && checkGameOver()) { endGame(); }
         } else {
-            console.log("PROCESSMOVE: Board did not change.");
+            // console.log("PROCESSMOVE: Board did not change.");
         }
     }
 
     document.addEventListener('keydown', handleKeyPress);
-    function handleKeyPress(event) { /* ... (same as before, ensure `changed` is local) ... */ }
+    function handleKeyPress(event) { /* ... (Keep your version from #47 / user paste #48) ... */ }
     gameBoardElement.addEventListener('touchstart', handleTouchStart, { passive: false });
-    // ... (touch handlers same as before, ensure `internalChanged` and `swipeDir` are local) ...
-    function handleTouchStart(event) { /* ... */ }
-    function handleTouchMove(event) { /* ... */ }
-    function handleTouchEnd(event) { /* ... */ }
-    function handleSwipe() { /* ... */ }
+    gameBoardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    gameBoardElement.addEventListener('touchend', handleTouchEnd, { passive: false });
+    function handleTouchStart(event) { /* ... (Keep your version from #47 / user paste #48) ... */ }
+    function handleTouchMove(event) { /* ... (Keep your version from #47 / user paste #48) ... */ }
+    function handleTouchEnd(event) { /* ... (Keep your version from #47 / user paste #48) ... */ }
+    function handleSwipe() { /* ... (Keep your version from #47 / user paste #48, ensure 'changed' and 'direction' are local) ... */ }
 
-    // --- 5. MOVEMENT LOGIC (Significant changes needed here to work with Tile objects) ---
-    // The following movement logic needs to be refactored to:
-    // 1. Operate on a board of Tile objects (or null).
-    // 2. When merging, create a new Tile object for the merged result, and mark the old ones.
-    // 3. Correctly update Tile object positions (tile.updatePosition).
-    // 4. Set flags like 'wasMergedThisTurn' on Tile objects.
-
-    // For now, I will provide a VERY SIMPLIFIED version of processRowLeft
-    // and the move functions that updates the logical board of Tile objects
-    // but DOES NOT YET have the advanced logic for tracking merges in a way
-    // that `actuate` can perfectly animate merges (like which tile consumed which).
-    // This will get basic sliding working.
-
+    // --- 5. MOVEMENT LOGIC (Refactored to work with Tile objects and prepare for animation) ---
     function prepareTilesForMove() {
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
-                if (board[r][c]) {
-                    board[r][c].savePosition(); // Store previous r, c
-                    board[r][c].mergedFrom = null;
-                    board[r][c].wasMergedThisTurn = false; // Reset merge flag
+                const tile = board[r][c];
+                if (tile) {
+                    tile.savePosition();    // Store r, c into previousR, previousC
+                    tile.mergedFrom = null; // Clear merge history for this move
+                    tile.wasMergedThisTurn = false; // Reset merge animation flag
                 }
             }
         }
     }
     
-    function moveTile(tile, newR, newC) { // newR, newC are the new logical positions
-        if (!tile) return;
-        board[tile.r][tile.c] = null; // Clear old position in logical board
-        tile.updatePosition({ r: newR, c: newC }); // Update tile object's internal position
-        board[newR][newC] = tile; // Place tile in new position in logical board
-    }
+    // processRowLeft now operates on an array of Tile objects (or nulls)
+    // It should return a new array of Tile objects (or nulls) representing the processed row.
+    function processRowLeftAndMerge(rowOfTiles) {
+        let filteredTiles = rowOfTiles.filter(tile => tile !== null);
+        let newRow = [];
+        let changedInRow = false;
 
-    function processRowAndCreateMoveList(rowTiles, isHorizontalMove) {
-        // This function will process one row (or column if transposed)
-        // It should return the new row of Tile objects and a list of moves/merges for animation
-        // For simplicity in this step, we'll just update the row and return it.
-        // True animation tracking needs more complex return values.
-
-        let originalRowJSON = JSON.stringify(rowTiles.map(t => t ? t.value : 0));
-        
-        // 1. Filter out nulls, keeping Tile objects
-        let filteredTiles = rowTiles.filter(tile => tile !== null);
-
-        // 2. Merge
-        for (let i = 0; i < filteredTiles.length - 1; i++) {
-            if (filteredTiles[i].value === filteredTiles[i+1].value) {
-                const mergedValue = filteredTiles[i].value * 2;
-                score += mergedValue;
-                
-                // The tile at i "absorbs" the tile at i+1
-                // For animation: filteredTiles[i+1] should animate into filteredTiles[i]
-                // We'll create a new tile for the merged result for simplicity now
-                // Or, update filteredTiles[i] and mark filteredTiles[i+1] for removal
-                
-                filteredTiles[i].value = mergedValue; // Update value
-                filteredTiles[i].wasMergedThisTurn = true; // Flag for pop animation
-                // Remove the merged tile object
-                // For DOM: The tile that got merged into (filteredTiles[i]) keeps its ID.
-                // The tile that disappeared (filteredTiles[i+1]) needs its DOM element removed.
-                // We need to track this: mark filteredTiles[i+1] for deletion.
-                if (tileElements[filteredTiles[i+1].id]) { // Mark for DOM removal
-                     tileElements[filteredTiles[i+1].id].willBeRemoved = true;
-                }
-
-                filteredTiles.splice(i + 1, 1); // Remove from processing list
-            }
-        }
-
-        // 3. Pad with nulls
-        const newProcessedRow = new Array(gridSize).fill(null);
         for (let i = 0; i < filteredTiles.length; i++) {
-            newProcessedRow[i] = filteredTiles[i];
+            let currentTile = filteredTiles[i];
+            if (i + 1 < filteredTiles.length && filteredTiles[i+1].value === currentTile.value) {
+                // Merge
+                let mergedValue = currentTile.value * 2;
+                score += mergedValue;
+                // Create a new tile for the merged result.
+                // The original tiles (currentTile, filteredTiles[i+1]) will be "consumed".
+                // For animation, we'd mark them and the new tile would appear.
+                // For now, just update currentTile and skip next.
+                currentTile.value = mergedValue;
+                currentTile.wasMergedThisTurn = true; // Flag for pop animation in actuate
+                // Mark the tile that was merged into this one as 'mergedFrom' this one for DOM cleanup
+                // This requires more complex Tile object structure if we want to animate the merge source disappearing.
+                // For now, the DOM cleanup in actuate will remove unreferenced tiles.
+                i++; // Skip the next tile as it has been merged
+                changedInRow = true;
+            }
+            newRow.push(currentTile);
+        }
+
+        // Pad with nulls
+        const finalRow = new Array(gridSize).fill(null);
+        for (let i = 0; i < newRow.length; i++) {
+            finalRow[i] = newRow[i];
+        }
+
+        // Check if row content (values) actually changed
+        let originalValues = rowOfTiles.map(t => t ? t.value : null);
+        let finalValues = finalRow.map(t => t ? t.value : null);
+        if (JSON.stringify(originalValues) !== JSON.stringify(finalValues)) {
+            changedInRow = true;
         }
         
-        let rowChanged = JSON.stringify(newProcessedRow.map(t => t ? t.value : 0)) !== originalRowJSON;
-        return { newRow: newProcessedRow, changed: rowChanged };
+        return { processedRow: finalRow, rowChanged: changedInRow };
     }
 
-
-    function moveTilesLeft() {
+    function moveTilesLeft() { 
         prepareTilesForMove();
         let overallBoardChanged = false;
         for (let r = 0; r < gridSize; r++) {
-            const rowToProcess = board[r]; // This is a row of Tile objects or nulls
-            const { newRow, changed } = processRowAndCreateMoveList(rowToProcess, true);
-            if (changed) {
+            const { processedRow, rowChanged } = processRowLeftAndMerge([...board[r]]); // Pass a copy
+            if (rowChanged) {
                 overallBoardChanged = true;
-                // Update the positions of tiles in newRow based on their new index
-                for(let c=0; c < gridSize; c++) {
-                    if(newRow[c]) {
-                        newRow[c].updatePosition({r: r, c: c});
+                // Update tile positions in the processedRow and then update the main board
+                for (let c = 0; c < gridSize; c++) {
+                    board[r][c] = processedRow[c]; // Place Tile object (or null)
+                    if (board[r][c]) {
+                        board[r][c].updatePosition({ r: r, c: c });
                     }
-                    board[r][c] = newRow[c]; // Update the main board
                 }
             }
         }
-        console.log("MOVE_FUNC: moveTilesLeft returning:", overallBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesLeft returning:", overallBoardChanged);
         return overallBoardChanged;
     }
 
-    function moveTilesRight() {
+    function moveTilesRight() { 
         prepareTilesForMove();
         let overallBoardChanged = false;
         for (let r = 0; r < gridSize; r++) {
-            const rowToProcess = [...board[r]].reverse(); // Reverse to process "left" then reverse back
-            const { newRow: processedReversedRow, changed } = processRowAndCreateMoveList(rowToProcess, true);
-            if (changed) {
+            const originalRow = [...board[r]];
+            const reversedRow = [...originalRow].reverse();
+            const { processedRow: processedReversedRow, rowChanged } = processRowLeftAndMerge(reversedRow);
+            if (rowChanged) {
                 overallBoardChanged = true;
                 const finalNewRow = processedReversedRow.reverse();
-                for(let c=0; c < gridSize; c++) {
-                    if(finalNewRow[c]) {
-                        finalNewRow[c].updatePosition({r: r, c: c});
+                for (let c = 0; c < gridSize; c++) {
+                    board[r][c] = finalNewRow[c];
+                    if (board[r][c]) {
+                        board[r][c].updatePosition({ r: r, c: c });
                     }
-                    board[r][c] = finalNewRow[c]; // Update the main board
                 }
             }
         }
-        console.log("MOVE_FUNC: moveTilesRight returning:", overallBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesRight returning:", overallBoardChanged);
         return overallBoardChanged;
     }
-    
-    function moveTilesUp() {
+
+    function transposeBoard(matrix) { /* ... (Keep your working version from #47/user's #48) ... */ }
+
+    function moveTilesUp() { 
         prepareTilesForMove();
         let overallBoardChanged = false;
-        let tempLogicalBoard = transposeBoard(board); // Transpose board of Tile objects
-        for (let r = 0; r < gridSize; r++) { // r is now effectively a column index
-            const colToProcess = tempLogicalBoard[r];
-            const { newRow: processedCol, changed } = processRowAndCreateMoveList(colToProcess, false);
-            if (changed) {
+        let tempLogicalBoard = transposeBoard(board);
+        for (let r = 0; r < gridSize; r++) { // r is effectively original column index
+            const { processedRow: newColAsRow, rowChanged } = processRowLeftAndMerge([...tempLogicalBoard[r]]);
+            if (rowChanged) {
                 overallBoardChanged = true;
-                for(let c=0; c < gridSize; c++) { // c is now effectively a row index
-                    if(processedCol[c]) {
-                        // Position is relative to transposed board during processing
-                        // Actual r,c will be set when transposing back or by reading from tile object
-                    }
-                    tempLogicalBoard[r][c] = processedCol[c];
+                for (let c = 0; c < gridSize; c++) { // c is effectively original row index
+                    tempLogicalBoard[r][c] = newColAsRow[c];
+                    // Tile objects in newColAsRow still have their old r,c.
+                    // Their final r,c will be set after transposing back.
                 }
             }
         }
         if (overallBoardChanged) {
-            board = transposeBoard(tempLogicalBoard); // Transpose back
-            // After transposing back, update r,c for all tiles based on their new grid position
+            board = transposeBoard(tempLogicalBoard);
+            // Update r,c in each Tile object to reflect its final position
             for(let r=0; r<gridSize; r++) {
                 for(let c=0; c<gridSize; c++) {
                     if(board[r][c]) {
@@ -414,21 +447,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        console.log("MOVE_FUNC: moveTilesUp returning:", overallBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesUp returning:", overallBoardChanged);
         return overallBoardChanged;
     }
 
-    function moveTilesDown() {
+    function moveTilesDown() { 
         prepareTilesForMove();
         let overallBoardChanged = false;
         let tempLogicalBoard = transposeBoard(board);
-        for (let r = 0; r < gridSize; r++) { // r is col index
-            const colToProcess = [...tempLogicalBoard[r]].reverse();
-            const { newRow: processedReversedCol, changed } = processRowAndCreateMoveList(colToProcess, false);
-            if (changed) {
+        for (let r = 0; r < gridSize; r++) { // r is original column index
+            const originalColAsRow = [...tempLogicalBoard[r]];
+            const reversedColAsRow = originalColAsRow.reverse();
+            const { processedRow: processedReversedCol, rowChanged } = processRowLeftAndMerge(reversedColAsRow);
+            if (rowChanged) {
                 overallBoardChanged = true;
                 const finalNewCol = processedReversedCol.reverse();
-                for(let c=0; c < gridSize; c++) { // c is row index
+                for (let c = 0; c < gridSize; c++) { // c is original row index
                     tempLogicalBoard[r][c] = finalNewCol[c];
                 }
             }
@@ -443,24 +477,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        console.log("MOVE_FUNC: moveTilesDown returning:", overallBoardChanged);
+        // console.log("MOVE_FUNC: moveTilesDown returning:", overallBoardChanged);
         return overallBoardChanged;
     }
-    
-    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) --- (Keep as is, but checkWin uses board of Tile objects)
+
+    // --- 6. GAME STATE LOGIC (WIN/GAME OVER) --- (Adjust for Tile objects)
     function checkWinCondition() {
-        if (hasWon) return false; // Don't re-trigger win if already won and playing on
-        for(let r=0;r<gridSize;r++){
-            for(let c=0;c<gridSize;c++){
-                if(board[r][c] && board[r][c].value === targetTileValue) { // Check .value
-                    console.log("Win condition met: tile value reached!");
-                    return true;
-                }
-            }
-        }
+        if (hasWon) return false; 
+        for(let r=0;r<gridSize;r++){ for(let c=0;c<gridSize;c++){ if(board[r][c] && board[r][c].value === targetTileValue){return true;}}}
         return false;
     }
-    function showWinMessage() { /* ... (same as before, but ensure hasWon is set here) ... */ hasWon=true; if(youWinMessageElement)youWinMessageElement.classList.remove('hidden');}
+    function showWinMessage() {hasWon=true;if(youWinMessageElement)youWinMessageElement.classList.remove('hidden');console.log("WIN: You Win message shown");}
+    
     function canAnyTileMove() {
         if (getEmptyCells().length > 0) return true;
         for (let r = 0; r < gridSize; r++) {
@@ -473,16 +501,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (board[r][c] && board[r+1][c] && board[r][c].value === board[r+1][c].value) return true;
             }
         }
+        // console.log("GAMEOVER_CHECK: No empty cells & no merges possible."); 
         return false;
     }
-    function checkGameOver() { /* ... (same as before) ... */ } 
-    function endGame() { /* ... (same as before) ... */ }
+    function checkGameOver() {if(!canAnyTileMove()){console.log("GAMEOVER_CHECK: Game is over.");return true;}return false;} 
+    function endGame() {isGameOver=true;if(finalScoreElement)finalScoreElement.textContent=score;if(gameOverMessageElement)gameOverMessageElement.classList.remove('hidden');console.log("GAMEOVER: Game Over message shown. Final Score:",score);}
 
-    // --- Event Listeners for Buttons --- (Keep as is)
+    // --- Event Listeners for Buttons --- (Same as before)
     if (newGameButton) newGameButton.addEventListener('click', startGame);
-    // ... (other button listeners)
+    if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
+    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; console.log("Keep playing selected.");});
+    if (newGameFromWinButton) newGameFromWinButton.addEventListener('click', startGame);
     
-    window.addEventListener('resize', () => { /* ... (same as before, ensure requestAnimationFrame is used if needed) ... */ });
+    window.addEventListener('resize', () => {
+        console.log("Window resized event triggered. Recalculating dimensions.");
+        requestAnimationFrame(() => { 
+            calculateDimensions();
+            actuate(); // Use actuate to re-render based on new dimensions
+        });
+    });
 
     startGame(); 
 });
