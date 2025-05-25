@@ -10,121 +10,65 @@ body {
     align-items: center;
     min-height: 100vh;
     box-sizing: border-box;
-    overflow-x: hidden; /* Prevent horizontal scrollbars if board is slightly off */
+    overflow-x: hidden; 
 }
 
-header {
-    margin-bottom: 15px;
-}
-
-header h1 {
-    font-size: clamp(2.5em, 8vw, 4em); 
-    margin: 0.2em 0;
-    color: #776e65;
-}
-
+header { margin-bottom: 15px; }
+header h1 { font-size: clamp(2.5em, 8vw, 4em); margin: 0.2em 0; color: #776e65; }
 .score-container {
-    font-size: clamp(1.2em, 4vw, 1.8em); 
-    margin-bottom: 10px;
-    background-color: #bbada0;
-    padding: 5px 15px;
-    border-radius: 3px;
-    color: white;
-    min-width: 100px; 
-    display: inline-block;
+    font-size: clamp(1.2em, 4vw, 1.8em); margin-bottom: 10px; background-color: #bbada0;
+    padding: 5px 15px; border-radius: 3px; color: white; min-width: 100px; display: inline-block;
 }
-
-#score {
-    font-weight: bold;
-}
-
-#instructions {
-    margin-bottom: 15px;
-    max-width: 500px; 
-    font-size: clamp(0.8em, 2.5vw, 1em);
-}
+#score { font-weight: bold; }
+#instructions { margin-bottom: 15px; max-width: 500px; font-size: clamp(0.8em, 2.5vw, 1em); }
 
 #new-game-button, 
-#try-again-button {
-    padding: 10px 20px;
-    font-size: clamp(0.9em, 3vw, 1.1em);
-    background-color: #8f7a66;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background-color 0.2s ease;
-    text-decoration: none; 
-    display: inline-block; 
+#try-again-button,
+#you-win-message #keep-playing-button,
+#you-win-message #new-game-from-win-button {
+    padding: 10px 20px; font-size: clamp(0.9em, 3vw, 1.1em); background-color: #8f7a66;
+    color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;
+    transition: background-color 0.2s ease; text-decoration: none; display: inline-block; margin: 5px;
 }
 
 #new-game-button:hover, 
-#try-again-button:hover {
+#try-again-button:hover,
+#you-win-message #keep-playing-button:hover,
+#you-win-message #new-game-from-win-button:hover {
     background-color: #776e65;
 }
 
-#game-board-container {
-    display: flex; 
-    justify-content: center;
-    align-items: center;
-    width: 100%; 
-    margin-top: 10px;
-}
-
-/* Game board is now a container for a background grid AND absolutely positioned tiles */
+#game-board-container { display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 10px; }
 #game-board {
-    display: grid; /* Still use grid for background cells' layout */
+    display: grid; 
     grid-template-columns: repeat(4, 1fr); 
     grid-template-rows: repeat(4, 1fr);
-    
-    width: 90vmin; 
-    height: 90vmin;
-    max-width: 450px; 
-    max-height: 450px;
-
+    width: 90vmin; height: 90vmin;
+    max-width: 450px; max-height: 450px;
     background-color: #bbada0; 
     border-radius: 6px;
-    
     gap: clamp(5px, 2vmin, 12px);
     padding: clamp(5px, 2vmin, 12px); 
-    
     box-sizing: border-box;
-    position: relative; /* CRUCIAL: For absolutely positioning numbered tiles inside */
+    position: relative; 
 }
 
-/* Styling for the static background grid cells (these sit behind the numbered tiles) */
 .grid-cell {
-    background-color: rgba(238, 228, 218, 0.35); /* Standard empty cell color from 2048 */
+    background-color: rgba(238, 228, 218, 0.35); 
     border-radius: 3px;
-    /* These cells are just for background; they don't hold text */
 }
 
-/* Styling for the absolutely positioned numbered tiles */
 .tile {
-    position: absolute; /* CRUCIAL: Tiles are now absolutely positioned */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border-radius: 3px;
-    box-sizing: border-box;
-    color: #776e65; 
-    font-size: clamp(1.2em, 5vmin, 2.5em); 
-    /* Width and Height will be set by JavaScript to match cell size */
-    /* Left and Top will be set by JavaScript for positioning */
-    
-    /* CRUCIAL: Add transitions for smooth movement and appearance */
-    transition: left 0.1s ease-in-out, 
-                top 0.1s ease-in-out, 
-                transform 0.1s ease-in-out, /* For scaling/pop animations */
-                background-color 0.1s ease-in-out, 
-                color 0.1s ease-in-out,
-                opacity 0.1s ease-in-out;
-    user-select: none; /* Prevent text selection on tiles */
+    position: absolute; 
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; border-radius: 3px; box-sizing: border-box;
+    color: #776e65; font-size: clamp(1.2em, 5vmin, 2.5em); 
+    transition: left 0.1s ease-out, top 0.1s ease-out, 
+                transform 0.1s ease-out, background-color 0.1s ease-out, 
+                color 0.1s ease-out, opacity 0.1s ease-out;
+    user-select: none; 
 }
 
-/* Tile value styles are the same */
 .tile.tile-2 { background-color: #eee4da; color: #776e65; }
 .tile.tile-4 { background-color: #ede0c8; color: #776e65; }
 .tile.tile-8 { background-color: #f2b179; color: #f9f6f2; }
@@ -138,107 +82,44 @@ header h1 {
 .tile.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: clamp(0.8em, 3.5vmin, 1.8em); }
 .tile.tile-super { background-color: #3c3a32; color: #f9f6f2; font-size: clamp(0.7em, 3vmin, 1.5em); } 
 
+.tile-new { transform: scale(0); opacity: 0; } /* Initial state for new tiles */
+.tile-merged { animation: pop 0.2s ease-in-out; z-index: 20; }
 
-/* Animation classes */
-.tile-new {
-    transform: scale(0); /* Start small for appear animation */
-    opacity: 0;          /* Start transparent */
-    /* The animation will be triggered by JS adding this class briefly */
-    /* We can also directly use the transition property for simple appearance */
-}
-.tile-merged {
-    animation: pop 0.2s ease-in-out; /* Pop animation when tiles merge */
-    z-index: 20; /* Ensure merging tile is on top during animation */
-}
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-/* Keyframe animation for newly appearing tiles (if needed beyond simple transition) */
-/* @keyframes appear {
-    from {
-        transform: scale(0);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-} */
-
-/* Keyframe animation for merged tiles */
-@keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); } /* Briefly enlarge */
-    100% { transform: scale(1); }
-}
-
-/* Game Over and You Win message styles (same as before) */
-#game-over-message {
+#game-over-message, #you-win-message {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(238, 228, 218, 0.85); 
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; border-radius: 6px; z-index: 100; 
 }
-#game-over-message h2 { 
+#game-over-message { background-color: rgba(238, 228, 218, 0.85); }
+#you-win-message { background-color: rgba(237, 194, 46, 0.7); }
+
+#game-over-message h2, #you-win-message h2 { 
     font-size: clamp(2em, 7vw, 3.5em); color: #776e65; margin-bottom: 10px; 
 }
-#game-over-message .final-score-paragraph {
+#you-win-message h2 { color: #f9f6f2; text-shadow: 1px 1px 2px #776e65; }
+
+#game-over-message .final-score-paragraph, #you-win-message p {
     font-size: clamp(1.3em, 4.5vw, 1.9em); color: #776e65; margin: 10px 0 15px 0; 
 }
-#game-over-message .back-to-home-link-container { margin-top: 10px; }
-#game-over-message .back-to-home-link-container a {
-    display: inline-block; padding: 10px 20px; font-size: clamp(0.9em, 3vw, 1.1em); 
-    background-color: #8f7a66; color: white; border: none; border-radius: 5px; 
-    cursor: pointer; text-decoration: none; transition: background-color 0.2s ease; 
-}
-#game-over-message .back-to-home-link-container a:hover {
-    background-color: #776e65; color: white; 
-}
+#you-win-message p { color: #f9f6f2; text-shadow: 1px 1px 1px #776e65; }
 
-#you-win-message {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(237, 194, 46, 0.7); 
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; border-radius: 6px; z-index: 100; 
-}
-#you-win-message h2 { 
-    font-size: clamp(2em, 7vw, 3.5em); color: #f9f6f2; margin-bottom: 10px; 
-    text-shadow: 1px 1px 2px #776e65; 
-}
-#you-win-message p { 
-    font-size: clamp(1.3em, 4.5vw, 1.9em); color: #f9f6f2; margin: 10px 0 15px 0; 
-    text-shadow: 1px 1px 1px #776e65;
-}
-#you-win-message #keep-playing-button,
-#you-win-message #new-game-from-win-button {
-    padding: 10px 20px; font-size: clamp(0.9em, 3vw, 1.1em);
-    background-color: #8f7a66; color: white; border: none; border-radius: 5px;
-    cursor: pointer; margin: 5px; transition: background-color 0.2s ease;
-}
-#you-win-message #keep-playing-button:hover,
-#you-win-message #new-game-from-win-button:hover {
-    background-color: #776e65;
-}
+#game-over-message .back-to-home-link-container, 
 #you-win-message .back-to-home-link-container { margin-top: 10px; }
+
+#game-over-message .back-to-home-link-container a, 
 #you-win-message .back-to-home-link-container a {
     display: inline-block; padding: 10px 20px; font-size: clamp(0.9em, 3vw, 1.1em); 
     background-color: #8f7a66; color: white; border: none; border-radius: 5px; 
     cursor: pointer; text-decoration: none; transition: background-color 0.2s ease; 
 }
+#game-over-message .back-to-home-link-container a:hover, 
 #you-win-message .back-to-home-link-container a:hover {
-    background-color: #776e65; color: white;             
+    background-color: #776e65; color: white; 
 }
 
-.hidden {
-    display: none !important;
-}
-footer {
-    margin-top: 20px;
-    padding-bottom: 10px; 
-    font-size: clamp(0.8em, 2.5vw, 1em);
-}
-footer a {
-    color: #776e65;
-    text-decoration: none;
-}
-footer a:hover {
-    text-decoration: underline;
-}
+.hidden { display: none !important; }
+footer { margin-top: 20px; padding-bottom: 10px; font-size: clamp(0.8em, 2.5vw, 1em); }
+footer a { color: #776e65; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
