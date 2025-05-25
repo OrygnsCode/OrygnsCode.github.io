@@ -1,0 +1,203 @@
+body {
+    font-family: 'Poppins', Arial, sans-serif; /* Using Poppins from main site */
+    text-align: center;
+    background-color: #faf8ef; /* Classic 2048 background */
+    color: #776e65; /* Classic 2048 text color */
+    margin: 0;
+    padding: 10px; /* Add some padding for small screens */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+header {
+    margin-bottom: 15px;
+}
+
+header h1 {
+    font-size: clamp(2.5em, 8vw, 4em); /* Responsive font size */
+    margin: 0.2em 0;
+    color: #776e65;
+}
+
+.score-container {
+    font-size: clamp(1.2em, 4vw, 1.8em); /* Responsive font size */
+    margin-bottom: 10px;
+    background-color: #bbada0;
+    padding: 5px 15px;
+    border-radius: 3px;
+    color: white;
+    min-width: 100px; /* Ensure it has some width */
+    display: inline-block;
+}
+
+#score {
+    font-weight: bold;
+}
+
+#instructions {
+    margin-bottom: 15px;
+    max-width: 500px; /* Prevent instructions from becoming too wide */
+    font-size: clamp(0.8em, 2.5vw, 1em);
+}
+
+#new-game-button, 
+#try-again-button {
+    padding: 10px 20px;
+    font-size: clamp(0.9em, 3vw, 1.1em);
+    background-color: #8f7a66;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s ease;
+}
+
+#new-game-button:hover, 
+#try-again-button:hover {
+    background-color: #776e65;
+}
+
+#game-board-container {
+    display: flex; /* Use flex to center the board better */
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Take full available width to help center board */
+    margin-top: 10px;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    grid-template-rows: repeat(4, 1fr);
+
+    /* Responsive board size using vmin to keep it square and fit screen */
+    /* vmin is the smaller of vw (viewport width) or vh (viewport height) */
+    width: 90vmin; 
+    height: 90vmin;
+    max-width: 450px; /* Maximum size on larger screens */
+    max-height: 450px;
+
+    background-color: #bbada0; /* Darker background for the board itself */
+    border-radius: 6px;
+
+    /* Gap between grid cells, responsive */
+    gap: clamp(5px, 2vmin, 12px);
+    padding: clamp(5px, 2vmin, 12px); 
+
+    box-sizing: border-box;
+    position: relative; /* For game over message positioning */
+}
+
+.tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 3px;
+    box-sizing: border-box;
+    background-color: #cdc1b4; /* Default for empty cells or if JS doesn't add number class */
+    color: #776e65; /* Default text color (mostly for numbers) */
+
+    /* Responsive font size for tiles */
+    font-size: clamp(1.2em, 5vmin, 2.5em); 
+
+    /* Animation for tile appearance and movement */
+    transition: transform 0.1s ease-in-out, background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+    /* Prevent text selection on tiles */
+    user-select: none;
+}
+
+/* Specific tile styles based on value */
+/* Text color often changes to white for darker backgrounds */
+.tile.tile-2 { background-color: #eee4da; color: #776e65; }
+.tile.tile-4 { background-color: #ede0c8; color: #776e65; }
+.tile.tile-8 { background-color: #f2b179; color: #f9f6f2; }
+.tile.tile-16 { background-color: #f59563; color: #f9f6f2; }
+.tile.tile-32 { background-color: #f67c5f; color: #f9f6f2; }
+.tile.tile-64 { background-color: #f65e3b; color: #f9f6f2; }
+.tile.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: clamp(1em, 4.5vmin, 2.2em); } /* Adjust font for 3 digits */
+.tile.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: clamp(1em, 4.5vmin, 2.2em); }
+.tile.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: clamp(1em, 4.5vmin, 2.2em); }
+.tile.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: clamp(0.8em, 3.5vmin, 1.8em); } /* Adjust font for 4 digits */
+.tile.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: clamp(0.8em, 3.5vmin, 1.8em); }
+.tile.tile-super { background-color: #3c3a32; color: #f9f6f2; font-size: clamp(0.7em, 3vmin, 1.5em); } /* For tiles > 2048 */
+
+/* Animation classes (to be added/removed by JavaScript) */
+.tile-new {
+    animation: appear 0.2s ease-in;
+}
+.tile-merged {
+    animation: pop 0.2s ease-in-out;
+}
+
+@keyframes appear {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+#game-over-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(238, 228, 218, 0.85); /* Slightly more opaque */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 6px; 
+    z-index: 100; /* Ensure it's on top */
+}
+
+#game-over-message h2 {
+    font-size: clamp(2em, 7vw, 3.5em);
+    color: #776e65;
+    margin-bottom: 0.5em;
+}
+
+.hidden {
+    display: none !important;
+}
+
+footer {
+    margin-top: 20px;
+    padding-bottom: 10px; /* Ensure footer is not cut off on small screens */
+    font-size: clamp(0.8em, 2.5vw, 1em);
+}
+
+footer a {
+    color: #776e65;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Optional: Media query for very small screens if needed for further adjustments */
+/* @media (max-width: 360px) {
+    header h1 {
+        font-size: 2em;
+    }
+    .tile {
+        font-size: clamp(1em, 4.5vmin, 2em); 
+    }
+} */
