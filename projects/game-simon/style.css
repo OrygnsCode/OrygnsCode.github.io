@@ -35,11 +35,10 @@ html {
 body {
     font-family: 'Arial', sans-serif; 
     margin: 0;
-    padding: 20px; /* Overall page padding */
+    padding: 20px; 
     display: flex;
     flex-direction: column;
     align-items: center; /* Horizontally centers flex items like .wrap and footer */
-    justify-content: space-between; /* Pushes .wrap towards top, footer towards bottom */
     min-height: 100vh; 
     box-sizing: border-box; 
 }
@@ -59,6 +58,7 @@ body {
 
 .rw { /* Row wrapper for buttons */
     display: flex; 
+    /* Removed margin-bottom: -4px to let borders define gaps */
 }
 
 /* Quadrant Shapes */
@@ -72,27 +72,30 @@ body {
     width: 472px; 
     height: 472px;
     border-radius: 50%; 
-    position: relative; 
-    text-align: center; 
-    /* margin-top: 5vh; -- Replaced by body justify-content for overall spacing */
-    /* margin-bottom will be handled by body justify-content and footer margin */
+    position: relative; /* Keep relative for z-index stacking of .center */
+    text-align: center; /* Centers .wrap-in if it's inline-block (it's block by default) */
+    margin-top: 5vh; 
+    margin-bottom: 40px; /* Increased space for footer */
+    /* Horizontal centering is handled by body's align-items: center */
+    /* margin-left: auto; margin-right: auto; - Not strictly needed if body is flex centering */
     background-color: #333; 
     box-shadow: 0px 0px 12px #222;
-    display: flex; 
+    display: flex; /* To center .wrap-in if it doesn't fill .wrap */
     justify-content: center;
     align-items: center;
     padding: 12px; 
     box-sizing: border-box;
-    flex-shrink: 0; 
+    flex-shrink: 0; /* Prevent .wrap from shrinking if footer content is too much */
 }
 
 /* Inner wrapper for the quadrants */
 .wrap-in {
-    width: 400px; 
-    height: 400px; 
+    width: 400px; /* (200px per button) */
+    height: 400px; /* (200px per button) */
     position: relative; 
     display: flex;
     flex-wrap: wrap; 
+    /* The .push buttons with their 12px borders will create internal gaps */
 }
 
 /* Center Console */
@@ -103,8 +106,8 @@ body {
     border-radius: 100%; 
     top: 50%;
     left: 50%;
-    margin-top: -122px;  
-    margin-left: -122px; 
+    margin-top: -122px;  /* -(220/2 + 12 border) */
+    margin-left: -122px; /* -(220/2 + 12 border) */
     background-color: #ECE7EE; 
     border: 12px solid #333; 
     z-index: 10; 
@@ -168,31 +171,52 @@ body {
 /* Scaling for Mobile */
 @media screen and (max-width: 500px) {
     .wrap {
-        /* Removed fixed top and margin-left for centering, rely on body flex + auto margins on .wrap if needed */
-        transform: scale(0.6);
-        transform-origin: center center; /* Scale from center */
-        margin-top: 20px; /* Adjust as needed for smaller screens */
+        top: 0; /* Remove fixed top positioning, let flexbox handle it */
+        margin-top: 20px; /* Adjust margin for smaller screens */
         margin-bottom: 20px;
+        transform: scale(0.6);
+        /* For scaling from center and then re-centering with flexbox: */
+        /* transform-origin: center center; */ 
+        /* The original origin and margin-left was for non-flex centering */
+        /* With body as flex align-items:center, this might not need left/margin-left anymore */
+        left: auto;
+        margin-left: auto;
+        margin-right: auto; 
     }
+    /* If using scale and wanting to avoid large margin for centering: */
+    /*
+    .wrap {
+        position: absolute; // If you want to scale relative to viewport center more easily
+        top: 50%;
+        left: 50%;
+        width: 472px; // Keep original width for scale calculation
+        height: 472px; // Keep original height
+        transform: translate(-50%, -50%) scale(0.6); // Scale and center
+        margin: 0; // Reset margins
+    }
+    body {
+        position: relative; // For absolute child to be relative to
+    }
+    */
 }
 
 /* Footer Styling */
 footer {
     text-align: center;
-    /* margin-top: auto; -- This will be handled by body's justify-content */
-    padding-top: 20px;    /* Space above footer text */
-    padding-bottom: 20px; /* Space at the very bottom of the page */
-    width: 100%; /* Ensures it can be centered if body align-items is not enough */
-    margin-top: 20px; /* Explicit margin from content above */
-    flex-shrink: 0; /* Prevent footer from shrinking */
+    margin-top: auto; /* Push footer to bottom if content is short */
+    padding-top: 30px; /* Space above footer text */
+    padding-bottom: 20px; 
+    width: 100%; 
+    color: #ccc; 
+    /* position: relative; -- Not needed if body is flex column */
+    /* clear: both; -- Not needed for flex */
 }
 
 footer a {
-    color: #000000; /* MODIFIED: Link color to black */
+    color: #eee; 
     text-decoration: none;
 }
 
 footer a:hover {
     text-decoration: underline;
-    color: #333333; /* Slightly lighter black on hover */
 }
