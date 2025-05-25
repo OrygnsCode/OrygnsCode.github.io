@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tryAgainButton = document.getElementById('try-again-button');
 
     const gridSize = 4;
-    let board = []; // This will be a 2D array [row][column] storing tile values (0 for empty)
+    let board = []; // 2D array representing the game board values
     let score = 0;
     let isGameOver = false;
 
@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isGameOver = false;
         score = 0;
         initializeBoardArray(); // Set up the internal 2D array for the board
-
+        
         addRandomTile(); // Add the first random tile
         addRandomTile(); // Add the second random tile
-
+        
         renderBoard(); // Draw the board and tiles onto the HTML page
         updateScoreDisplay();
         if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden'); // Hide game over message
@@ -45,19 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tileValue = board[r][c];
                 const tileElement = document.createElement('div');
                 tileElement.classList.add('tile'); // Base class for styling all cells/tiles
-
+                
                 if (tileValue !== 0) {
                     tileElement.textContent = tileValue;
-                    // Add class for specific tile value (e.g., 'tile-2', 'tile-4') for styling
                     tileElement.classList.add(`tile-${tileValue}`); 
-                    if (tileValue > 2048) { // For numbers larger than 2048, if you have a .tile-super style
+                    if (tileValue > 2048) { 
                         tileElement.classList.add('tile-super');
                     }
-                } else {
-                    // You can add a specific class for empty tiles if you want them styled differently
-                    // than the default .tile background, e.g., tileElement.classList.add('tile-empty');
-                    // The CSS already has a default background for .tile which works for empty cells.
                 }
+                // Empty cells will just have the default .tile background
                 gameBoardElement.appendChild(tileElement);
             }
         }
@@ -74,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 if (board[r][c] === 0) {
-                    emptyCells.push({ r, c }); // Store coordinates of empty cells
+                    emptyCells.push({ r, c }); 
                 }
             }
         }
@@ -85,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyCells = getEmptyCells();
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            // 90% chance of a '2', 10% chance of a '4'
             board[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
             console.log(`Added tile ${board[randomCell.r][randomCell.c]} at row ${randomCell.r}, col ${randomCell.c}`);
         }
@@ -95,53 +90,96 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleKeyPress);
 
     function handleKeyPress(event) {
-        if (isGameOver) return; // Don't do anything if the game is over
+        if (isGameOver) return; 
 
-        let boardChanged = false; // Flag to check if a move actually changed the board
+        let boardChanged = false; 
         switch (event.key) {
             case 'ArrowUp':
                 console.log("Key pressed: ArrowUp");
-                // boardChanged = moveTilesUp(); // Placeholder for now
-                event.preventDefault(); // Prevent default browser scroll
+                boardChanged = moveTilesUp(); 
+                event.preventDefault(); 
                 break;
             case 'ArrowDown':
                 console.log("Key pressed: ArrowDown");
-                // boardChanged = moveTilesDown(); // Placeholder
+                boardChanged = moveTilesDown(); 
                 event.preventDefault();
                 break;
             case 'ArrowLeft':
                 console.log("Key pressed: ArrowLeft");
-                // boardChanged = moveTilesLeft(); // Placeholder
+                boardChanged = moveTilesLeft(); // Call our new function
                 event.preventDefault();
                 break;
             case 'ArrowRight':
                 console.log("Key pressed: ArrowRight");
-                // boardChanged = moveTilesRight(); // Placeholder
+                boardChanged = moveTilesRight(); 
                 event.preventDefault();
                 break;
             default:
-                return; // Ignore any other keys
+                return; 
         }
 
         if (boardChanged) {
-            // This block will be important once movement functions are implemented
-            // addRandomTile();
-            // renderBoard();
-            // updateScoreDisplay();
-            // if (checkGameOver()) {
+            addRandomTile();    
+            renderBoard();      
+            updateScoreDisplay(); 
+            
+            // if (checkGameOver()) { // We will implement this later
             //     endGame();
             // }
+        } else {
+            console.log("No change in board after key press (or move not implemented yet).");
         }
     }
 
-    // --- 5. MOVEMENT LOGIC (Placeholders - To be implemented next!) ---
-    // function moveTilesUp() { console.log("Attempting to move UP"); return false; }
-    // function moveTilesDown() { console.log("Attempting to move DOWN"); return false; }
-    // function moveTilesLeft() { console.log("Attempting to move LEFT"); return false; }
-    // function moveTilesRight() { console.log("Attempting to move RIGHT"); return false; }
+    // --- 5. MOVEMENT LOGIC ---
+
+    // Helper function to process a single row for moving left
+    function processRowLeft(row) {
+        // 1. Filter out zeros (slide tiles left)
+        let filteredRow = row.filter(val => val !== 0);
+        
+        // 2. Combine adjacent identical tiles
+        for (let i = 0; i < filteredRow.length - 1; i++) {
+            if (filteredRow[i] === filteredRow[i+1]) {
+                filteredRow[i] *= 2; 
+                score += filteredRow[i]; 
+                filteredRow.splice(i + 1, 1); // Remove the merged tile (effectively setting to 0 and it will be filtered)
+            }
+        }
+        // The previous splice() means we don't need to filter out zeros again here explicitly for this simple left merge
+        // as it directly modifies filteredRow.
+        
+        // 4. Pad with zeros to the right to make it gridSize length
+        const newRow = [];
+        for (let i = 0; i < gridSize; i++) {
+            newRow[i] = filteredRow[i] || 0; 
+        }
+        return newRow;
+    }
+
+    function moveTilesLeft() {
+        let boardChanged = false;
+        for (let r = 0; r < gridSize; r++) {
+            const originalRow = [...board[r]]; 
+            const newRow = processRowLeft([...board[r]]); // Pass a copy of the row to processRowLeft
+            board[r] = newRow; 
+
+            if (!originalRow.every((val, index) => val === newRow[index])) {
+                boardChanged = true;
+            }
+        }
+        if (boardChanged) console.log("Tiles moved/merged left.");
+        return boardChanged;
+    }
+
+    // Placeholders for other movement functions
+    function moveTilesUp() { console.log("Attempting to move UP - Not implemented yet"); return false; }
+    function moveTilesDown() { console.log("Attempting to move DOWN - Not implemented yet"); return false; }
+    function moveTilesRight() { console.log("Attempting to move RIGHT - Not implemented yet"); return false; }
+
 
     // --- 6. GAME OVER LOGIC (Placeholders) ---
-    // function checkGameOver() { return false; } // Placeholder
+    // function checkGameOver() { /* To be implemented */ return false; } 
     // function endGame() {
     //     isGameOver = true;
     //     if(finalScoreElement) finalScoreElement.textContent = score;
@@ -151,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
-    if (tryAgainButton) tryAgainButton.addEventListener('click', startGame); // tryAgainButton is on game over screen
+    if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
 
     // --- Initial Game Start when the page loads ---
     startGame();
