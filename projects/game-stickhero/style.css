@@ -1,0 +1,91 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  background-color: #e0e0e0; /* Added a light background for the page */
+  overflow: hidden; /* Prevent scrollbars from canvas resizing */
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: relative; /* For absolute positioning of score, intro, etc. */
+}
+
+#score {
+  position: absolute;
+  top: 30px;
+  left: 50%; /* Center based on its own width */
+  transform: translateX(-50%); /* Actual horizontal centering */
+  font-size: 2.5em; /* Slightly larger score */
+  font-weight: 900;
+  color: #333;
+  z-index: 10;
+}
+
+#game {
+    /* Canvas is now resized by JS to window.innerWidth/Height */
+    /* Default fixed size is removed, JS handles it */
+    background-color: #fff; /* Default background for canvas if needed, though JS draws over it */
+}
+
+#introduction {
+  width: 200px;
+  /* height: 150px; -- let content define height */
+  padding: 10px;
+  position: absolute;
+  top: 50%; /* Position relative to container */
+  left: 50%;
+  transform: translate(-50%, -200px); /* Adjust vertical offset */
+  font-weight: 600;
+  font-size: 0.9em;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  transition: opacity 0.5s; /* Faster fade */
+  color: #555;
+  z-index: 10;
+}
+
+#restart {
+  width: 120px;
+  height: 120px;
+  position: absolute;
+  top: 50%; /* Centered */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Precise centering */
+  border-radius: 50%;
+  color: white;
+  background-color: #ff4136; /* A nice red */
+  border: none;
+  font-weight: 700;
+  font-size: 1.2em;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: none; /* Hidden by default, JS shows it */
+  cursor: pointer;
+  z-index: 20; /* Make sure it's on top */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#restart:hover {
+    background-color: #ff1a0e;
+}
+
+#perfect {
+  position: absolute;
+  top: 100px; /* Position from top */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #ff4136; /* Red color for perfect */
+  opacity: 0;
+  transition: opacity 0.5s, transform 0.5s; /* Added transform transition */
+  z-index: 10;
+}
