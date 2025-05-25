@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game - OrygnsCode</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <header>
+        <h1>2048</h1>
+        <div class="score-container">
+            Score: <span id="score">0</span>
+        </div>
+    </header>
+
+    <div id="instructions">
+        <p>Use your <strong>arrow keys</strong> (or <strong>swipe</strong> on mobile) to move the tiles. 
+        Tiles with the same number merge into one when they touch. Add them up to reach the 
+        <strong>2048 tile!</strong></p>
+        <button id="new-game-button">New Game</button>
+    </div>
+
+    <div id="game-board-container">
+        <div id="game-board">
+            </div>
+        <div id="game-over-message" class="hidden">
+            <h2>Game Over!</h2>
+            <p>Your final score: <span id="final-score">0</span></p>
+            <button id="try-again-button">Try Again</button>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="../../index.html">Back to OrygnsCode Home</a></p> 
+    </footer>
+
+    <script src="script.js"></script> 
+</body>
+</html>
