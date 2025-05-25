@@ -54,6 +54,8 @@ header h1 {
     cursor: pointer;
     margin-top: 10px;
     transition: background-color 0.2s ease;
+    text-decoration: none; /* Ensure buttons don't get underlines if they are <a> tags later */
+    display: inline-block; /* Ensure padding works correctly */
 }
 
 #new-game-button:hover, 
@@ -141,39 +143,41 @@ header h1 {
     z-index: 100; 
 }
 
-#game-over-message h2 { /* "Game Over!" text */
+#game-over-message h2 { 
     font-size: clamp(2em, 7vw, 3.5em);
     color: #776e65;
-    margin-bottom: 10px; /* Adjusted margin */
+    margin-bottom: 10px; 
 }
 
-/* NEW/MODIFIED Style for the "Your final score: X" paragraph */
 #game-over-message .final-score-paragraph {
-    font-size: clamp(1.3em, 4.5vw, 1.9em); /* Made it a bit bigger */
+    font-size: clamp(1.3em, 4.5vw, 1.9em); 
     color: #776e65;
-    margin: 10px 0 15px 0; /* Adjusted margins top/bottom */
+    margin: 10px 0 15px 0; 
 }
 
-/* NEW Style for the container of the "Back to OrygnsCode Home" link */
 #game-over-message .back-to-home-link-container {
-    margin-top: 20px; /* Space above the link */
+    margin-top: 10px; /* Adjusted margin to be similar to buttons */
 }
 
-/* NEW Style for the "Back to OrygnsCode Home" link itself */
+/* === MODIFIED STYLES for the "Back to OrygnsCode Home" link === */
 #game-over-message .back-to-home-link-container a {
-    color: #8f7a66; /* Using button-like color */
-    text-decoration: none;
-    font-size: clamp(0.8em, 2.8vw, 1em);
-    padding: 8px 12px; /* A little padding */
-    border: 1px solid #bbada0; /* Subtle border */
-    border-radius: 3px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    display: inline-block; /* Important for padding and block-like behavior */
+    padding: 10px 20px;    /* Match button padding */
+    font-size: clamp(0.9em, 3vw, 1.1em); /* Match button font-size */
+    background-color: #8f7a66; /* Match button background */
+    color: white;              /* Match button text color */
+    border: none;              /* Match button border (none) */
+    border-radius: 5px;        /* Match button border-radius */
+    cursor: pointer;           /* Make it feel like a button */
+    text-decoration: none;     /* Remove underline */
+    transition: background-color 0.2s ease; /* Match button transition */
 }
 
 #game-over-message .back-to-home-link-container a:hover {
-    background-color: #8f7a66;
-    color: white;
+    background-color: #776e65; /* Match button hover background */
+    color: white;              /* Ensure text color remains white on hover */
 }
+/* === END OF MODIFIED STYLES === */
 
 .hidden {
     display: none !important;
