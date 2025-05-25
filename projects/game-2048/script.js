@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tile DOM elements will be stored in a map: { tileId: tileElement }
     // Initialize as an empty object at the script level
-    let tileElements = {}; // <<<< GLOBAL DECLARATION
+    let tileElements = {}; // Ensures tileElements is declared in the outer scope
 
     // --- Tile Object Definition ---
     function Tile(position, value) {
@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 board[r][c] = null;
             }
         }
-        // console.log("INIT: Logical board array initialized with nulls.");
     }
 
     function calculateDimensions() {
@@ -73,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const firstBgCell = gameBoardElement.querySelector('.grid-cell');
         if (!firstBgCell) {
-            console.error("!!! calculateDimensions: .grid-cell for measurement not found! Ensure createBackgroundGrid ran and CSS is loaded.");
+            console.error("!!! calculateDimensions: .grid-cell for measurement not found!");
             const boardStyleFallback = getComputedStyle(gameBoardElement);
             const boardClientWidthFallback = gameBoardElement.clientWidth;
             let computedGapFallback = parseFloat(boardStyleFallback.gap);
@@ -82,28 +81,26 @@ document.addEventListener('DOMContentLoaded', () => {
             cellSize = (boardClientWidthFallback - (gridSize - 1) * cellGapFromCSS) / gridSize;
             firstCellOffsetX = parseFloat(boardStyleFallback.paddingLeft) || cellGapFromCSS; 
             firstCellOffsetY = parseFloat(boardStyleFallback.paddingTop) || cellGapFromCSS;  
-            console.warn("Using fallback dimension calculations due to missing .grid-cell for measurement.");
         } else {
             const boardStyle = getComputedStyle(gameBoardElement);
             let computedGap = parseFloat(boardStyle.gap);
             if (isNaN(computedGap)) {
-                console.warn("Could not parse 'gap' from CSS. Using fallback 10px for cellGapFromCSS.");
                 const vminValue = Math.min(window.innerWidth, window.innerHeight) / 100;
-                computedGap = Math.max(5, Math.min(2 * vminValue, 12));
+                computedGap = Math.max(5, Math.min(2 * vminValue, 12)); // Estimate clamp
             }
             cellGapFromCSS = computedGap;
             cellSize = firstBgCell.offsetWidth; 
             firstCellOffsetX = firstBgCell.offsetLeft;
             firstCellOffsetY = firstBgCell.offsetTop;
         }
-        // console.log(`DIMENSIONS: FirstCell OffsetX=${firstCellOffsetX}px, OffsetY=${firstCellOffsetY}px, CellGap (CSS)=${cellGapFromCSS}px, CellSize (from bg cell)=${cellSize}px`);
+        // console.log(`DIMENSIONS: OffsetX=${firstCellOffsetX}px, OffsetY=${firstCellOffsetY}px, Gap=${cellGapFromCSS}px, CellSize=${cellSize}px`);
         if (isNaN(cellSize) || cellSize <= 0) {
-            console.error("!!! Calculated cellSize from .grid-cell is invalid! Value:", cellSize, "Using fallback 80px.");
+            console.error("!!! CellSize invalid:", cellSize, "Using fallback 80px.");
             cellSize = 80; 
         }
-        if (isNaN(firstCellOffsetX)) { /* console.warn("firstCellOffsetX is NaN, using fallback 10"); */ firstCellOffsetX = 10; }
-        if (isNaN(firstCellOffsetY)) { /* console.warn("firstCellOffsetY is NaN, using fallback 10"); */ firstCellOffsetY = 10; }
-        if (isNaN(cellGapFromCSS)) { /* console.warn("cellGapFromCSS is NaN, using fallback 10"); */ cellGapFromCSS = 10; }
+        if (isNaN(firstCellOffsetX)) firstCellOffsetX = 10;
+        if (isNaN(firstCellOffsetY)) firstCellOffsetY = 10;
+        if (isNaN(cellGapFromCSS)) cellGapFromCSS = 10;
     }
     
     function createBackgroundGrid() {
@@ -118,25 +115,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame() {
-        console.log("INIT: Starting new game..."); // This is your line 119 approx.
+        console.log("INIT: Starting new game..."); // Your log line 119 (approx)
         isGameOver = false;
         hasWon = false;
         score = 0;
         tileIdCounter = 1; 
         updateScoreDisplay();
 
-        // Ensure tileElements is an object, then clear its previous DOM elements
-        // This was the fix from response #57 for the error you are seeing
-        if (tileElements && typeof tileElements === 'object') { // Check before using Object.values
-            Object.values(tileElements).forEach(el => { if(el && el.remove) el.remove(); });
-        }
-        tileElements = {}; // Line 125 (approx) in response #57. This is where your error pointed.
-                           // If tileElements was not defined before this block, it would error on Object.values.
-                           // But it *is* defined globally now.
+        // Clear existing numbered tile DOM elements from the board
+        const existingNumberedTiles = gameBoardElement.querySelectorAll('.tile:not(.grid-cell)');
+        existingNumberedTiles.forEach(tile => tile.remove());
+        
+        tileElements = {}; // Line 125 (approx) - re-initialize map for new game's DOM elements
 
-        if (!gameBoardElement.querySelector('.grid-cell') || gameBoardElement.querySelectorAll('.grid-cell').length !== (gridSize*gridSize) ) {
-             createBackgroundGrid(); 
-        }
+        // Create background grid cells if they aren't there (e.g., first load)
+        // Or if createBackgroundGrid already clears gameBoardElement.innerHTML, this check might not be needed
+        // For safety, let's assume createBackgroundGrid is the authority for setting up the background.
+        createBackgroundGrid(); 
         
         requestAnimationFrame(() => {
             calculateDimensions();  
@@ -146,130 +141,390 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
             if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
-            // console.log("INIT: Game started. Initial logical board:", JSON.parse(JSON.stringify(board.map(row => row.map(t => t ? t.value : null )))));
+            // console.log("INIT: Game started. Logical board:", JSON.parse(JSON.stringify(board.map(row => row.map(t => t ? t.value : null )))));
         });
     }
 
-    // --- 2. RENDERING / ACTUATION ---
     function actuate() {
-        // ... (Keep the actuate function from response #57 exactly as it was) ...
         updateScoreDisplay();
+
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tile = board[r][c];
-                if (tile) { tile.mergedFrom = null; }
+                if (tile) { 
+                    tile.mergedFrom = null; 
+                    // tile.savePosition(); // Should be called in prepareTilesForMove
+                }
             }
         }
+
+        // --- Create or update DOM elements for tiles ---
+        const currentTileIdsOnBoard = new Set();
+
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const logicalTile = board[r][c]; 
+                
                 if (logicalTile) {
+                    currentTileIdsOnBoard.add(logicalTile.id);
                     let tileElement = tileElements[logicalTile.id];
+
                     if (!tileElement) { 
                         tileElement = document.createElement('div');
                         tileElement.classList.add('tile');
-                        tileElement.style.width = `${cellSize}px`;
-                        tileElement.style.height = `${cellSize}px`;
-                        tileElement.style.left = `${firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS)}px`;
-                        tileElement.style.top = `${firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS)}px`;
+                        // Initial position for new tiles (they will animate from here or from scale 0)
+                        // If previousR/C are set, it implies a move, otherwise, it's a new spawn.
+                        if (logicalTile.previousR !== null && logicalTile.previousC !== null) {
+                             tileElement.style.left = `${firstCellOffsetX + logicalTile.previousC * (cellSize + cellGapFromCSS)}px`;
+                             tileElement.style.top = `${firstCellOffsetY + logicalTile.previousR * (cellSize + cellGapFromCSS)}px`;
+                        } else { // New tile, position directly at its target
+                             tileElement.style.left = `${firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS)}px`;
+                             tileElement.style.top = `${firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS)}px`;
+                        }
                         gameBoardElement.appendChild(tileElement);
                         tileElements[logicalTile.id] = tileElement;
                     }
+                    
+                    tileElement.style.width = `${cellSize}px`;
+                    tileElement.style.height = `${cellSize}px`;
                     tileElement.textContent = logicalTile.value;
                     tileElement.className = 'tile'; 
                     tileElement.classList.add(`tile-${logicalTile.value}`);
                     if (logicalTile.value > 2048) tileElement.classList.add('tile-super');
+
+                    // Apply animations
                     if (logicalTile.justAppeared) {
-                        tileElement.classList.add('tile-new'); 
-                        requestAnimationFrame(() => {
+                        tileElement.classList.add('tile-new'); // CSS has transform: scale(0), opacity: 0;
+                        requestAnimationFrame(() => { // Allow initial state to apply
                            tileElement.style.transform = 'scale(1)';
                            tileElement.style.opacity = '1';
                         });
                         logicalTile.justAppeared = false; 
                     } else if (logicalTile.wasMergedThisTurn) {
-                        tileElement.classList.add('tile-merged');
+                        tileElement.classList.add('tile-merged'); // CSS has pop animation
                         setTimeout(() => { if(tileElement) tileElement.classList.remove('tile-merged'); }, 200); 
                         logicalTile.wasMergedThisTurn = false;
+                        // Ensure normal appearance after pop
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     } else {
+                        // For moved tiles (not new, not merged this turn)
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     }
+                    
+                    // Set final target position (CSS transition will make it slide)
                     const targetLeft = firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS);
                     const targetTop = firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS);
-                    tileElement.style.left = `${targetLeft}px`;
-                    tileElement.style.top = `${targetTop}px`;
+                    
+                    // Delay setting final position slightly to allow "from" position to render if different
+                    requestAnimationFrame(() => {
+                        tileElement.style.left = `${targetLeft}px`;
+                        tileElement.style.top = `${targetTop}px`;
+                    });
                 }
             }
         }
+
+        // Clean up DOM elements for tiles that are no longer in the logical board
         for (const tileId in tileElements) {
-            let foundInBoard = false;
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    if (board[r][c] && board[r][c].id == tileId) {
-                        foundInBoard = true; break;
-                    }
-                }
-                if (foundInBoard) break;
-            }
-            if (!foundInBoard) {
+            if (!currentTileIdsOnBoard.has(parseInt(tileId))) {
                 if (tileElements[tileId] && tileElements[tileId].remove) {
                     tileElements[tileId].remove();
                 }
                 delete tileElements[tileId];
             }
         }
+        // console.log("ACTUATE: Display updated.");
     }
 
     function updateScoreDisplay() { if (scoreElement) scoreElement.textContent = score; }
 
-    // --- 3. ADDING RANDOM TILES ---
-    function getEmptyCells() { /* ... (Keep the version from response #57) ... */ }
-    function addRandomTile() { /* ... (Keep the version from response #57) ... */ }
+    function getEmptyCells() {
+        const localEmptyCells = [];
+        try {
+            if (!board || board.length !== gridSize) { return []; }
+            for (let r = 0; r < gridSize; r++) {
+                if (!board[r] || board[r].length !== gridSize) { return []; }
+                for (let c = 0; c < gridSize; c++) { if (board[r][c] === null) localEmptyCells.push({ r, c }); }
+            }
+            return localEmptyCells;
+        } catch (e) { console.error("Error in getEmptyCells:", e); return []; }
+    }
+
+    function addRandomTile() { 
+        const emptyCells = getEmptyCells();
+        if (emptyCells.length > 0) {
+            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            const value = Math.random() < 0.9 ? 2 : 4;
+            const newTile = new Tile({ r: randomCell.r, c: randomCell.c }, value);
+            newTile.justAppeared = true; 
+            board[randomCell.r][randomCell.c] = newTile;
+        }
+    }
     function addStartTiles() { addRandomTile(); addRandomTile(); }
     
-    // --- 4. HANDLING PLAYER INPUT & MOVES ---
-    function processMove(boardChanged, direction) { /* ... (Keep the version from response #57) ... */ }
+    function processMove(boardChanged, direction) { 
+        if (boardChanged === true) {
+            addRandomTile(); 
+            actuate();   
+            if (!hasWon && checkWinCondition()) { showWinMessage(); return; }
+            if (!hasWon && checkGameOver()) { endGame(); }
+        }
+    }
+
     document.addEventListener('keydown', handleKeyPress);
-    function handleKeyPress(event) { /* ... (Keep the version from response #57) ... */ }
+    function handleKeyPress(event) {
+        if ((isGameOver && !hasWon) || (youWinMessageElement && !youWinMessageElement.classList.contains('hidden'))) return;
+        let changed = false; 
+        let dir = "Unknown";
+        try {
+            switch (event.key) {
+                case 'ArrowUp': dir = 'Up'; changed = moveTilesUp(); event.preventDefault(); break;
+                case 'ArrowDown': dir = 'Down'; changed = moveTilesDown(); event.preventDefault(); break;
+                case 'ArrowLeft': dir = 'Left'; changed = moveTilesLeft(); event.preventDefault(); break;
+                case 'ArrowRight': dir = 'Right'; changed = moveTilesRight(); event.preventDefault(); break;
+                default: return; 
+            }
+        } catch (e) { console.error(`INPUT_ERROR: During ${dir} key:`, e); changed = false; }
+        processMove(changed, dir);
+    }
+
     gameBoardElement.addEventListener('touchstart', handleTouchStart, { passive: false });
     gameBoardElement.addEventListener('touchmove', handleTouchMove, { passive: false });
     gameBoardElement.addEventListener('touchend', handleTouchEnd, { passive: false });
-    function handleTouchStart(event) { /* ... (Keep the version from response #57) ... */ }
-    function handleTouchMove(event) { /* ... (Keep the version from response #57) ... */ }
-    function handleTouchEnd(event) { /* ... (Keep the version from response #57) ... */ }
-    function handleSwipe() { /* ... (Keep the version from response #57) ... */ }
+    function handleTouchStart(event) {touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY;}
+    function handleTouchMove(event) {event.preventDefault();}
+    function handleTouchEnd(event) {
+        if ((isGameOver && !hasWon) || (youWinMessageElement && !youWinMessageElement.classList.contains('hidden'))) return;
+        touchEndX = event.changedTouches[0].clientX;
+        touchEndY = event.changedTouches[0].clientY;
+        handleSwipe();
+    }
+    function handleSwipe() {
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        let internalChanged = false; 
+        let swipeDir = "None";
+        try {
+            if (Math.abs(deltaX) > Math.abs(deltaY)) { 
+                if (Math.abs(deltaX) > swipeThreshold) { 
+                    if (deltaX > 0) { swipeDir = 'Right'; internalChanged = moveTilesRight(); } 
+                    else { swipeDir = 'Left'; internalChanged = moveTilesLeft(); }
+                }
+            } else { 
+                if (Math.abs(deltaY) > swipeThreshold) { 
+                    if (deltaY > 0) { swipeDir = 'Down'; internalChanged = moveTilesDown(); } 
+                    else { swipeDir = 'Up'; internalChanged = moveTilesUp(); }
+                }
+            }
+        } catch (e) { console.error(`INPUT_ERROR: During swipe ${swipeDir}:`, e); internalChanged = false; }
+        processMove(internalChanged, swipeDir);
+    }
 
-    // --- 5. MOVEMENT LOGIC ---
-    function prepareTilesForMove() { /* ... (Keep the version from response #57) ... */ }
-    function processRowAndMerge(rowOfTiles) { /* ... (Keep the version from response #57) ... */ }
-    function moveTilesLeft() { /* ... (Keep the version from response #57) ... */ }
-    function moveTilesRight() { /* ... (Keep the version from response #57) ... */ }
-    function transposeBoard(matrix) { /* ... (Keep the version from response #57) ... */ }
-    function moveTilesUp() { /* ... (Keep the version from response #57) ... */ }
-    function moveTilesDown() { /* ... (Keep the version from response #57) ... */ }
+    function prepareTilesForMove() {
+        for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+                const tile = board[r][c];
+                if (tile) {
+                    tile.savePosition();    
+                    tile.mergedFrom = null; 
+                    tile.wasMergedThisTurn = false; 
+                }
+            }
+        }
+    }
+    
+    function processRowAndMerge(rowOfTiles) { 
+        let filteredTiles = rowOfTiles.filter(tile => tile !== null);
+        let newRowOutput = []; 
+        let changedInRow = false;
+        let i = 0;
+
+        let originalValuesBeforeMergeAndSlide = rowOfTiles.map(t => t ? t.id : null); 
+
+        while (i < filteredTiles.length) {
+            let currentTile = filteredTiles[i];
+            if (i + 1 < filteredTiles.length && filteredTiles[i+1].value === currentTile.value) {
+                const mergedValue = currentTile.value * 2;
+                score += mergedValue;
+                
+                // Create a new tile for the merged result, carrying over ID of currentTile (the one that stays)
+                const mergedTile = new Tile({r: currentTile.r, c: currentTile.c}, mergedValue); // Position will be updated by caller
+                mergedTile.id = currentTile.id; // Preserve ID of the tile that "absorbs"
+                mergedTile.wasMergedThisTurn = true;
+                mergedTile.mergedFrom = [currentTile, filteredTiles[i+1]]; 
+                
+                newRowOutput.push(mergedTile);
+                // Mark the tile that got consumed (filteredTiles[i+1]) so its DOM can be removed
+                if (tileElements[filteredTiles[i+1].id]) {
+                    tileElements[filteredTiles[i+1].id].toBeRemovedAfterAnimation = true;
+                }
+                
+                changedInRow = true;
+                i += 2; 
+            } else {
+                newRowOutput.push(currentTile);
+                i++;
+            }
+        }
+
+        const finalPaddedRow = new Array(gridSize).fill(null);
+        for (let k = 0; k < newRowOutput.length; k++) {
+            finalPaddedRow[k] = newRowOutput[k];
+            if (rowOfTiles[k] === null || (rowOfTiles[k] && finalPaddedRow[k] && rowOfTiles[k].id !== finalPaddedRow[k].id)) {
+                 // If new position k has a tile, but old position k was null OR had a different tile ID
+                changedInRow = true; 
+            } else if (rowOfTiles[k] && finalPaddedRow[k] === null) {
+                // If old position k had a tile, but new position k is null
+                changedInRow = true;
+            }
+        }
+        
+        // Additional check if only values changed (e.g. merge without slide)
+        if(!changedInRow) {
+            let finalValues = finalPaddedRow.map(t => t ? t.value : null);
+            let originalRawValues = rowOfTiles.map(t => t ? t.value : null);
+            if(JSON.stringify(finalValues) !== JSON.stringify(originalRawValues)) {
+                changedInRow = true;
+            }
+        }
+        return { processedRow: finalPaddedRow, rowChanged: changedInRow };
+    }
+
+    function moveTilesLeft() { 
+        prepareTilesForMove();
+        let overallBoardChanged = false;
+        for (let r = 0; r < gridSize; r++) {
+            const { processedRow, rowChanged } = processRowAndMerge([...board[r]]);
+            if (rowChanged) {
+                overallBoardChanged = true;
+                for(let c=0; c < gridSize; c++) {
+                    board[r][c] = processedRow[c]; 
+                    if (board[r][c]) { board[r][c].updatePosition({ r: r, c: c }); }
+                }
+            }
+        }
+        return overallBoardChanged;
+    }
+
+    function moveTilesRight() { 
+        prepareTilesForMove();
+        let overallBoardChanged = false;
+        for (let r = 0; r < gridSize; r++) {
+            const reversedRowInput = [...board[r]].reverse();
+            const { processedRow: processedReversedRow, rowChanged } = processRowAndMerge(reversedRowInput);
+            if (rowChanged) {
+                overallBoardChanged = true;
+                const finalNewRow = processedReversedRow.reverse();
+                for (let c = 0; c < gridSize; c++) {
+                    board[r][c] = finalNewRow[c];
+                    if (board[r][c]) { board[r][c].updatePosition({ r: r, c: c }); }
+                }
+            }
+        }
+        return overallBoardChanged;
+    }
+    
+    function transposeBoard(matrix) {
+        try {
+            if (!matrix || matrix.length !== gridSize || !matrix[0] || matrix[0].length !== gridSize) {
+                console.error("Error in transposeBoard: Invalid matrix received", JSON.parse(JSON.stringify(matrix)));
+                const fallbackMatrix = [];
+                for(let r_fallback=0; r_fallback<gridSize; r_fallback++) fallbackMatrix.push(new Array(gridSize).fill(null));
+                return fallbackMatrix; 
+            }
+            const newMatrix = matrix[0].map((col, i) => matrix.map(row => row[i]));
+            return newMatrix;
+        } catch (e) {
+            console.error("ERROR in transposeBoard (catch):", e, "Matrix was:", JSON.parse(JSON.stringify(matrix)));
+            const fallbackMatrix = [];
+            for(let r_fallback=0; r_fallback<gridSize; r_fallback++) fallbackMatrix.push(new Array(gridSize).fill(null));
+            return fallbackMatrix; 
+        }
+    }
+
+    function moveTilesUp() { 
+        prepareTilesForMove();
+        let overallBoardChanged = false;
+        let tempLogicalBoard = transposeBoard(board);
+        for (let r = 0; r < gridSize; r++) { 
+            const { processedRow: newColAsRow, rowChanged } = processRowAndMerge([...tempLogicalBoard[r]]);
+            if (rowChanged) {
+                overallBoardChanged = true;
+                for(let c=0; c < gridSize; c++) { 
+                    tempLogicalBoard[r][c] = newColAsRow[c];
+                }
+            }
+        }
+        if (overallBoardChanged) {
+            board = transposeBoard(tempLogicalBoard);
+            for(let r_final=0; r_final<gridSize; r_final++) {
+                for(let c_final=0; c_final<gridSize; c_final++) {
+                    if(board[r_final][c_final]) {
+                        board[r_final][c_final].updatePosition({r:r_final, c:c_final});
+                    }
+                }
+            }
+        }
+        return overallBoardChanged;
+    }
+
+    function moveTilesDown() { 
+        prepareTilesForMove();
+        let overallBoardChanged = false;
+        let tempLogicalBoard = transposeBoard(board);
+        for (let r = 0; r < gridSize; r++) { 
+            const originalColAsRow = [...tempLogicalBoard[r]];
+            const reversedColAsRow = originalColAsRow.reverse();
+            const { processedRow: processedReversedCol, rowChanged } = processRowAndMerge(reversedColAsRow);
+            if (rowChanged) {
+                overallBoardChanged = true;
+                const finalNewCol = processedReversedCol.reverse();
+                for (let c = 0; c < gridSize; c++) { 
+                    tempLogicalBoard[r][c] = finalNewCol[c];
+                }
+            }
+        }
+        if (overallBoardChanged) {
+            board = transposeBoard(tempLogicalBoard);
+            for(let r_final=0; r_final<gridSize; r_final++) {
+                for(let c_final=0; c_final<gridSize; c_final++) {
+                    if(board[r_final][c_final]) {
+                        board[r_final][c_final].updatePosition({r:r_final, c:c_final});
+                    }
+                }
+            }
+        }
+        return overallBoardChanged;
+    }
 
     // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
-    function checkWinCondition() { /* ... (Keep the version from response #57) ... */ }
-    function showWinMessage() { /* ... (Keep the version from response #57) ... */ }
-    function canAnyTileMove() { /* ... (Keep the version from response #57) ... */ }
-    function checkGameOver() { /* ... (Keep the version from response #57) ... */ } 
-    function endGame() { /* ... (Keep the version from response #57) ... */ }
+    function checkWinCondition() {if (hasWon) return false; for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize;c++){if(board[r][c] && board[r][c].value === targetTileValue){return true;}}}return false;}
+    function showWinMessage() {hasWon=true;if(youWinMessageElement)youWinMessageElement.classList.remove('hidden'); /* console.log("WIN: You Win message shown"); */}
+    function canAnyTileMove() {if(getEmptyCells().length>0)return true;for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize-1;c++){if(board[r][c]&&board[r][c+1]&&board[r][c].value===board[r][c+1].value)return true;}}for(let c=0;c<gridSize;c++){for(let r=0;r<gridSize-1;r++){if(board[r][c]&&board[r+1][c]&&board[r][c].value===board[r+1][c].value)return true;}}return false;}
+    function checkGameOver() {if(!canAnyTileMove()){/* console.log("GAMEOVER_CHECK: No moves possible."); */ return true;}return false;} 
+    function endGame() {isGameOver=true;if(finalScoreElement)finalScoreElement.textContent=score;if(gameOverMessageElement)gameOverMessageElement.classList.remove('hidden'); /* console.log("GAMEOVER: Game Over message shown. Final Score:",score); */}
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
-    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; console.log("Keep playing selected.");});
+    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; /* console.log("Keep playing selected."); */});
     if (newGameFromWinButton) newGameFromWinButton.addEventListener('click', startGame);
     
     window.addEventListener('resize', () => {
-        console.log("Window resized event triggered. Recalculating dimensions.");
+        // console.log("Window resized event triggered.");
         requestAnimationFrame(() => { 
+            // console.log("RESIZE_RAF: Recalculating dimensions and actuating.");
             calculateDimensions();
             actuate(); 
         });
     });
 
-    startGame(); 
+    // --- Initial Game Start ---
+    if (gameBoardElement) {
+        startGame(); 
+    } else {
+        console.error("!!! CRITICAL: gameBoardElement is null AT SCRIPT END. Game cannot start.");
+    }
 });
