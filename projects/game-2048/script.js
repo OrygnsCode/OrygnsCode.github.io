@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const youWinMessageElement = document.getElementById('you-win-message');
     const keepPlayingButton = document.getElementById('keep-playing-button');
     const newGameFromWinButton = document.getElementById('new-game-from-win-button');
-    // NEW: High Score DOM Elements
     const highScoreDisplayElement = document.getElementById('high-score'); 
     const gameOverHighScoreElement = document.getElementById('game-over-high-score'); 
 
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetTileValue = 2048;
     let board = [];
     let score = 0;
-    let highScore = 0; // NEW: Variable to store high score
+    let highScore = 0; 
     let isGameOver = false;
     let hasWon = false;
     let tileIdCounter = 1;
@@ -36,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let newlyAddedTileInfo = null;
 
     // --- LocalStorage Key for High Score ---
-    const HIGH_SCORE_KEY = '2048-orygnscode-highScore'; // Made key more unique
+    const HIGH_SCORE_KEY = '2048-orygnscode-highScore';
 
     // --- Tile Object Definition ---
     function Tile(position, value) {
@@ -66,8 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDimensions() {
         if (!gameBoardElement) {
             console.error("!!! calculateDimensions: gameBoardElement not found!");
-            cellSize = 80; cellGapFromCSS = 10; firstCellOffsetX = 10; firstCellOffsetY = 10;
-            return;
+            cellSize = 80; cellGapFromCSS = 10; firstCellOffsetX = 10; firstCellOffsetY = 10; return;
         }
         const firstBgCell = gameBoardElement.querySelector('.grid-cell');
         if (!firstBgCell) {
@@ -80,10 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
             cellSize = (boardClientWidthFallback - (gridSize - 1) * cellGapFromCSS) / gridSize;
             firstCellOffsetX = parseFloat(boardStyleFallback.paddingLeft) || cellGapFromCSS; 
             firstCellOffsetY = parseFloat(boardStyleFallback.paddingTop) || cellGapFromCSS;  
+            // console.warn("Using fallback dimension calculations due to missing .grid-cell.");
         } else {
             const boardStyle = getComputedStyle(gameBoardElement);
             let computedGap = parseFloat(boardStyle.gap);
             if (isNaN(computedGap) || computedGap < 0) {
+                // console.warn("Could not parse 'gap' from CSS or invalid. Using fallback.");
                 const vminValue = Math.min(window.innerWidth, window.innerHeight) / 100;
                 computedGap = Math.max(5, Math.min(2 * vminValue, 12));
             }
@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             firstCellOffsetX = firstBgCell.offsetLeft;
             firstCellOffsetY = firstBgCell.offsetTop;
         }
+        // console.log(`DIMENSIONS: OffsetX=${firstCellOffsetX}px, OffsetY=${firstCellOffsetY}px, Gap=${cellGapFromCSS}px, CellSize=${cellSize}px`);
         if (isNaN(cellSize) || cellSize <= 0) {cellSize = 80; }
         if (isNaN(firstCellOffsetX)) { firstCellOffsetX = 10; }
         if (isNaN(firstCellOffsetY)) { firstCellOffsetY = 10; }
@@ -115,8 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;
         tileIdCounter = 1; 
         
-        loadHighScore(); // Load high score
-        updateScoreDisplay(); // Display current score and loaded high score
+        console.log("INIT: Calling loadHighScore...");
+        loadHighScore(); 
+        console.log("INIT: Calling updateScoreDisplay...");
+        updateScoreDisplay(); 
 
         if (typeof tileElements === 'object' && tileElements !== null) {
             Object.values(tileElements).forEach(el => { if(el && typeof el.remove === 'function') el.remove(); });
@@ -130,23 +133,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { console.error("INIT: gameBoardElement is null!"); return; }
         
         requestAnimationFrame(() => {
+            console.log("INIT_RAF: Starting main setup...");
             calculateDimensions();  
             initializeBoardArray(); 
             addStartTiles();        
             actuate();              
-
             if (gameOverMessageElement) gameOverMessageElement.classList.add('hidden');
             if (youWinMessageElement) youWinMessageElement.classList.add('hidden');
+            console.log("INIT_RAF: Game setup complete.");
         });
     }
 
     // --- 2. RENDERING / ACTUATION ---
     function actuate() {
-        updateScoreDisplay(); // Updates both score and high score in header
+        updateScoreDisplay();
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 const tile = board[r][c];
-                if (tile) { tile.mergedFrom = null; tile.savePosition(); /* Save position before potential move */ }
+                if (tile) { tile.mergedFrom = null; tile.savePosition(); }
             }
         }
 
@@ -160,25 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!tileElement) { 
                         tileElement = document.createElement('div');
                         tileElement.classList.add('tile');
-                        // For new tiles, position them at their spawn spot.
-                        // If it was a moved tile whose DOM was missing, it's recreated at its new spot.
+                        tileElement.style.width = `${cellSize}px`;
+                        tileElement.style.height = `${cellSize}px`;
                         tileElement.style.left = `${firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS)}px`;
                         tileElement.style.top = `${firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS)}px`;
                         gameBoardElement.appendChild(tileElement);
                         tileElements[logicalTile.id] = tileElement;
                     }
-                    tileElement.style.width = `${cellSize}px`;
-                    tileElement.style.height = `${cellSize}px`;
                     tileElement.textContent = logicalTile.value;
                     tileElement.className = 'tile'; 
                     tileElement.classList.add(`tile-${logicalTile.value}`);
                     if (logicalTile.value > 2048) tileElement.classList.add('tile-super');
 
-                    // Apply animations / final state
                     if (logicalTile.justAppeared) {
                         tileElement.classList.add('tile-new'); 
-                        tileElement.style.left = `${firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS)}px`;
-                        tileElement.style.top = `${firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS)}px`;
                         requestAnimationFrame(() => {
                            tileElement.style.transform = 'scale(1)';
                            tileElement.style.opacity = '1';
@@ -190,16 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         logicalTile.wasMergedThisTurn = false;
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
-                    } else { // For tiles that just moved (not new, not merged)
+                    } else {
                         tileElement.style.transform = 'scale(1)';
                         tileElement.style.opacity = '1';
                     }
-                    
-                    // Update position for sliding (CSS transition will make it slide)
                     const targetLeft = firstCellOffsetX + logicalTile.c * (cellSize + cellGapFromCSS);
                     const targetTop = firstCellOffsetY + logicalTile.r * (cellSize + cellGapFromCSS);
-                    
-                    // If tile's current DOM position is different from its logical new position, update.
                     if (tileElement.style.left !== `${targetLeft}px` || tileElement.style.top !== `${targetTop}px`) {
                          requestAnimationFrame(()=>{ 
                            tileElement.style.left = `${targetLeft}px`;
@@ -221,7 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateScoreDisplay() { 
         if (scoreElement) scoreElement.textContent = score;
-        if (highScoreDisplayElement) highScoreDisplayElement.textContent = highScore; // Update high score in header
+        if (highScoreDisplayElement) {
+            highScoreDisplayElement.textContent = highScore; 
+            // console.log("DISPLAY_HS: Header high score updated to:", highScore); // Can be verbose
+        }
     }
 
     // --- 3. ADDING RANDOM TILES ---
@@ -253,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (boardChanged === true) {
             addRandomTile(); 
             actuate();   
-            checkAndUpdateHighScore(); // NEW
+            checkAndUpdateHighScore(); 
             if (!hasWon && checkWinCondition()) { showWinMessage(); return; }
             if (!hasWon && checkGameOver()) { endGame(); }
         }
@@ -472,61 +470,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- NEW: HIGH SCORE LOGIC ---
     function loadHighScore() {
+        console.log("HS_LOGIC: Attempting to load high score...");
         try {
             const storedHighScore = localStorage.getItem(HIGH_SCORE_KEY);
-            if (storedHighScore !== null && !isNaN(parseInt(storedHighScore, 10))) {
-                highScore = parseInt(storedHighScore, 10);
+            // console.log("HS_LOGIC: Stored high score string from localStorage:", storedHighScore);
+            if (storedHighScore !== null) {
+                const parsedScore = parseInt(storedHighScore, 10);
+                if (!isNaN(parsedScore)) {
+                    highScore = parsedScore;
+                } else {
+                    // console.warn("HS_LOGIC: Stored high score is not a number. Resetting to 0.");
+                    highScore = 0;
+                }
             } else {
-                highScore = 0;
+                highScore = 0; 
             }
         } catch (e) {
-            console.error("Error loading high score from localStorage:", e);
-            highScore = 0;
+            console.error("HS_LOGIC: Error loading high score from localStorage:", e);
+            highScore = 0; 
         }
-        console.log("High score loaded:", highScore);
-        if (highScoreDisplayElement) highScoreDisplayElement.textContent = highScore;
+        console.log("HS_LOGIC: High score variable set to:", highScore);
     }
 
     function saveHighScore() {
+        // console.log("HS_LOGIC: Attempting to save high score:", highScore);
         try {
             localStorage.setItem(HIGH_SCORE_KEY, highScore.toString());
-            console.log("High score saved:", highScore);
+            // console.log("HS_LOGIC: High score successfully saved to localStorage.");
         } catch (e) {
-            console.error("Error saving high score to localStorage:", e);
+            console.error("HS_LOGIC: Error saving high score to localStorage:", e);
         }
     }
 
     function checkAndUpdateHighScore() {
+        // console.log(`HS_LOGIC: Checking to update high score. Current score: ${score}, Current highScore: ${highScore}`);
         if (score > highScore) {
             highScore = score;
-            saveHighScore(); // Save immediately when a new high score is set
-            if (highScoreDisplayElement) highScoreDisplayElement.textContent = highScore; 
-            console.log("New high score achieved:", highScore);
+            // console.log("HS_LOGIC: New high score! Value:", highScore);
+            saveHighScore(); 
+            updateScoreDisplay(); 
         }
     }
 
     // --- 6. GAME STATE LOGIC (WIN/GAME OVER) ---
     function checkWinCondition() {if (hasWon) return false; for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize;c++){if(board[r][c] && board[r][c].value === targetTileValue){return true;}}}return false;}
-    function showWinMessage() {hasWon=true; checkAndUpdateHighScore(); if(youWinMessageElement){youWinMessageElement.classList.remove('hidden'); /* youWinMessageElement.querySelector('p').textContent = `You reached ${targetTileValue}! Score: ${score}`; */ } console.log("WIN: You Win message shown");}
+    function showWinMessage() {hasWon=true; checkAndUpdateHighScore(); if(youWinMessageElement){youWinMessageElement.classList.remove('hidden');} /* console.log("WIN: You Win message shown"); */}
     function canAnyTileMove() {if(getEmptyCells().length>0)return true;for(let r=0;r<gridSize;r++){for(let c=0;c<gridSize-1;c++){if(board[r][c]&&board[r][c+1]&&board[r][c].value===board[r][c+1].value)return true;}}for(let c=0;c<gridSize;c++){for(let r=0;r<gridSize-1;r++){if(board[r][c]&&board[r+1][c]&&board[r][c].value===board[r+1][c].value)return true;}}return false;}
     function checkGameOver() {if(!canAnyTileMove()){return true;}return false;} 
     function endGame() {
         isGameOver=true; 
-        checkAndUpdateHighScore(); // Final check and save if new high score
+        checkAndUpdateHighScore(); 
         if(finalScoreElement)finalScoreElement.textContent=score;
-        if(gameOverHighScoreElement) gameOverHighScoreElement.textContent = highScore; // Display high score on game over
+        if(gameOverHighScoreElement) gameOverHighScoreElement.textContent = highScore; 
         if(gameOverMessageElement)gameOverMessageElement.classList.remove('hidden');
-        console.log("GAMEOVER: Game Over message shown. Final Score:",score, "High Score:", highScore);
+        // console.log("GAMEOVER: Game Over message shown. Final Score:",score, "High Score:", highScore);
     }
 
     // --- Event Listeners for Buttons ---
     if (newGameButton) newGameButton.addEventListener('click', startGame);
     if (tryAgainButton) tryAgainButton.addEventListener('click', startGame);
-    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; console.log("Keep playing selected.");});
+    if (keepPlayingButton) keepPlayingButton.addEventListener('click', () => {if(youWinMessageElement)youWinMessageElement.classList.add('hidden');isGameOver=false; hasWon=true; /* console.log("Keep playing selected."); */});
     if (newGameFromWinButton) newGameFromWinButton.addEventListener('click', startGame);
     
     window.addEventListener('resize', () => {
+        // console.log("Window resized event triggered.");
         requestAnimationFrame(() => { 
+            // console.log("RESIZE_RAF: Recalculating dimensions and actuating.");
             calculateDimensions();
             actuate(); 
         });
