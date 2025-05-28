@@ -22,6 +22,16 @@ const renderer = new THREE.WebGLRenderer({ antialias: true }); // antialias for 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement); // Append canvas to the body
 
+// Skybox setup
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+cubeTextureLoader.setPath('assets/textures/skybox/'); // Path to the skybox directory
+const skyboxTexture = cubeTextureLoader.load([
+    'skybox_px.jpg', 'skybox_nx.jpg',
+    'skybox_py.jpg', 'skybox_ny.jpg',
+    'skybox_pz.jpg', 'skybox_nz.jpg'
+]);
+scene.background = skyboxTexture;
+
 // 4. Car Model and Ground Plane
 // Comment out or remove car placeholder
 // const carGeometry = new THREE.BoxGeometry(2, 0.8, 4); 
@@ -83,7 +93,9 @@ loader.load(
             mass: 1500, // Mass in kg (adjust as needed)
             position: initialCarPosition,
             material: carPhysMaterial,
-            shape: carShape
+            shape: carShape,
+            linearDamping: 0.2, // Added linear damping
+            angularDamping: 0.2 // Added angular damping
         });
         // Initial quaternion can be set from carModel if it has an initial rotation
         // carPhysBody.quaternion.copy(carModel.quaternion); // if carModel has specific initial rotation
@@ -92,13 +104,8 @@ loader.load(
         // Store the physics body, perhaps on the carModel object itself for easy access
         carModel.userData.physicsBody = carPhysBody; // Optional, but good practice
 
-        // Define contact material between car and ground AFTER carPhysMaterial is defined
-        const carGroundContactMaterial = new CANNON.ContactMaterial(carPhysMaterial, groundPhysMaterial, {
-            friction: 0.3, // Adjust friction
-            restitution: 0.2 // Adjust bounce (0 is no bounce)
-        });
-        world.addContactMaterial(carGroundContactMaterial);
-
+        // Define contact material between car and track AFTER both materials are available
+        // This will be handled in the track loader's callback
     },
     function (xhr) {
         // Called while loading is progressing
@@ -110,29 +117,87 @@ loader.load(
     }
 );
 
-// Create ground plane (visual)
-const groundGeometry = new THREE.PlaneGeometry(100, 100); // width, height
-const groundThreeMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide }); // Grey color, double side to be visible from below too
-const ground = new THREE.Mesh(groundGeometry, groundThreeMaterial);
-scene.add(ground);
+// Track model loading
+let trackModel;
+loader.load('assets/models/track.glb', function (gltf) {
+    trackModel = gltf.scene;
+    // Adjust scale, position, and rotation as needed
+    trackModel.scale.set(10, 10, 10); // Scale up the track
+    trackModel.position.set(0, -0.5, 0); // Adjust Y to place it correctly, assuming car starts at y > 0
+    // trackModel.rotation.set(0, 0, 0); // Adjust rotation if necessary
+    scene.add(trackModel);
 
-// Position and rotate the visual ground
-ground.rotation.x = -Math.PI / 2; // Rotate to be horizontal
-ground.position.y = -0.4; // Position it to match the physics ground body
+    // It's good practice to traverse the model and enable shadows if needed
+    trackModel.traverse(function (node) {
+        if (node.isMesh) {
+            node.receiveShadow = true;
+            // node.castShadow = true; // Enable if track parts should cast shadows
+        }
+    });
 
-// Physics for ground
-const groundPhysMaterial = new CANNON.Material('groundMaterial'); // Defined earlier for carGroundContactMaterial
-const groundBody = new CANNON.Body({
-    mass: 0, // mass = 0 makes the body static
-    material: groundPhysMaterial,
-    shape: new CANNON.Plane()
+    const trackPhysMaterial = new CANNON.Material('trackMaterial');
+
+    trackModel.traverse(function (node) {
+        if (node.isMesh) {
+            node.receiveShadow = true;
+            // node.castShadow = true; // Enable if track parts should cast shadows
+
+            const geometry = node.geometry;
+            if (geometry.attributes.position && geometry.index) {
+                const vertices = geometry.attributes.position.array;
+                const indices = geometry.index.array;
+
+                // Scale vertices manually
+                const scaledVertices = new Float32Array(vertices.length);
+                const scaleFactor = trackModel.scale; // THREE.Vector3(10, 10, 10)
+                for (let i = 0; i < vertices.length; i += 3) {
+                    scaledVertices[i] = vertices[i] * scaleFactor.x;
+                    scaledVertices[i + 1] = vertices[i + 1] * scaleFactor.y;
+                    scaledVertices[i + 2] = vertices[i + 2] * scaleFactor.z;
+                }
+
+                const trackShape = new CANNON.Trimesh(scaledVertices, indices);
+                const trackPhysBody = new CANNON.Body({
+                    mass: 0, // Static body
+                    material: trackPhysMaterial,
+                    shape: trackShape
+                });
+
+                // Set position and rotation for the physics body to match the visual model
+                // The Trimesh vertices are already scaled, so the body's position should be the visual model's position.
+                trackPhysBody.position.copy(trackModel.position); 
+                trackPhysBody.quaternion.copy(trackModel.quaternion); // Apply visual model's rotation if any
+
+                world.addBody(trackPhysBody);
+            }
+        }
+    });
+    
+    // After track model physics are set up, define contact material
+    // Ensure carPhysBody and its material are available
+    if (carPhysBody && carPhysBody.material) {
+        const carPhysMaterial = carPhysBody.material;
+        const carTrackContactMaterial = new CANNON.ContactMaterial(
+            carPhysMaterial,
+            trackPhysMaterial,
+            {
+                friction: 0.7, // Adjusted friction for track
+                restitution: 0.05, // Adjusted restitution for track
+            }
+        );
+        world.addContactMaterial(carTrackContactMaterial);
+        console.log("Car-Track contact material created.");
+    } else {
+        console.warn("Car physics material not available when track loaded. Contact material not created yet.");
+        // Potentially, set a flag or retry creating contact material once car is also loaded.
+        // For simplicity, this example assumes car might load first or at a similar time.
+    }
+
+}, undefined, function (error) {
+    console.error('An error happened while loading the track model:', error);
 });
-// Rotate the physics plane to match the Three.js visual plane
-groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-// Position it to match the Three.js visual ground
-groundBody.position.y = -0.4;
-world.addBody(groundBody);
 
+// Physics for ground (REMOVED - replaced by track physics)
 
 // 5. Handle window resizing
 window.addEventListener('resize', () => {
