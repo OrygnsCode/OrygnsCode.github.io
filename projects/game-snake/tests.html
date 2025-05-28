@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Unit Tests</title>
+    <link rel="stylesheet" href="style.css"> <!-- Optional: for minimal styling of results -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #test-results { border: 1px solid #ccc; padding: 10px; }
+        .test-suite { margin-bottom: 15px; }
+        .suite-name { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; }
+        .test-case { margin-left: 20px; margin-bottom: 3px; }
+        .passed { color: green; }
+        .failed { color: red; font-weight: bold; }
+        pre { background-color: #f0f0f0; padding: 5px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Snake Game - Unit Tests</h1>
+    
+    <!-- Mock HTML elements required by script.js, even if not visible -->
+    <div style="display: none;">
+        <canvas id="gameCanvas"></canvas>
+        <button id="startButton">Start Game</button>
+        <span id="scoreDisplay">0</span>
+    </div>
+
+    <div id="test-results">
+        <p>Running tests...</p>
+    </div>
+
+    <!-- IMPORTANT: Load the game script BEFORE the test script -->
+    <script src="script.js"></script>
+    <script src="tests.js"></script>
+</body>
+</html>
