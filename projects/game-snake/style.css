@@ -1,0 +1,92 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#gameCanvas {
+    border: 5px solid #333;
+    background-color: #fff; /* Canvas background, though script.js also clears it */
+    margin-bottom: 20px;
+    display: block; /* Prevents extra space below canvas */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.controls {
+    margin-bottom: 15px;
+}
+
+#startButton {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#startButton:hover {
+    background-color: #45a049;
+}
+
+#startButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.score-container {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#scoreDisplay {
+    font-weight: bold;
+    color: #d9534f; /* Reddish color for score */
+}
+
+.back-button-container {
+    margin-top: 25px;
+}
+
+/* Styling for "Back to OrygnsCode Home" button, consistent with game-2048 */
+.back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #8f7a66; /* From game-2048 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: #776e65; /* Darker shade from game-2048 */
+    color: white;
+}
