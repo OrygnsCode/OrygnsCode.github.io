@@ -1,4 +1,5 @@
-# OrygnsCode.github.io
-My personal website for projects and random creations.
+OrygnsCode.github.io
 
-Go to https://orygnscode.github.io/index.html to access it! :D
+Practicing building and deploying code using 100% AI assistance—powered by Jules and streamlined through GitHub.
+
+Visit the project: https://orygnscode.github.io/index.html 😄
