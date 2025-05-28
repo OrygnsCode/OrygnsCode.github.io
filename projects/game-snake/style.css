@@ -90,3 +90,125 @@ h1 {
     background-color: #776e65; /* Darker shade from game-2048 */
     color: white;
 }
+
+/* --- On-Screen Controls --- */
+.controls-container { /* Renamed from #onScreenControls for consistency, can apply to multiple groups if needed */
+    display: none; /* Hidden by default, shown in media query */
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.dpad-middle-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px; /* Space between up button and middle row */
+}
+
+.control-button {
+    background-color: #555;
+    color: white;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1.5em; /* Larger for touch */
+    min-width: 50px; /* Ensure decent tap target */
+    min-height: 50px;
+    cursor: pointer;
+    margin: 3px; /* Small margin between buttons */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none; /* Prevent text selection on tap */
+    transition: background-color 0.2s ease;
+}
+
+.control-button:hover, .control-button:active {
+    background-color: #777;
+}
+
+/* Specific button positioning if needed (mostly handled by flex) */
+/* #btnUp {} */
+/* #btnLeft {} */
+/* #btnDown {} */
+/* #btnRight {} */
+
+
+/* --- Responsive Design --- */
+@media (max-width: 600px) {
+    body {
+        padding: 10px; /* Reduce body padding on small screens */
+    }
+
+    .container {
+        padding: 15px; /* Reduce container padding */
+        width: 100%; /* Allow container to take full width */
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-size: 1.8em; /* Slightly smaller h1 */
+        margin-bottom: 15px;
+    }
+
+    #gameCanvas {
+        width: 90vw; /* Make canvas responsive, take most of screen width */
+        height: 90vw; /* Maintain square aspect ratio */
+        max-width: 400px; /* Optional: cap max size if 90vw becomes too large on some "mobile" views */
+        max-height: 400px;
+        border-width: 3px; /* Slightly thinner border */
+        margin-bottom: 15px;
+    }
+
+    #startButton {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    
+    .controls-container { /* This is #onScreenControls */
+        display: flex; /* Show on-screen controls on mobile */
+    }
+
+    .control-button {
+        font-size: 1.3em; /* Adjust font size for smaller buttons if needed */
+        min-width: 55px; /* Ensure good touch target */
+        min-height: 55px;
+        padding: 8px;
+    }
+    /* Example: Make middle button (Down) slightly wider for D-pad feel */
+    .dpad-middle-row #btnDown {
+        /* min-width: 60px; */ 
+    }
+
+
+    .score-container {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+    }
+
+    .back-button-container {
+        margin-top: 20px;
+    }
+
+    .back-button {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+}
+
+/* For very small screens, further adjustments if needed */
+@media (max-width: 360px) {
+    h1 {
+        font-size: 1.5em;
+    }
+    .control-button {
+        font-size: 1.2em;
+        min-width: 45px;
+        min-height: 45px;
+    }
+    #gameCanvas {
+        width: 95vw;
+        height: 95vw;
+    }
+}

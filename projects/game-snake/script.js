@@ -5,6 +5,7 @@ const GAME_UPDATE_INTERVAL = 120; // Milliseconds between snake moves (tune for 
 
 // --- DOM Elements ---
 let canvas, ctx, startButton, scoreDisplay;
+let btnUp, btnDown, btnLeft, btnRight; // On-screen control buttons
 
 // --- Game State Variables ---
 let snake;
@@ -386,18 +387,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ctx) ctx = canvas.getContext('2d');
     if (!startButton) startButton = document.getElementById('startButton');
     if (!scoreDisplay) scoreDisplay = document.getElementById('scoreDisplay');
+    
+    // Get on-screen control buttons
+    btnUp = document.getElementById('btnUp');
+    btnDown = document.getElementById('btnDown');
+    btnLeft = document.getElementById('btnLeft');
+    btnRight = document.getElementById('btnRight');
 
     if (!canvas.width) canvas.width = CANVAS_SIZE; // Ensure canvas dimensions are set
     if (!canvas.height) canvas.height = CANVAS_SIZE;
 
+    // Event listener for the main start button
     startButton.addEventListener('click', () => {
         startButton.disabled = true; // Disable button while game is active
         initGame();
     });
+
+    // Event listener for keyboard controls
     document.addEventListener('keydown', changeDirection);
+
+    // Event listeners for on-screen controls
+    if (btnUp) {
+        btnUp.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection({ key: 'ArrowUp' }); });
+        btnUp.addEventListener('click', () => { changeDirection({ key: 'ArrowUp' }); });
+    }
+    if (btnDown) {
+        btnDown.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection({ key: 'ArrowDown' }); });
+        btnDown.addEventListener('click', () => { changeDirection({ key: 'ArrowDown' }); });
+    }
+    if (btnLeft) {
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection({ key: 'ArrowLeft' }); });
+        btnLeft.addEventListener('click', () => { changeDirection({ key: 'ArrowLeft' }); });
+    }
+    if (btnRight) {
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); changeDirection({ key: 'ArrowRight' }); });
+        btnRight.addEventListener('click', () => { changeDirection({ key: 'ArrowRight' }); });
+    }
 
     showInitialMessage(); // Show initial message after everything is set up
 });
-// Removed: showInitialMessage(); // This was called before DOMContentLoaded could guarantee elements were ready.
-// It's now called at the end of DOMContentLoaded and also initially where global vars are defined.
-// For safety, ensuring it's called *after* ctx is defined is best. The DOMContentLoaded call is sufficient.
