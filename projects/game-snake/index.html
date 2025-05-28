@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Snake Game</h1>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="controls">
+            <button id="startButton">Start Game</button>
+        </div>
+
+        <div id="onScreenControls" class="controls-container">
+            <button id="btnUp" class="control-button">↑</button>
+            <div class="dpad-middle-row">
+                <button id="btnLeft" class="control-button">←</button>
+                <button id="btnDown" class="control-button">↓</button>
+                <button id="btnRight" class="control-button">→</button>
+            </div>
+        </div>
+
+        <div class="score-container">
+            Score: <span id="scoreDisplay">0</span>
+        </div>
+        <div class="back-button-container">
+            <a href="../../index.html" class="back-button">Back to OrygnsCode Home</a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
