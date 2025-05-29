@@ -599,7 +599,9 @@ function Character() {
 	  * Handles character activity when the up key is pressed.
 	  */
 	this.onUpKeyPressed = function() {
-		self.queuedActions.push("up");
+		if (!self.isJumping) {
+			self.queuedActions.push("up");
+		}
 	}
 
 	/**
