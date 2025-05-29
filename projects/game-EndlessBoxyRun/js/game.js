@@ -53,7 +53,8 @@ function World() {
 	// Scoped variables in this world.
 	var element, scene, camera, character, renderer, light,
 		objects, paused, keysAllowed, score, difficulty,
-		treePresenceProb, maxTreeSize, fogDistance, gameOver;
+		treePresenceProb, maxTreeSize, fogDistance, gameOver,
+		touchStartX, touchStartY, swipeThreshold; // Added for touch controls
 
 	// Initialize the world.
 	init();
@@ -170,6 +171,68 @@ function World() {
 				keysAllowed = {};
 			}
 		);
+
+		// Initialize touch variables
+		touchStartX = 0;
+		touchStartY = 0;
+		swipeThreshold = 50; // pixels - adjust as needed
+
+		// Add touch event listeners
+		element.addEventListener('touchstart', function(event) {
+			// if (!paused) { // Only process if game is active - original thought, but might prevent tap to start
+			// Consider preventDefault here, but might interfere with initial pause/unpause or other UI elements if any
+			// For now, let's handle preventDefault on touchend/touchmove for game actions
+			// }
+			touchStartX = event.touches[0].clientX;
+			touchStartY = event.touches[0].clientY;
+		}, false);
+
+		element.addEventListener('touchend', function(event) {
+			if (gameOver) return; // Don't process if game is over
+
+			var touchEndX = event.changedTouches[0].clientX;
+			var touchEndY = event.changedTouches[0].clientY;
+
+			var deltaX = touchEndX - touchStartX;
+			var deltaY = touchEndY - touchStartY;
+
+			var absDeltaX = Math.abs(deltaX);
+			var absDeltaY = Math.abs(deltaY);
+
+			if (paused && !collisionsDetected() && absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap and game is paused
+				paused = false;
+				character.onUnpause();
+				document.getElementById("variable-content").style.visibility = "hidden";
+				document.getElementById("controls").style.display = "none";
+				event.preventDefault(); // Prevent any other action like text selection
+				return; // Tap processed, exit
+			}
+			
+			if (!paused) { // Only process swipes if game is active
+				if (absDeltaY > swipeThreshold || absDeltaX > swipeThreshold) { // Check if it's a swipe
+					if (absDeltaY > absDeltaX) { // Primarily vertical swipe
+						if (deltaY < -swipeThreshold) { // Swipe Up
+							character.onUpKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						}
+					} else { // Primarily horizontal swipe
+						if (deltaX < -swipeThreshold) { // Swipe Left
+							character.onLeftKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						} else if (deltaX > swipeThreshold) { // Swipe Right
+							character.onRightKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						}
+					}
+				}
+			}
+		}, false);
+
+		element.addEventListener('touchmove', function(event) {
+			if (!paused && !gameOver) { // Only prevent default if game is active and not over
+				event.preventDefault(); // Prevent scrolling during active touch
+			}
+		}, { passive: false }); // passive: false is important for preventDefault to work in touchmove
 
 		// Initialize the scores and difficulty.
 		score = 0;
@@ -501,32 +564,35 @@ function Character() {
 		// Obtain the curren time for future calculations.
 		var currentTime = new Date() / 1000;
 
-		// Apply actions to the character if none are currently being
-		// carried out.
-		if (!self.isJumping &&
-			!self.isSwitchingLeft &&
-			!self.isSwitchingRight &&
-			self.queuedActions.length > 0) {
-			switch(self.queuedActions.shift()) {
-				case "up":
-					self.isJumping = true;
-					self.jumpStartTime = new Date() / 1000;
-					break;
-				case "left":
-					if (self.currentLane != -1) {
-						self.isSwitchingLeft = true;
-					}
-					break;
-				case "right":
-					if (self.currentLane != 1) {
-						self.isSwitchingRight = true;
-					}
-					break;
+		// Obtain the curren time for future calculations.
+		var currentTime = new Date() / 1000;
+
+		// Process jump actions from queue if not already switching lanes
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "up" && !self.isJumping) { // Check if next is "up" and not already jumping
+				self.isJumping = true;
+				self.jumpStartTime = new Date() / 1000;
+				self.queuedActions.shift(); // Remove "up" action
 			}
 		}
 
-		// If the character is jumping, update the height of the character.
-		// Otherwise, the character continues running.
+		// Process movement (left/right) actions from queue
+		// This can happen whether jumping or not, as long as not already switching lanes.
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "left") {
+				if (self.currentLane != -1) {
+					self.isSwitchingLeft = true;
+				}
+				self.queuedActions.shift(); // Remove "left" action
+			} else if (self.queuedActions[0] == "right") {
+				if (self.currentLane != 1) {
+					self.isSwitchingRight = true;
+				}
+				self.queuedActions.shift(); // Remove "right" action
+			}
+		}
+
+		// Update jump state (vertical movement)
 		if (self.isJumping) {
 			var jumpClock = currentTime - self.jumpStartTime;
 			self.element.position.y = self.jumpHeight * Math.sin(
@@ -537,10 +603,11 @@ function Character() {
 				self.isJumping = false;
 				self.runningStartTime += self.jumpDuration;
 			}
-		} else {
+		} else { // Only apply running animations if not jumping
 			var runningClock = currentTime - self.runningStartTime;
 			self.element.position.y = sinusoid(
 				2 * self.stepFreq, 0, 20, 0, runningClock);
+			// ... (all other running animation lines for head, torso, arms, legs)
 			self.head.rotation.x = sinusoid(
 				2 * self.stepFreq, -10, -5, 0, runningClock) * deg2Rad;
 			self.torso.rotation.x = sinusoid(
@@ -561,25 +628,25 @@ function Character() {
 				self.stepFreq, -130, 5, 240, runningClock) * deg2Rad;
 			self.rightLowerLeg.rotation.x = sinusoid(
 				self.stepFreq, -130, 5, 60, runningClock) * deg2Rad;
+		}
 
-			// If the character is not jumping, it may be switching lanes.
-			if (self.isSwitchingLeft) {
-				self.element.position.x -= 200;
-				var offset = self.currentLane * 800 - self.element.position.x;
-				if (offset > 800) {
-					self.currentLane -= 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingLeft = false;
-				}
+		// Update lateral movement (lane switching), can happen during jump or run
+		if (self.isSwitchingLeft) {
+			self.element.position.x -= 200; // Consider adjusting speed if needed
+			var offset = self.currentLane * 800 - self.element.position.x;
+			if (offset > 800) {
+				self.currentLane -= 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingLeft = false;
 			}
-			if (self.isSwitchingRight) {
-				self.element.position.x += 200;
-				var offset = self.element.position.x - self.currentLane * 800;
-				if (offset > 800) {
-					self.currentLane += 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingRight = false;
-				}
+		}
+		if (self.isSwitchingRight) {
+			self.element.position.x += 200; // Consider adjusting speed if needed
+			var offset = self.element.position.x - self.currentLane * 800;
+			if (offset > 800) {
+				self.currentLane += 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingRight = false;
 			}
 		}
 	}
@@ -595,7 +662,9 @@ function Character() {
 	  * Handles character activity when the up key is pressed.
 	  */
 	this.onUpKeyPressed = function() {
-		self.queuedActions.push("up");
+		if (!self.isJumping) {
+			self.queuedActions.push("up");
+		}
 	}
 
 	/**
