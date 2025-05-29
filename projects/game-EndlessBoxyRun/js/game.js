@@ -335,7 +335,7 @@ function World() {
 				paused = true;
     			var variableContent = document.getElementById("variable-content");
     			variableContent.style.visibility = "visible";
-				variableContent.innerHTML = "Game over! Press down arrow or tap screen to try again.";
+				variableContent.innerHTML = "Game over! Press down arrow or refresh your page if you are on mobile to try again!";
 
 				// Define the listener function for restart via down arrow key
 				var restartKeyListener = function(e) {
