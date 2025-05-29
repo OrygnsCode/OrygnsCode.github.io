@@ -214,6 +214,30 @@ h2 {
   }
 }
 
+.back-to-home-container {
+  margin-top: 20px;
+  text-align: center;
+
+  .back-button {
+    display: block;
+    width: 100%;
+    padding: 2px 12px 4px;
+    font-family: inherit; // Will inherit from .sidebar
+    font-size: 24px;
+    border: solid 2px #ccc; // Consider using a variable if one exists for #ccc
+    border-radius: 8px;
+    background-color: rgba(89, 63, 107, 0.7); // #593f6b with transparency
+    color: #fff; // Consider using a variable if one exists for #fff
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    &:hover {
+      background-color: rgba(89, 63, 107, 0.9); // Slightly less transparent
+    }
+  }
+}
+
 @keyframes bounce {
   0% { animation-timing-function: ease-out; transform: translateY(0); }
   30% { animation-timing-function: ease-in; transform: translateY(-40px); }
