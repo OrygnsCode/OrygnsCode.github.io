@@ -501,32 +501,35 @@ function Character() {
 		// Obtain the curren time for future calculations.
 		var currentTime = new Date() / 1000;
 
-		// Apply actions to the character if none are currently being
-		// carried out.
-		if (!self.isJumping &&
-			!self.isSwitchingLeft &&
-			!self.isSwitchingRight &&
-			self.queuedActions.length > 0) {
-			switch(self.queuedActions.shift()) {
-				case "up":
-					self.isJumping = true;
-					self.jumpStartTime = new Date() / 1000;
-					break;
-				case "left":
-					if (self.currentLane != -1) {
-						self.isSwitchingLeft = true;
-					}
-					break;
-				case "right":
-					if (self.currentLane != 1) {
-						self.isSwitchingRight = true;
-					}
-					break;
+		// Obtain the curren time for future calculations.
+		var currentTime = new Date() / 1000;
+
+		// Process jump actions from queue if not already switching lanes
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "up" && !self.isJumping) { // Check if next is "up" and not already jumping
+				self.isJumping = true;
+				self.jumpStartTime = new Date() / 1000;
+				self.queuedActions.shift(); // Remove "up" action
 			}
 		}
 
-		// If the character is jumping, update the height of the character.
-		// Otherwise, the character continues running.
+		// Process movement (left/right) actions from queue
+		// This can happen whether jumping or not, as long as not already switching lanes.
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "left") {
+				if (self.currentLane != -1) {
+					self.isSwitchingLeft = true;
+				}
+				self.queuedActions.shift(); // Remove "left" action
+			} else if (self.queuedActions[0] == "right") {
+				if (self.currentLane != 1) {
+					self.isSwitchingRight = true;
+				}
+				self.queuedActions.shift(); // Remove "right" action
+			}
+		}
+
+		// Update jump state (vertical movement)
 		if (self.isJumping) {
 			var jumpClock = currentTime - self.jumpStartTime;
 			self.element.position.y = self.jumpHeight * Math.sin(
@@ -537,10 +540,11 @@ function Character() {
 				self.isJumping = false;
 				self.runningStartTime += self.jumpDuration;
 			}
-		} else {
+		} else { // Only apply running animations if not jumping
 			var runningClock = currentTime - self.runningStartTime;
 			self.element.position.y = sinusoid(
 				2 * self.stepFreq, 0, 20, 0, runningClock);
+			// ... (all other running animation lines for head, torso, arms, legs)
 			self.head.rotation.x = sinusoid(
 				2 * self.stepFreq, -10, -5, 0, runningClock) * deg2Rad;
 			self.torso.rotation.x = sinusoid(
@@ -561,25 +565,25 @@ function Character() {
 				self.stepFreq, -130, 5, 240, runningClock) * deg2Rad;
 			self.rightLowerLeg.rotation.x = sinusoid(
 				self.stepFreq, -130, 5, 60, runningClock) * deg2Rad;
+		}
 
-			// If the character is not jumping, it may be switching lanes.
-			if (self.isSwitchingLeft) {
-				self.element.position.x -= 200;
-				var offset = self.currentLane * 800 - self.element.position.x;
-				if (offset > 800) {
-					self.currentLane -= 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingLeft = false;
-				}
+		// Update lateral movement (lane switching), can happen during jump or run
+		if (self.isSwitchingLeft) {
+			self.element.position.x -= 200; // Consider adjusting speed if needed
+			var offset = self.currentLane * 800 - self.element.position.x;
+			if (offset > 800) {
+				self.currentLane -= 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingLeft = false;
 			}
-			if (self.isSwitchingRight) {
-				self.element.position.x += 200;
-				var offset = self.element.position.x - self.currentLane * 800;
-				if (offset > 800) {
-					self.currentLane += 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingRight = false;
-				}
+		}
+		if (self.isSwitchingRight) {
+			self.element.position.x += 200; // Consider adjusting speed if needed
+			var offset = self.element.position.x - self.currentLane * 800;
+			if (offset > 800) {
+				self.currentLane += 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingRight = false;
 			}
 		}
 	}
@@ -595,7 +599,9 @@ function Character() {
 	  * Handles character activity when the up key is pressed.
 	  */
 	this.onUpKeyPressed = function() {
-		self.queuedActions.push("up");
+		if (!self.isJumping) {
+			self.queuedActions.push("up");
+		}
 	}
 
 	/**
