@@ -11,38 +11,38 @@
 		<div class="panel">
 			<div class="game-title">
 				<div class="title">Endless Boxy Run</div>
-				<div class="byline">by orygnscode</div>
+				<div class="byline">by <a target="_blank" href="https://github.com/OrygnsCode/OrygnsCode.github.io/">orygnscode</a></div>
 			</div>
 			<div class="stat">
 				<label>Score</label>
 				<p id="score">0</p>
 			</div>
 			<table id="controls">
-			  	<tr>
+			  	<tr class="keyboard-control">
 			    	<td>Up:</td>
 			    	<td>Jump</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="keyboard-control">
 			    	<td>Left:</td>
 			    	<td>Left lane switch</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="keyboard-control">
 			    	<td>Right:</td>
 			    	<td>Right lane switch</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="keyboard-control">
 			    	<td>p:</td>
 			    	<td>Pause</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="swipe-control" style="display:none;">
 			    	<td>Swipe Up:</td>
 			    	<td>Jump</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="swipe-control" style="display:none;">
 			    	<td>Swipe Left:</td>
 			    	<td>Left lane switch</td>
 			  	</tr>
-			  	<tr>
+			  	<tr class="swipe-control" style="display:none;">
 			    	<td>Swipe Right:</td>
 			    	<td>Right lane switch</td>
 			  	</tr>
@@ -56,5 +56,14 @@
 		<div id="world"></div>
 			
 		</div>
+    <div id="mobile-instructions-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box;">
+        <div>
+            <h2 style="margin-bottom: 15px; font-size: 1.8em;">Controls</h2>
+            <p style="font-size: 1.2em; margin-bottom: 8px;">Swipe Up: Jump</p>
+            <p style="font-size: 1.2em; margin-bottom: 8px;">Swipe Left: Move Left</p>
+            <p style="font-size: 1.2em; margin-bottom: 25px;">Swipe Right: Move Right</p>
+            <p style="font-size: 1em; font-style: italic;">(Tap screen to start)</p>
+        </div>
+    </div>
 	</body>
 </html>

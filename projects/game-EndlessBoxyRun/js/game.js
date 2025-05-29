@@ -47,6 +47,8 @@ window.addEventListener('load', function(){
   */
 function World() {
 
+	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+
 	// Explicit binding of this even in changing contexts.
 	var self = this;
 
@@ -54,7 +56,8 @@ function World() {
 	var element, scene, camera, character, renderer, light,
 		objects, paused, keysAllowed, score, difficulty,
 		treePresenceProb, maxTreeSize, fogDistance, gameOver,
-		touchStartX, touchStartY, swipeThreshold; // Added for touch controls
+		touchStartX, touchStartY, swipeThreshold, // Added for touch controls
+		mobileOverlay, variableContent; // Added for mobile instructions overlay
 
 	// Initialize the world.
 	init();
@@ -132,10 +135,18 @@ function World() {
 					if (paused && !collisionsDetected() && key > 18) {
 						paused = false;
 						character.onUnpause();
-						document.getElementById(
-							"variable-content").style.visibility = "hidden";
-						document.getElementById(
-							"controls").style.display = "none";
+						
+						// Hide mobile overlay if it exists and is mobile
+						if (isMobile && mobileOverlay) {
+							mobileOverlay.style.display = 'none';
+						}
+						// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
+						if (variableContent) {
+							variableContent.style.visibility = "hidden";
+						}
+						// Hide controls table
+						document.getElementById("controls").style.display = "none";
+
 					} else {
 						if (key == p) {
 							paused = true;
@@ -199,29 +210,45 @@ function World() {
 			var absDeltaX = Math.abs(deltaX);
 			var absDeltaY = Math.abs(deltaY);
 
-			if (paused && !collisionsDetected() && absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap and game is paused
-				paused = false;
-				character.onUnpause();
-				document.getElementById("variable-content").style.visibility = "hidden";
-				document.getElementById("controls").style.display = "none";
-				event.preventDefault(); // Prevent any other action like text selection
-				return; // Tap processed, exit
-			}
-			
-			if (!paused) { // Only process swipes if game is active
-				if (absDeltaY > swipeThreshold || absDeltaX > swipeThreshold) { // Check if it's a swipe
-					if (absDeltaY > absDeltaX) { // Primarily vertical swipe
-						if (deltaY < -swipeThreshold) { // Swipe Up
-							character.onUpKeyPressed();
-							event.preventDefault(); // Prevent scroll/zoom
-						}
-					} else { // Primarily horizontal swipe
-						if (deltaX < -swipeThreshold) { // Swipe Left
-							character.onLeftKeyPressed();
-							event.preventDefault(); // Prevent scroll/zoom
-						} else if (deltaX > swipeThreshold) { // Swipe Right
-							character.onRightKeyPressed();
-							event.preventDefault(); // Prevent scroll/zoom
+			// Check if it's a tap first
+			if (absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap
+				if (gameOver && isMobile) { // If game is over and on mobile, tap to restart
+					document.location.reload(true);
+					event.preventDefault(); // Prevent any other action
+					return; 
+				} else if (paused && !collisionsDetected() && !gameOver) { // If paused, not game over, tap to start
+					paused = false;
+					character.onUnpause();
+
+					// Hide mobile overlay if it exists and is mobile
+					if (isMobile && mobileOverlay) {
+						mobileOverlay.style.display = 'none';
+					}
+					// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
+					// This might have been hidden by init() on mobile already if overlay was shown.
+					if (variableContent) {
+						variableContent.style.visibility = "hidden";
+					}
+					// Hide controls table
+					document.getElementById("controls").style.display = "none";
+					
+					event.preventDefault(); // Prevent any other action like text selection
+					return; 
+				}
+			} else if (!paused && !gameOver) { // If not a tap, and game is active (not paused and not game over), check for swipes
+				// Only process swipes if game is active and not over, and it wasn't a tap handled above
+				if (absDeltaY > absDeltaX) { // Primarily vertical swipe
+					if (deltaY < -swipeThreshold) { // Swipe Up
+						character.onUpKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
+					}
+				} else { // Primarily horizontal swipe
+					if (deltaX < -swipeThreshold) { // Swipe Left
+						character.onLeftKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
+					} else if (deltaX > swipeThreshold) { // Swipe Right
+						character.onRightKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
 						}
 					}
 				}
@@ -233,6 +260,48 @@ function World() {
 				event.preventDefault(); // Prevent scrolling during active touch
 			}
 		}, { passive: false }); // passive: false is important for preventDefault to work in touchmove
+
+		// Conditionally display controls based on device type
+		var keyboardControls = document.querySelectorAll('.keyboard-control');
+		var swipeControls = document.querySelectorAll('.swipe-control');
+
+		// Assign DOM elements to World-scoped variables
+		mobileOverlay = document.getElementById('mobile-instructions-overlay');
+		variableContent = document.getElementById('variable-content');
+
+		if (isMobile) {
+			if (paused && mobileOverlay) { // Check if paused (initial state)
+				mobileOverlay.style.display = 'flex'; // Show the overlay
+				if (variableContent) {
+					variableContent.style.display = 'none'; // Hide the original "Press any button..."
+				}
+			} else if (mobileOverlay) { // Ensure it's hidden if not initial paused state (e.g. game already started)
+				mobileOverlay.style.display = 'none';
+			}
+			keyboardControls.forEach(function(row) {
+				row.style.display = 'none';
+			});
+			swipeControls.forEach(function(row) {
+				row.style.display = ''; // Resets to default (table-row for <tr>)
+			});
+		} else {
+			keyboardControls.forEach(function(row) {
+				row.style.display = ''; // Resets to default
+			});
+			swipeControls.forEach(function(row) {
+				// Swipe controls are already display:none by default via inline style,
+				// but this explicitly ensures they remain hidden on non-mobile.
+				row.style.display = 'none';
+			});
+		} else { // Not mobile
+			if (mobileOverlay) {
+				mobileOverlay.style.display = 'none'; // Ensure it's hidden on non-mobile
+			}
+			if (variableContent && paused) { // If not mobile and paused, ensure "Press any key" is visible
+				variableContent.style.display = ''; // Reset to default display
+				variableContent.style.visibility = 'visible'; // Explicitly make visible
+			}
+		}
 
 		// Initialize the scores and difficulty.
 		score = 0;
@@ -314,17 +383,27 @@ function World() {
 			if (collisionsDetected()) {
 				gameOver = true;
 				paused = true;
-				document.addEventListener(
-        			'keydown',
-        			function(e) {
-        				if (e.keyCode == 40)
-            			document.location.reload(true);
-        			}
-    			);
     			var variableContent = document.getElementById("variable-content");
     			variableContent.style.visibility = "visible";
-    			variableContent.innerHTML = 
-    				"Game over! Press the down arrow to try again.";
+
+				if (isMobile) {
+					variableContent.innerHTML = "Game over! Tap screen to try again.";
+					// Tap-to-restart for mobile will be handled by the global touchend listener.
+				} else {
+					variableContent.innerHTML = "Game over! Press the down arrow to try again.";
+					// Define the listener function for non-mobile restart
+					var restartKeyListener = function(e) {
+						if (e.keyCode == 40 && gameOver) { // ensure gameOver is true
+							document.location.reload(true);
+							// Listener is removed automatically on page reload.
+						}
+					};
+					// Add the listener. If it was added before and not removed, this could add it again.
+					// However, typical game over logic means this section runs once per game over.
+					// Page reload clears all listeners.
+					document.addEventListener('keydown', restartKeyListener);
+				}
+
     			var table = document.getElementById("ranks");
     			var rankNames = ["Typical Engineer", "Couch Potato", "Weekend Jogger", "Daily Runner",
     				"Local Prospect", "Regional Star", "National Champ", "Second Mo Farah"];
