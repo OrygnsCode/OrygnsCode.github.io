@@ -246,7 +246,7 @@ h2 {
   width: 100%;    /* Added */
   padding: 2px 12px 4px; /* Changed */
   font-family: inherit;
-  font-size: 24px; /* Changed */
+  font-size: 18px; /* Changed */
   border: solid 2px #ccc;
   border-radius: 8px;
   background-color: rgba(89, 63, 107, 0.7); /* Changed to rgba for transparency */
