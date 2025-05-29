@@ -47,13 +47,17 @@ window.addEventListener('load', function(){
   */
 function World() {
 
+	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+
 	// Explicit binding of this even in changing contexts.
 	var self = this;
 
 	// Scoped variables in this world.
 	var element, scene, camera, character, renderer, light,
 		objects, paused, keysAllowed, score, difficulty,
-		treePresenceProb, maxTreeSize, fogDistance, gameOver;
+		treePresenceProb, maxTreeSize, fogDistance, gameOver,
+		touchStartX, touchStartY, swipeThreshold, // Added for touch controls
+		mobileOverlay, variableContent; // Added for mobile instructions overlay
 
 	// Initialize the world.
 	init();
@@ -131,10 +135,18 @@ function World() {
 					if (paused && !collisionsDetected() && key > 18) {
 						paused = false;
 						character.onUnpause();
-						document.getElementById(
-							"variable-content").style.visibility = "hidden";
-						document.getElementById(
-							"controls").style.display = "none";
+						
+						// Hide mobile overlay if it exists and is mobile
+						if (isMobile && mobileOverlay) {
+							mobileOverlay.style.display = 'none';
+						}
+						// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
+						if (variableContent) {
+							variableContent.style.visibility = "hidden";
+						}
+						// Hide controls table
+						document.getElementById("controls").style.display = "none";
+
 					} else {
 						if (key == p) {
 							paused = true;
@@ -170,6 +182,152 @@ function World() {
 				keysAllowed = {};
 			}
 		);
+
+		// Initialize touch variables
+		touchStartX = 0;
+		touchStartY = 0;
+		swipeThreshold = 50; // pixels - adjust as needed
+
+		// Add touch event listeners
+		element.addEventListener('touchstart', function(event) {
+			// if (!paused) { // Only process if game is active - original thought, but might prevent tap to start
+			// Consider preventDefault here, but might interfere with initial pause/unpause or other UI elements if any
+			// For now, let's handle preventDefault on touchend/touchmove for game actions
+			// }
+			touchStartX = event.touches[0].clientX;
+			touchStartY = event.touches[0].clientY;
+		}, false);
+
+		element.addEventListener('touchend', function(event) {
+			if (gameOver) return; // Don't process if game is over
+
+			var touchEndX = event.changedTouches[0].clientX;
+			var touchEndY = event.changedTouches[0].clientY;
+
+			var deltaX = touchEndX - touchStartX;
+			var deltaY = touchEndY - touchStartY;
+
+			var absDeltaX = Math.abs(deltaX);
+			var absDeltaY = Math.abs(deltaY);
+
+			// Check if it's a tap first
+			if (absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap
+				if (gameOver && isMobile) { // If game is over and on mobile, tap to restart
+					document.location.reload(true);
+					event.preventDefault(); // Prevent any other action
+					return; 
+				} else if (paused && !collisionsDetected() && !gameOver) { // If paused, not game over, tap to start
+					paused = false;
+					character.onUnpause();
+
+					// Hide mobile overlay if it exists and is mobile
+					if (isMobile && mobileOverlay) {
+						mobileOverlay.style.display = 'none';
+					}
+					// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
+					// This might have been hidden by init() on mobile already if overlay was shown.
+					if (variableContent) {
+						variableContent.style.visibility = "hidden";
+					}
+					// Hide controls table
+					document.getElementById("controls").style.display = "none";
+					
+					event.preventDefault(); // Prevent any other action like text selection
+					return; 
+				}
+			} else if (!paused && !gameOver) { // If not a tap, and game is active (not paused and not game over), check for swipes
+				// Only process swipes if game is active and not over, and it wasn't a tap handled above
+				if (absDeltaY > absDeltaX) { // Primarily vertical swipe
+					if (deltaY < -swipeThreshold) { // Swipe Up
+						character.onUpKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
+					}
+				} else { // Primarily horizontal swipe
+					if (deltaX < -swipeThreshold) { // Swipe Left
+						character.onLeftKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
+					} else if (deltaX > swipeThreshold) { // Swipe Right
+						character.onRightKeyPressed();
+						event.preventDefault(); // Prevent scroll/zoom
+						}
+					}
+				}
+			}
+		}, false);
+
+		element.addEventListener('touchmove', function(event) {
+			if (!paused && !gameOver) { // Only prevent default if game is active and not over
+				event.preventDefault(); // Prevent scrolling during active touch
+			}
+		}, { passive: false }); // passive: false is important for preventDefault to work in touchmove
+
+		// Conditionally display controls based on device type
+		var keyboardControls = document.querySelectorAll('.keyboard-control');
+		var swipeControls = document.querySelectorAll('.swipe-control');
+
+		// Assign DOM elements to World-scoped variables
+		mobileOverlay = document.getElementById('mobile-instructions-overlay');
+		variableContent = document.getElementById('variable-content');
+
+		if (isMobile) {
+			if (paused && mobileOverlay) { // If mobile, paused, and overlay element exists
+				mobileOverlay.style.display = 'flex'; // Show the overlay
+				if (variableContent) {
+					variableContent.style.display = 'none'; // Hide the original "Press any button..."
+				}
+
+				// Define the function to start the game from overlay tap
+				var startGameFromOverlay = function(event) {
+					event.preventDefault(); // Prevent any default action
+					
+					// Double check game state to prevent multiple starts or starting a game that's over
+					if (paused && !collisionsDetected() && !gameOver) { 
+						paused = false;
+						character.onUnpause(); // Contains logic for pause state adjustment
+						
+						// Hide UI elements related to initial paused state
+						if (variableContent) variableContent.style.visibility = 'hidden'; // Ensure it's hidden
+						var controlsTable = document.getElementById("controls");
+						if (controlsTable) controlsTable.style.display = "none";
+						
+						if (mobileOverlay) mobileOverlay.style.display = 'none'; // Hide the overlay itself
+						
+						// Remove this event listener after it has done its job
+						if (mobileOverlay) mobileOverlay.removeEventListener('touchend', startGameFromOverlay);
+					}
+				};
+				
+				// Add the event listener to the overlay
+				// The startGameFromOverlay function will remove itself upon execution.
+				mobileOverlay.addEventListener('touchend', startGameFromOverlay);
+
+			} else if (mobileOverlay) { // If not paused or overlay doesn't exist (e.g. game already started)
+				mobileOverlay.style.display = 'none'; // Ensure overlay is hidden
+			}
+			keyboardControls.forEach(function(row) {
+				row.style.display = 'none';
+			});
+			swipeControls.forEach(function(row) {
+				row.style.display = ''; // Resets to default (table-row for <tr>)
+			});
+		} else {
+			keyboardControls.forEach(function(row) {
+				row.style.display = ''; // Resets to default
+			});
+			swipeControls.forEach(function(row) {
+				// Swipe controls are already display:none by default via inline style,
+				// but this explicitly ensures they remain hidden on non-mobile.
+				row.style.display = 'none';
+			});
+		} else { // Not mobile
+			if (mobileOverlay) {
+				mobileOverlay.style.display = 'none'; // Ensure it's hidden on non-mobile
+			}
+			if (variableContent && paused) { // If not mobile and paused, ensure "Press any key" is visible
+				variableContent.style.display = ''; // Reset to default display
+				variableContent.style.visibility = 'visible'; // Explicitly make visible
+			}
+		}
 
 		// Initialize the scores and difficulty.
 		score = 0;
@@ -251,17 +409,27 @@ function World() {
 			if (collisionsDetected()) {
 				gameOver = true;
 				paused = true;
-				document.addEventListener(
-        			'keydown',
-        			function(e) {
-        				if (e.keyCode == 40)
-            			document.location.reload(true);
-        			}
-    			);
     			var variableContent = document.getElementById("variable-content");
     			variableContent.style.visibility = "visible";
-    			variableContent.innerHTML = 
-    				"Game over! Press the down arrow to try again.";
+
+				if (isMobile) {
+					variableContent.innerHTML = "Game over! Tap screen to try again.";
+					// Tap-to-restart for mobile will be handled by the global touchend listener.
+				} else {
+					variableContent.innerHTML = "Game over! Press the down arrow to try again.";
+					// Define the listener function for non-mobile restart
+					var restartKeyListener = function(e) {
+						if (e.keyCode == 40 && gameOver) { // ensure gameOver is true
+							document.location.reload(true);
+							// Listener is removed automatically on page reload.
+						}
+					};
+					// Add the listener. If it was added before and not removed, this could add it again.
+					// However, typical game over logic means this section runs once per game over.
+					// Page reload clears all listeners.
+					document.addEventListener('keydown', restartKeyListener);
+				}
+
     			var table = document.getElementById("ranks");
     			var rankNames = ["Typical Engineer", "Couch Potato", "Weekend Jogger", "Daily Runner",
     				"Local Prospect", "Regional Star", "National Champ", "Second Mo Farah"];
@@ -501,32 +669,35 @@ function Character() {
 		// Obtain the curren time for future calculations.
 		var currentTime = new Date() / 1000;
 
-		// Apply actions to the character if none are currently being
-		// carried out.
-		if (!self.isJumping &&
-			!self.isSwitchingLeft &&
-			!self.isSwitchingRight &&
-			self.queuedActions.length > 0) {
-			switch(self.queuedActions.shift()) {
-				case "up":
-					self.isJumping = true;
-					self.jumpStartTime = new Date() / 1000;
-					break;
-				case "left":
-					if (self.currentLane != -1) {
-						self.isSwitchingLeft = true;
-					}
-					break;
-				case "right":
-					if (self.currentLane != 1) {
-						self.isSwitchingRight = true;
-					}
-					break;
+		// Obtain the curren time for future calculations.
+		var currentTime = new Date() / 1000;
+
+		// Process jump actions from queue if not already switching lanes
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "up" && !self.isJumping) { // Check if next is "up" and not already jumping
+				self.isJumping = true;
+				self.jumpStartTime = new Date() / 1000;
+				self.queuedActions.shift(); // Remove "up" action
 			}
 		}
 
-		// If the character is jumping, update the height of the character.
-		// Otherwise, the character continues running.
+		// Process movement (left/right) actions from queue
+		// This can happen whether jumping or not, as long as not already switching lanes.
+		if (!self.isSwitchingLeft && !self.isSwitchingRight && self.queuedActions.length > 0) {
+			if (self.queuedActions[0] == "left") {
+				if (self.currentLane != -1) {
+					self.isSwitchingLeft = true;
+				}
+				self.queuedActions.shift(); // Remove "left" action
+			} else if (self.queuedActions[0] == "right") {
+				if (self.currentLane != 1) {
+					self.isSwitchingRight = true;
+				}
+				self.queuedActions.shift(); // Remove "right" action
+			}
+		}
+
+		// Update jump state (vertical movement)
 		if (self.isJumping) {
 			var jumpClock = currentTime - self.jumpStartTime;
 			self.element.position.y = self.jumpHeight * Math.sin(
@@ -537,10 +708,11 @@ function Character() {
 				self.isJumping = false;
 				self.runningStartTime += self.jumpDuration;
 			}
-		} else {
+		} else { // Only apply running animations if not jumping
 			var runningClock = currentTime - self.runningStartTime;
 			self.element.position.y = sinusoid(
 				2 * self.stepFreq, 0, 20, 0, runningClock);
+			// ... (all other running animation lines for head, torso, arms, legs)
 			self.head.rotation.x = sinusoid(
 				2 * self.stepFreq, -10, -5, 0, runningClock) * deg2Rad;
 			self.torso.rotation.x = sinusoid(
@@ -561,25 +733,25 @@ function Character() {
 				self.stepFreq, -130, 5, 240, runningClock) * deg2Rad;
 			self.rightLowerLeg.rotation.x = sinusoid(
 				self.stepFreq, -130, 5, 60, runningClock) * deg2Rad;
+		}
 
-			// If the character is not jumping, it may be switching lanes.
-			if (self.isSwitchingLeft) {
-				self.element.position.x -= 200;
-				var offset = self.currentLane * 800 - self.element.position.x;
-				if (offset > 800) {
-					self.currentLane -= 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingLeft = false;
-				}
+		// Update lateral movement (lane switching), can happen during jump or run
+		if (self.isSwitchingLeft) {
+			self.element.position.x -= 200; // Consider adjusting speed if needed
+			var offset = self.currentLane * 800 - self.element.position.x;
+			if (offset > 800) {
+				self.currentLane -= 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingLeft = false;
 			}
-			if (self.isSwitchingRight) {
-				self.element.position.x += 200;
-				var offset = self.element.position.x - self.currentLane * 800;
-				if (offset > 800) {
-					self.currentLane += 1;
-					self.element.position.x = self.currentLane * 800;
-					self.isSwitchingRight = false;
-				}
+		}
+		if (self.isSwitchingRight) {
+			self.element.position.x += 200; // Consider adjusting speed if needed
+			var offset = self.element.position.x - self.currentLane * 800;
+			if (offset > 800) {
+				self.currentLane += 1;
+				self.element.position.x = self.currentLane * 800;
+				self.isSwitchingRight = false;
 			}
 		}
 	}
@@ -595,7 +767,9 @@ function Character() {
 	  * Handles character activity when the up key is pressed.
 	  */
 	this.onUpKeyPressed = function() {
-		self.queuedActions.push("up");
+		if (!self.isJumping) {
+			self.queuedActions.push("up");
+		}
 	}
 
 	/**
