@@ -1,15 +1,4 @@
 
-/**
- *
- * BOXY RUN
- * ----
- * Simple Temple-Run-esque game, created with love by Wan Fung Chui.
- *
- */
-
-/**
- * Constants used in this game.
- */
 var Colors = {
 	cherry: 0xe35d6a,
 	blue: 0x1560bd,
