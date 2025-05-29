@@ -3,29 +3,54 @@ const WEB_WORKER_URL = 'scripts/worker.js';
 const BLURBS = {
   'start': {
     header: 'Get Ready',
-    blurb: 'Select your difficulty and start the game.'
+    blurb: ['Pick a difficulty and let’s get this started.']
   },
   'p1-turn': {
     header: 'Your Turn',
-    blurb: 'Click on the board to drop your chip.'
+    blurb: ['Your move. Drop a chip when you’re ready.']
   },
   'p2-turn': {
     header: 'Computer\'s Turn',
-    blurb: 'The computer is trying to find the best way to make you lose.'
+    blurb: [
+      'Thinking it through. You might want to worry.',
+      'The board’s being scanned. Expect precision.',
+      'Plotting its next move — quietly and efficiently.',
+      'Looking for the cleanest way to win.',
+      'This won’t take long.'
+    ]
   },
   'p1-win': {
     header: 'You Win',
-    blurb: 'You are a winner. Remember this moment. Carry it with you, forever.'
+    blurb: [
+      'Four in a row. No mistakes. Well played.',
+      'Game over. You held your ground.',
+      'Smart moves, solid win.',
+      'You kept control and finished strong.',
+      'Outplayed the machine. That’s saying something.'
+    ]
   },
   'p2-win': {
     header: 'Computer Wins',
-    blurb: 'Try again when you\'re done wiping your tears of shame.'
+    blurb: [
+      'It found the line you missed.',
+      'That gap cost you the game.',
+      'Clean execution by the AI.',
+      'It saw it. You didn’t.',
+      'Better moves. Better outcome.'
+    ]
   },
   'tie': {
     header: 'Tie',
-    blurb: 'Everyone\'s a winner! Or loser. Depends on how you look at it.'
+    blurb: [
+      'No more room. No clear winner.',
+      'Balanced game. No edge given.',
+      'Even match. Even result.',
+      'Board’s full. Nothing settled.',
+      'Stalemate. It happens.'
+    ]
   }
 };
+
 const OUTLOOKS = {
   'win-imminent': 'Uh oh, computer is feeling saucy!',
   'loss-imminent': 'Computer is unsure. Now\'s your chance!'
@@ -64,7 +89,13 @@ $(function() {
 
 function setBlurb(key) {
   $('.info h2').text(BLURBS[key].header);
-  $('.info .blurb').text(BLURBS[key].blurb);
+  
+  const blurb = BLURBS[key].blurb;
+  const chosen = Array.isArray(blurb)
+    ? blurb[Math.floor(Math.random() * blurb.length)]
+    : blurb;
+
+  $('.info .blurb').text(chosen);
 }
 
 function setOutlook(key) {

@@ -234,28 +234,3 @@ h2 {
     transform: translateY(0);
   }
 }
-
-/* Styles for Back to Home Button */
-.back-to-home-container {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.back-button {
-  display: block; /* Changed from inline-block */
-  width: 100%;    /* Added */
-  padding: 2px 12px 4px; /* Changed */
-  font-family: inherit;
-  font-size: 24px; /* Changed */
-  border: solid 2px #ccc;
-  border-radius: 8px;
-  background-color: rgba(89, 63, 107, 0.7); /* Changed to rgba for transparency */
-  color: #fff;
-  text-decoration: none;
-  cursor: pointer;
-  box-sizing: border-box; /* Added to include padding and border in width calculation */
-}
-
-.back-button:hover {
-  background-color: rgba(89, 63, 107, 0.9); /* Changed to rgba, slightly less transparent */
-}
