@@ -47,8 +47,6 @@ window.addEventListener('load', function(){
   */
 function World() {
 
-	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
-
 	// Explicit binding of this even in changing contexts.
 	var self = this;
 
@@ -57,7 +55,7 @@ function World() {
 		objects, paused, keysAllowed, score, difficulty,
 		treePresenceProb, maxTreeSize, fogDistance, gameOver,
 		touchStartX, touchStartY, swipeThreshold, // Added for touch controls
-		mobileOverlay, variableContent; // Added for mobile instructions overlay
+		variableContent; // mobileOverlay removed
 
 	// Initialize the world.
 	init();
@@ -128,44 +126,30 @@ function World() {
 		document.addEventListener(
 			'keydown',
 			function(e) {
-				if (!gameOver) {
+				if (!gameOver) { // Ensure game not over
 					var key = e.keyCode;
-					if (keysAllowed[key] === false) return;
+					if (keysAllowed[key] === false) return; // Debounce
 					keysAllowed[key] = false;
-					if (paused && !collisionsDetected() && key > 18) {
+
+					if (paused && !collisionsDetected() && key > 18) { // Any key to start game if paused
 						paused = false;
 						character.onUnpause();
-						
-						// Hide mobile overlay if it exists and is mobile
-						if (isMobile && mobileOverlay) {
-							mobileOverlay.style.display = 'none';
-						}
-						// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
-						if (variableContent) {
-							variableContent.style.visibility = "hidden";
-						}
-						// Hide controls table
-						document.getElementById("controls").style.display = "none";
-
-					} else {
-						if (key == p) {
+						if (variableContent) variableContent.style.visibility = "hidden";
+						var ctrls = document.getElementById("controls");
+						if (ctrls) ctrls.style.display = "none";
+					} else if (!paused) { // Game is active (not paused)
+						if (key == p) { // 'p' for pause
 							paused = true;
 							character.onPause();
-							document.getElementById(
-								"variable-content").style.visibility = "visible";
-							document.getElementById(
-								"variable-content").innerHTML = 
-								"Game is paused. Press any key to resume.";
+							if (variableContent) {
+								variableContent.style.visibility = "visible";
+								variableContent.innerHTML = "Game is paused. Press any key to resume.";
+							}
 						}
-						if (key == up && !paused) {
-							character.onUpKeyPressed();
-						}
-						if (key == left && !paused) {
-							character.onLeftKeyPressed();
-						}
-						if (key == right && !paused) {
-							character.onRightKeyPressed();
-						}
+						// These actions should only be processed if game is active and not paused
+						if (key == up) character.onUpKeyPressed();
+						if (key == left) character.onLeftKeyPressed();
+						if (key == right) character.onRightKeyPressed();
 					}
 				}
 			}
@@ -212,29 +196,23 @@ function World() {
 
 			// Check if it's a tap first
 			if (absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap
-				if (gameOver && isMobile) { // If game is over and on mobile, tap to restart
+				if (gameOver) { // If game is over, tap reloads (for ALL users)
 					document.location.reload(true);
-					event.preventDefault(); // Prevent any other action
-					return; 
-				} else if (paused && !collisionsDetected() && !gameOver) { // If paused, not game over, tap to start
+					event.preventDefault(); 
+				} else if (paused && !collisionsDetected()) { // If paused AND NOT game over, tap starts/unpauses (for ALL users)
 					paused = false;
 					character.onUnpause();
-
-					// Hide mobile overlay if it exists and is mobile
-					if (isMobile && mobileOverlay) {
-						mobileOverlay.style.display = 'none';
-					}
-					// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
-					// This might have been hidden by init() on mobile already if overlay was shown.
-					if (variableContent) {
-						variableContent.style.visibility = "hidden";
-					}
-					// Hide controls table
-					document.getElementById("controls").style.display = "none";
 					
-					event.preventDefault(); // Prevent any other action like text selection
-					return; 
+					// Ensure variableContent (original "Press any key..." or "Game Paused") is hidden
+					// Note: variableContent is already assigned in init()
+					if (variableContent) variableContent.style.visibility = "hidden";
+					var ctrls = document.getElementById("controls");
+					if (ctrls) ctrls.style.display = "none";
+					
+					event.preventDefault();
 				}
+				// Since a tap is processed (either for restart or start), we return to avoid swipe logic.
+				return; 
 			} else if (!paused && !gameOver) { // If not a tap, and game is active (not paused and not game over), check for swipes
 				// Only process swipes if game is active and not over, and it wasn't a tap handled above
 				if (absDeltaY > absDeltaX) { // Primarily vertical swipe
@@ -261,73 +239,20 @@ function World() {
 			}
 		}, { passive: false }); // passive: false is important for preventDefault to work in touchmove
 
-		// Conditionally display controls based on device type
-		var keyboardControls = document.querySelectorAll('.keyboard-control');
-		var swipeControls = document.querySelectorAll('.swipe-control');
-
-		// Assign DOM elements to World-scoped variables
-		mobileOverlay = document.getElementById('mobile-instructions-overlay');
+		// Assign DOM element to World-scoped variable (mobileOverlay related lines removed)
 		variableContent = document.getElementById('variable-content');
 
-		if (isMobile) {
-			if (paused && mobileOverlay) { // If mobile, paused, and overlay element exists
-				mobileOverlay.style.display = 'flex'; // Show the overlay
-				if (variableContent) {
-					variableContent.style.display = 'none'; // Hide the original "Press any button..."
-				}
-
-				// Define the function to start the game from overlay tap
-				var startGameFromOverlay = function(event) {
-					event.preventDefault(); // Prevent any default action
-					
-					// Double check game state to prevent multiple starts or starting a game that's over
-					if (paused && !collisionsDetected() && !gameOver) { 
-						paused = false;
-						character.onUnpause(); // Contains logic for pause state adjustment
-						
-						// Hide UI elements related to initial paused state
-						if (variableContent) variableContent.style.visibility = 'hidden'; // Ensure it's hidden
-						var controlsTable = document.getElementById("controls");
-						if (controlsTable) controlsTable.style.display = "none";
-						
-						if (mobileOverlay) mobileOverlay.style.display = 'none'; // Hide the overlay itself
-						
-						// Remove this event listener after it has done its job
-						if (mobileOverlay) mobileOverlay.removeEventListener('touchend', startGameFromOverlay);
-					}
-				};
-				
-				// Add the event listener to the overlay
-				// The startGameFromOverlay function will remove itself upon execution.
-				mobileOverlay.addEventListener('touchend', startGameFromOverlay);
-
-			} else if (mobileOverlay) { // If not paused or overlay doesn't exist (e.g. game already started)
-				mobileOverlay.style.display = 'none'; // Ensure overlay is hidden
-			}
-			keyboardControls.forEach(function(row) {
-				row.style.display = 'none';
-			});
-			swipeControls.forEach(function(row) {
-				row.style.display = ''; // Resets to default (table-row for <tr>)
-			});
-		} else {
-			keyboardControls.forEach(function(row) {
-				row.style.display = ''; // Resets to default
-			});
-			swipeControls.forEach(function(row) {
-				// Swipe controls are already display:none by default via inline style,
-				// but this explicitly ensures they remain hidden on non-mobile.
-				row.style.display = 'none';
-			});
-		} else { // Not mobile
-			if (mobileOverlay) {
-				mobileOverlay.style.display = 'none'; // Ensure it's hidden on non-mobile
-			}
-			if (variableContent && paused) { // If not mobile and paused, ensure "Press any key" is visible
-				variableContent.style.display = ''; // Reset to default display
-				variableContent.style.visibility = 'visible'; // Explicitly make visible
-			}
+		// Logic for showing "Press any key..." if paused (no longer mobile specific for overlay)
+		if (paused && variableContent) {
+			variableContent.style.display = ''; // Reset to default display
+			variableContent.style.visibility = 'visible'; // Explicitly make visible
+		} else if (variableContent) { // If not paused, ensure it's hidden
+			variableContent.style.display = 'none';
+			variableContent.style.visibility = 'hidden';
 		}
+		
+		// Removed conditional display of controls (keyboard-control, swipe-control)
+		// They will now rely on their default HTML/CSS styles.
 
 		// Initialize the scores and difficulty.
 		score = 0;
@@ -411,24 +336,22 @@ function World() {
 				paused = true;
     			var variableContent = document.getElementById("variable-content");
     			variableContent.style.visibility = "visible";
+				variableContent.innerHTML = "Game over! Press down arrow or tap screen to try again.";
 
-				if (isMobile) {
-					variableContent.innerHTML = "Game over! Tap screen to try again.";
-					// Tap-to-restart for mobile will be handled by the global touchend listener.
-				} else {
-					variableContent.innerHTML = "Game over! Press the down arrow to try again.";
-					// Define the listener function for non-mobile restart
-					var restartKeyListener = function(e) {
-						if (e.keyCode == 40 && gameOver) { // ensure gameOver is true
-							document.location.reload(true);
-							// Listener is removed automatically on page reload.
-						}
-					};
-					// Add the listener. If it was added before and not removed, this could add it again.
-					// However, typical game over logic means this section runs once per game over.
-					// Page reload clears all listeners.
-					document.addEventListener('keydown', restartKeyListener);
-				}
+				// Define the listener function for restart via down arrow key
+				var restartKeyListener = function(e) {
+					if (e.keyCode == 40 && gameOver) { // ensure gameOver is true
+						document.location.reload(true);
+						// Listener is removed automatically on page reload, but good practice to remove it if not.
+						document.removeEventListener('keydown', restartKeyListener);
+					}
+				};
+				// Add the listener. If it was added before and not removed, this could add it again.
+				// However, typical game over logic means this section runs once per game over.
+				// Page reload clears all listeners.
+				document.addEventListener('keydown', restartKeyListener);
+				// Note: The previous logic for adding this listener was not conditional on isMobile
+				// after the last set of removals, so this ensures it's present.
 
     			var table = document.getElementById("ranks");
     			var rankNames = ["Typical Engineer", "Couch Potato", "Weekend Jogger", "Daily Runner",
