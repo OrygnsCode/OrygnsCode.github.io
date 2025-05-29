@@ -480,7 +480,7 @@ function Character() {
 	var self = this;
 
 	// Character defaults that don't change throughout the game.
-	this.skinColor = Colors.brown;
+	this.skinColor = Colors.peach;
 	this.hairColor = Colors.black;
 	this.shirtColor = Colors.yellow;
 	this.shortsColor = Colors.olive;
