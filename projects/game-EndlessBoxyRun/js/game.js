@@ -270,13 +270,39 @@ function World() {
 		variableContent = document.getElementById('variable-content');
 
 		if (isMobile) {
-			if (paused && mobileOverlay) { // Check if paused (initial state)
+			if (paused && mobileOverlay) { // If mobile, paused, and overlay element exists
 				mobileOverlay.style.display = 'flex'; // Show the overlay
 				if (variableContent) {
 					variableContent.style.display = 'none'; // Hide the original "Press any button..."
 				}
-			} else if (mobileOverlay) { // Ensure it's hidden if not initial paused state (e.g. game already started)
-				mobileOverlay.style.display = 'none';
+
+				// Define the function to start the game from overlay tap
+				var startGameFromOverlay = function(event) {
+					event.preventDefault(); // Prevent any default action
+					
+					// Double check game state to prevent multiple starts or starting a game that's over
+					if (paused && !collisionsDetected() && !gameOver) { 
+						paused = false;
+						character.onUnpause(); // Contains logic for pause state adjustment
+						
+						// Hide UI elements related to initial paused state
+						if (variableContent) variableContent.style.visibility = 'hidden'; // Ensure it's hidden
+						var controlsTable = document.getElementById("controls");
+						if (controlsTable) controlsTable.style.display = "none";
+						
+						if (mobileOverlay) mobileOverlay.style.display = 'none'; // Hide the overlay itself
+						
+						// Remove this event listener after it has done its job
+						if (mobileOverlay) mobileOverlay.removeEventListener('touchend', startGameFromOverlay);
+					}
+				};
+				
+				// Add the event listener to the overlay
+				// The startGameFromOverlay function will remove itself upon execution.
+				mobileOverlay.addEventListener('touchend', startGameFromOverlay);
+
+			} else if (mobileOverlay) { // If not paused or overlay doesn't exist (e.g. game already started)
+				mobileOverlay.style.display = 'none'; // Ensure overlay is hidden
 			}
 			keyboardControls.forEach(function(row) {
 				row.style.display = 'none';
