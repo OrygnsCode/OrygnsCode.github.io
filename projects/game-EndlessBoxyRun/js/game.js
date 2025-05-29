@@ -53,7 +53,8 @@ function World() {
 	// Scoped variables in this world.
 	var element, scene, camera, character, renderer, light,
 		objects, paused, keysAllowed, score, difficulty,
-		treePresenceProb, maxTreeSize, fogDistance, gameOver;
+		treePresenceProb, maxTreeSize, fogDistance, gameOver,
+		touchStartX, touchStartY, swipeThreshold; // Added for touch controls
 
 	// Initialize the world.
 	init();
@@ -170,6 +171,68 @@ function World() {
 				keysAllowed = {};
 			}
 		);
+
+		// Initialize touch variables
+		touchStartX = 0;
+		touchStartY = 0;
+		swipeThreshold = 50; // pixels - adjust as needed
+
+		// Add touch event listeners
+		element.addEventListener('touchstart', function(event) {
+			// if (!paused) { // Only process if game is active - original thought, but might prevent tap to start
+			// Consider preventDefault here, but might interfere with initial pause/unpause or other UI elements if any
+			// For now, let's handle preventDefault on touchend/touchmove for game actions
+			// }
+			touchStartX = event.touches[0].clientX;
+			touchStartY = event.touches[0].clientY;
+		}, false);
+
+		element.addEventListener('touchend', function(event) {
+			if (gameOver) return; // Don't process if game is over
+
+			var touchEndX = event.changedTouches[0].clientX;
+			var touchEndY = event.changedTouches[0].clientY;
+
+			var deltaX = touchEndX - touchStartX;
+			var deltaY = touchEndY - touchStartY;
+
+			var absDeltaX = Math.abs(deltaX);
+			var absDeltaY = Math.abs(deltaY);
+
+			if (paused && !collisionsDetected() && absDeltaX < swipeThreshold && absDeltaY < swipeThreshold) { // It's a tap and game is paused
+				paused = false;
+				character.onUnpause();
+				document.getElementById("variable-content").style.visibility = "hidden";
+				document.getElementById("controls").style.display = "none";
+				event.preventDefault(); // Prevent any other action like text selection
+				return; // Tap processed, exit
+			}
+			
+			if (!paused) { // Only process swipes if game is active
+				if (absDeltaY > swipeThreshold || absDeltaX > swipeThreshold) { // Check if it's a swipe
+					if (absDeltaY > absDeltaX) { // Primarily vertical swipe
+						if (deltaY < -swipeThreshold) { // Swipe Up
+							character.onUpKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						}
+					} else { // Primarily horizontal swipe
+						if (deltaX < -swipeThreshold) { // Swipe Left
+							character.onLeftKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						} else if (deltaX > swipeThreshold) { // Swipe Right
+							character.onRightKeyPressed();
+							event.preventDefault(); // Prevent scroll/zoom
+						}
+					}
+				}
+			}
+		}, false);
+
+		element.addEventListener('touchmove', function(event) {
+			if (!paused && !gameOver) { // Only prevent default if game is active and not over
+				event.preventDefault(); // Prevent scrolling during active touch
+			}
+		}, { passive: false }); // passive: false is important for preventDefault to work in touchmove
 
 		// Initialize the scores and difficulty.
 		score = 0;
