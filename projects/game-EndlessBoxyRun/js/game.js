@@ -227,7 +227,6 @@ function World() {
 					} else if (deltaX > swipeThreshold) { // Swipe Right
 						character.onRightKeyPressed();
 						event.preventDefault(); // Prevent scroll/zoom
-						}
 					}
 				}
 			}
