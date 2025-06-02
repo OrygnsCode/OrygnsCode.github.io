@@ -14,7 +14,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // ------------------------ Global Variables -----------------------------------
 // Scene, Camera, Renderer - Core Three.js components
 let scene, camera, renderer;
-let jetModel; // Stores the loaded aircraft 3D model
+// let jetModel; // Stores the loaded aircraft 3D model
+let placeholderAircraft; // Placeholder for the aircraft
 
 // UI Elements
 let cameraModeUI; // Displays the current camera mode
@@ -67,6 +68,45 @@ CameraSystem.currentMode = CameraSystem.Modes.THIRD_PERSON; // Default camera mo
 function init() {
     // Scene Setup
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb); // Sky blue
+
+    // Create ground plane
+    const groundGeometry = new THREE.PlaneGeometry(1000, 1000); // Large plane
+    const groundMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x808080, // Grey color
+        roughness: 0.8, 
+        metalness: 0.2 
+    });
+    const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+    groundMesh.rotation.x = -Math.PI / 2; // Rotate to be horizontal
+    groundMesh.position.y = -10; // Position it below where the aircraft might be
+    scene.add(groundMesh);
+
+    // Create placeholder aircraft
+    placeholderAircraft = new THREE.Group(); // Use a Group to combine parts
+
+    // Fuselage
+    const fuselageGeometry = new THREE.BoxGeometry(0.5, 0.5, 2); // width, height, depth
+    const fuselageMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 }); // Red
+    const fuselageMesh = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
+    placeholderAircraft.add(fuselageMesh);
+
+    // Wings
+    const wingGeometry = new THREE.BoxGeometry(2, 0.1, 0.5); // width, height, depth
+    const wingMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Green
+    const wingMesh = new THREE.Mesh(wingGeometry, wingMaterial);
+    wingMesh.position.y = 0; // Adjust as needed
+    placeholderAircraft.add(wingMesh);
+    
+    // Tail (optional, simple example)
+    const tailMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff }); // Blue
+    const tailGeometry = new THREE.BoxGeometry(0.2, 0.5, 0.5);
+    const tailMesh = new THREE.Mesh(tailGeometry, tailMaterial); // Assuming tailMaterial is defined or use fuselageMaterial
+    tailMesh.position.z = 1; // Position at the back of the fuselage
+    placeholderAircraft.add(tailMesh);
+
+    placeholderAircraft.position.set(0, 0, 0); // Initial position
+    scene.add(placeholderAircraft);
 
     // Camera Setup
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -82,7 +122,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping; // For realistic lighting with HDRI
     renderer.toneMappingExposure = 1.0;
-    renderer.outputEncoding = THREE.sRGBEncoding; // Correct color output
+    renderer.outputColorSpace = THREE.SRGBColorSpace; // Correct color output
     document.body.appendChild(renderer.domElement);
 
     // UI Setup
@@ -90,8 +130,11 @@ function init() {
     updateCameraModeUI(); // Set initial UI text
 
     // Load Assets
-    loadSkybox();
-    loadAircraftModel();
+    // loadSkybox();
+    // loadAircraftModel();
+
+    // Setup Lighting
+    setupLighting(); 
 
     // Setup Event Listeners
     setupEventListeners();
@@ -105,15 +148,14 @@ function init() {
  * Loads the HDRI skybox.
  */
 function loadSkybox() {
-    const skyboxPath = 'game-skyace/assets/skybox/Sky-4k.hdr';
+    const skyboxPath = 'assets/skybox/Sky-4k.hdr';
     // Note: A 4K HDRI (Sky-4k.hdr) can be performance-intensive for loading and rendering,
     // especially on lower-end systems. Consider using a 2K version if performance issues arise.
     // The user should place the actual Sky-4k.hdr file at the specified path.
     console.log(`Attempting to load skybox from: ${skyboxPath}`);
     new RGBELoader()
-        .setPath('game-skyace/assets/skybox/') // Loader uses directory path
         .load(
-            'Sky-4k.hdr', // File name
+            'assets/skybox/Sky-4k.hdr', // File name
             function (texture) { // onSuccess
                 texture.mapping = THREE.EquirectangularReflectionMapping;
                 scene.background = texture; 
@@ -131,15 +173,14 @@ function loadSkybox() {
  * Loads the aircraft GLTF model.
  */
 function loadAircraftModel() {
-    const modelPath = 'game-skyace/assets/models/FighterJet.glb';
+    const modelPath = 'assets/models/FighterJet.glb';
     // FighterJet.glb is loaded. Its complexity (poly count, texture sizes) also impacts performance.
     // Assume it's reasonably optimized for a demo. GLB format is generally efficient.
     // The user should place the actual FighterJet.glb file at the specified path.
     console.log(`Attempting to load aircraft model from: ${modelPath}`);
     const gltfLoader = new GLTFLoader();
-    gltfLoader.setPath('game-skyace/assets/models/') // Loader uses directory path
-        .load(
-            'FighterJet.glb', // File name
+    gltfLoader.load(
+            'assets/models/FighterJet.glb', // File name
             function (gltf) { // onSuccess
                 jetModel = gltf.scene;
                 jetModel.scale.set(0.1, 0.1, 0.1); 
@@ -259,11 +300,11 @@ function animate() {
     // Delta time calculation could be added here for frame-rate independent physics
     // const deltaTime = clock.getDelta(); 
 
-    if (jetModel) {
-        handleAircraftControls(/*deltaTime*/); // Pass deltaTime if using it
-        updateCamera(/*deltaTime*/);           // Pass deltaTime if using it
+    if (placeholderAircraft) { 
+        handleAircraftControls(/*deltaTime*/); 
+        updateCamera(/*deltaTime*/);          
     } else {
-        // Fallback camera behavior if jetModel is not yet loaded
+        // Fallback camera behavior
         if (camera && camera.position.x === 0 && camera.position.y === 0 && camera.position.z === 0) {
             camera.position.set(0, 1, 5); 
             camera.lookAt(0, 0, 0);
@@ -289,24 +330,24 @@ function handleAircraftControls(/*deltaTime*/) {
 
     // Mouse Steering
     if (Math.abs(currentMouseX) > aircraftControls.mouseDeadZone) {
-        jetModel.rotateY(-currentMouseX * aircraftControls.mouseSteerSpeed);
+        placeholderAircraft.rotateY(-currentMouseX * aircraftControls.mouseSteerSpeed);
     }
     if (Math.abs(currentMouseY) > aircraftControls.mouseDeadZone) {
-        jetModel.rotateX(currentMouseY * aircraftControls.mouseSteerSpeed);
+        placeholderAircraft.rotateX(currentMouseY * aircraftControls.mouseSteerSpeed);
     }
 
     // Keyboard Rotation (Pitch, Yaw, Roll)
-    if (input.w || input.ArrowUp) jetModel.rotateX(aircraftControls.keyboardRotationSpeed);
-    if (input.s || input.ArrowDown) jetModel.rotateX(-aircraftControls.keyboardRotationSpeed);
-    if (input.a || input.ArrowLeft) jetModel.rotateY(aircraftControls.keyboardRotationSpeed);
-    if (input.d || input.ArrowRight) jetModel.rotateY(-aircraftControls.keyboardRotationSpeed);
-    if (input.q) jetModel.rotateZ(aircraftControls.keyboardRotationSpeed * 0.75);
-    if (input.e) jetModel.rotateZ(-aircraftControls.keyboardRotationSpeed * 0.75);
+    if (input.w || input.ArrowUp) placeholderAircraft.rotateX(aircraftControls.keyboardRotationSpeed);
+    if (input.s || input.ArrowDown) placeholderAircraft.rotateX(-aircraftControls.keyboardRotationSpeed);
+    if (input.a || input.ArrowLeft) placeholderAircraft.rotateY(aircraftControls.keyboardRotationSpeed);
+    if (input.d || input.ArrowRight) placeholderAircraft.rotateY(-aircraftControls.keyboardRotationSpeed);
+    if (input.q) placeholderAircraft.rotateZ(aircraftControls.keyboardRotationSpeed * 0.75);
+    if (input.e) placeholderAircraft.rotateZ(-aircraftControls.keyboardRotationSpeed * 0.75);
 
     // Aircraft Movement (forward in its current orientation)
     // Re-use _forwardVector. Set it to local forward then transform by world quaternion.
-    _forwardVector.set(0,0,-1).applyQuaternion(jetModel.quaternion);
-    jetModel.position.addScaledVector(_forwardVector, aircraftControls.currentSpeed);
+    _forwardVector.set(0,0,-1).applyQuaternion(placeholderAircraft.quaternion);
+    placeholderAircraft.position.addScaledVector(_forwardVector, aircraftControls.currentSpeed);
 }
 
 /**
@@ -315,8 +356,8 @@ function handleAircraftControls(/*deltaTime*/) {
  */
 function updateCamera(/*deltaTime*/) {
     // Use module-scoped temp objects to avoid allocations in the loop
-    jetModel.getWorldPosition(_tempVector3); // _tempVector3 now holds jet's world position
-    jetModel.getWorldQuaternion(_tempQuaternion); // _tempQuaternion now holds jet's world orientation
+    placeholderAircraft.getWorldPosition(_tempVector3); // _tempVector3 now holds jet's world position
+    placeholderAircraft.getWorldQuaternion(_tempQuaternion); // _tempQuaternion now holds jet's world orientation
 
     let offset; // To be used for cockpit and nose modes
 
