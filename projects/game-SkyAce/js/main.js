@@ -82,7 +82,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping; // For realistic lighting with HDRI
     renderer.toneMappingExposure = 1.0;
-    renderer.outputEncoding = THREE.sRGBEncoding; // Correct color output
+    renderer.outputColorSpace = THREE.SRGBColorSpace; // Correct color output
     document.body.appendChild(renderer.domElement);
 
     // UI Setup
@@ -111,7 +111,7 @@ function loadSkybox() {
     // The user should place the actual Sky-4k.hdr file at the specified path.
     console.log(`Attempting to load skybox from: ${skyboxPath}`);
     new RGBELoader()
-        .setPath('game-skyace/assets/skybox/') // Loader uses directory path
+        .setPath('assets/skybox/') // Loader uses directory path
         .load(
             'Sky-4k.hdr', // File name
             function (texture) { // onSuccess
@@ -137,7 +137,7 @@ function loadAircraftModel() {
     // The user should place the actual FighterJet.glb file at the specified path.
     console.log(`Attempting to load aircraft model from: ${modelPath}`);
     const gltfLoader = new GLTFLoader();
-    gltfLoader.setPath('game-skyace/assets/models/') // Loader uses directory path
+    gltfLoader.setPath('assets/models/') // Loader uses directory path
         .load(
             'FighterJet.glb', // File name
             function (gltf) { // onSuccess
