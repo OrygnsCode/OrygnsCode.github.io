@@ -105,7 +105,7 @@ function init() {
  * Loads the HDRI skybox.
  */
 function loadSkybox() {
-    const skyboxPath = 'game-skyace/assets/skybox/Sky-4k.hdr';
+    const skyboxPath = 'assets/skybox/Sky-4k.hdr';
     // Note: A 4K HDRI (Sky-4k.hdr) can be performance-intensive for loading and rendering,
     // especially on lower-end systems. Consider using a 2K version if performance issues arise.
     // The user should place the actual Sky-4k.hdr file at the specified path.
@@ -131,7 +131,7 @@ function loadSkybox() {
  * Loads the aircraft GLTF model.
  */
 function loadAircraftModel() {
-    const modelPath = 'game-skyace/assets/models/FighterJet.glb';
+    const modelPath = 'assets/models/FighterJet.glb';
     // FighterJet.glb is loaded. Its complexity (poly count, texture sizes) also impacts performance.
     // Assume it's reasonably optimized for a demo. GLB format is generally efficient.
     // The user should place the actual FighterJet.glb file at the specified path.
