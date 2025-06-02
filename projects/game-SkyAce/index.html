@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyACE Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; } /* Overflow hidden to prevent scrollbars */
+        canvas { display: block; }
+        #cameraModeUI {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7); /* Slightly more opaque */
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px; /* Slightly smaller font */
+            border-radius: 5px;
+            z-index: 100; /* Ensure it's on top */
+            min-width: 150px; /* Ensure enough space for text */
+            text-align: center;
+        }
+    </style>
+    <!-- Import map for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/examples/jsm/loaders/RGBELoader.js": "https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js",
+                "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="cameraModeUI">Camera: Third-Person View</div> <!-- Initial text -->
+    <!-- The script will append the canvas here -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
