@@ -61,17 +61,23 @@ const shootingSpeed = 12;
 
 // Function to handle SVG files
 function importSVG(name) {
+  console.log("importSVG name:", name);
   const svg = document.getElementById(name);
   let object_svg = new Image();
   const data = new XMLSerializer().serializeToString(svg);
+  console.log("importSVG object_svg.src before:", object_svg.src);
   object_svg.src = "data:image/svg+xml;base64," + window.btoa(data); // The btoa() method encodes a string in base-64
+  console.log("importSVG object_svg.src after:", object_svg.src);
   return object_svg;
 }
 
 // Import the inline SVG elements
 let player1_svg = importSVG("player1");
+console.log("player1_svg:", player1_svg);
 let player2_svg = importSVG("player2");
+console.log("player2_svg:", player2_svg);
 let flicker_svg = importSVG("flicker");
+console.log("flicker_svg:", flicker_svg);
 
 // Set the size of the explosion early on because the size changes with the animation cause a bug
 const explosionSize = {
@@ -81,8 +87,10 @@ const explosionSize = {
 
 // Popup UI handling
 function openPopup() {
+  console.log("openPopup called");
   start = popup.querySelector(".start-button");
   start.addEventListener("click", startGame);
+  console.log("startGame event listener added to start button");
   contenders.style.display = "block";
   popup.style.display = "block";
   overlay.style.display = "block";
@@ -459,21 +467,36 @@ function getRocketPoints() {
 
 // Update the effects on the rocket
 function updateRocket() {
+  if (this.id === "one") {
+    console.log("updateRocket for player1");
+  }
   // If pushing the up key then apply the thruster
   if (this.thruster) {
+    if (this.id === "one") {
+      console.log("player1 thruster true");
+    }
     this.vx += acceleration * Math.cos(rad(this.direction));
     this.vy -= acceleration * Math.sin(rad(this.direction));
   }
   // Left rotates the rocket anti-clockwise
   if (this.rotateLeft) {
+    if (this.id === "one") {
+      console.log("player1 rotateLeft true");
+    }
     this.direction += turnRate;
   }
   // Right rotates the rocket clockwise
   if (this.rotateRight) {
+    if (this.id === "one") {
+      console.log("player1 rotateRight true");
+    }
     this.direction -= turnRate;
   }
   // If the rocket is firing with the spacebar
   if (this.fire) {
+    if (this.id === "one") {
+      console.log("player1 fire true");
+    }
     // Limit the shots being fired with a timeout
     if (this.shotTimeout >= shootingRate) {
       // Get the points for the rocket to work out where the rocket is firing from
@@ -933,6 +956,7 @@ function setPlayer(toggle, number) {
 }
 // Define the changes to be made at the start of the game
 function startGame() {
+  console.log("startGame called");
   // Setup the background
   placeElements();
   // Empty the arrays of asteroids
@@ -940,6 +964,7 @@ function startGame() {
   // Create the players for the new game
   player1 = setPlayer(playerOne, "one");
   player2 = setPlayer(playerTwo, "two");
+  console.log("player1 and player2 objects created:", player1, player2);
   // Define the sworn enemy of the players if they are controlled by the computer
   if (playerOne == true) {
     player1.swornEnemy = player2;
@@ -961,8 +986,10 @@ function startGame() {
   message.innerHTML = "";
   // Set playing to true to start the game!
   playing = true;
+  console.log("playing set to true");
   // Set the interval to make the game work
   game_mode = setInterval(function() {
+    console.log("setInterval callback called");
     if (playing) {
       // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1055,6 +1082,7 @@ function startGame() {
 
 // Define what happens at the end of the game
 function gameOver(target) {
+  console.log("gameOver called with target:", target);
   p1_graphic.style.opacity = 0;
   p2_graphic.style.opacity = 0;
   // Stop the game from being played
@@ -1102,6 +1130,7 @@ function gameOver(target) {
 
 // Define what to do when the page loads
 document.addEventListener("DOMContentLoaded", function(event) {
+  console.log("DOMContentLoaded event fired");
   // Define the sizes based on the user's window
   calculateSizes();
   // Place the background elements
@@ -1112,6 +1141,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.addEventListener(
     "keydown",
     function(event) {
+      console.log("keydown event:", event);
       if (event.defaultPrevented) {
         return;
       }
@@ -1124,22 +1154,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
           switch (key) {
             case "ArrowUp": // event.key || event.code
             case 38: // event.keyCode
+              console.log("ArrowUp pressed - Player 2 Thruster ON");
               // Apply Thruster
               player2.thruster = true;
               break;
             case "ArrowLeft": // event.key || event.code
             case 37: // event.keyCode
+              console.log("ArrowLeft pressed - Player 2 Rotate Left ON");
               // Rotate Left
               player2.rotateLeft = true;
               break;
             case "ArrowRight": // event.key || event.code
             case 39: // event.keyCode
+              console.log("ArrowRight pressed - Player 2 Rotate Right ON");
               // Rotate Right
               player2.rotateRight = true;
               break;
             case "Space": // event.code
             case " ": // event.key
             case 32: // event.keyCode
+              console.log("Space pressed - Player 2 Fire ON");
               // Start firing
               player2.fire = true;
               break;
@@ -1151,23 +1185,27 @@ document.addEventListener("DOMContentLoaded", function(event) {
             case "KeyW": // event.code
             case "w": // event.key
             case 87: // event.keyCode
+              console.log("KeyW pressed - Player 1 Thruster ON");
               player1.thruster = true;
               break;
             case "KeyA": // event.code
             case "a": // event.key
             case 65: // event.keyCode
+              console.log("KeyA pressed - Player 1 Rotate Left ON");
               // Stop rotating Left
               player1.rotateLeft = true;
               break;
             case "KeyD": // event.code
             case "d": // event.key
             case 68: // event.keyCode
+              console.log("KeyD pressed - Player 1 Rotate Right ON");
               // Stop rotating Right
               player1.rotateRight = true;
               break;
             case "KeyZ": // event.code
             case "z": // event.key
             case 90: // event.keyCode
+              console.log("KeyZ pressed - Player 1 Fire ON");
               // Stop firing
               player1.fire = true;
               break;
@@ -1181,6 +1219,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.addEventListener(
     "keyup",
     function(event) {
+      console.log("keyup event:", event);
       if (event.defaultPrevented) {
         return;
       }
@@ -1191,22 +1230,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
           switch (key) {
             case "ArrowUp": // event.key || event.code
             case 38: // event.keyCode
+              console.log("ArrowUp released - Player 2 Thruster OFF");
               // Apply Thruster
               player2.thruster = false;
               break;
             case "ArrowLeft": // event.key || event.code
             case 37: // event.keyCode
+              console.log("ArrowLeft released - Player 2 Rotate Left OFF");
               // Rotate Left
               player2.rotateLeft = false;
               break;
             case "ArrowRight": // event.key || event.code
             case 39: // event.keyCode
+              console.log("ArrowRight released - Player 2 Rotate Right OFF");
               // Rotate Right
               player2.rotateRight = false;
               break;
             case "Space": // event.code
             case " ": // event.key
             case 32: // event.keyCode
+              console.log("Space released - Player 2 Fire OFF");
               // Start firing
               player2.fire = false;
               break;
@@ -1218,23 +1261,27 @@ document.addEventListener("DOMContentLoaded", function(event) {
             case "KeyW": // event.code
             case "w": // event.key
             case 87: // event.keyCode
+              console.log("KeyW released - Player 1 Thruster OFF");
               player1.thruster = false;
               break;
             case "KeyA": // event.code
             case "a": // event.key
             case 65: // event.keyCode
+              console.log("KeyA released - Player 1 Rotate Left OFF");
               // Stop rotating Left
               player1.rotateLeft = false;
               break;
             case "KeyD": // event.code
             case "d": // event.key
             case 68: // event.keyCode
+              console.log("KeyD released - Player 1 Rotate Right OFF");
               // Stop rotating Right
               player1.rotateRight = false;
               break;
             case "KeyZ": // event.code
             case "z": // event.key
             case 90: // event.keyCode
+              console.log("KeyZ released - Player 1 Fire OFF");
               // Stop firing
               player1.fire = false;
               break;
