@@ -119,6 +119,9 @@ p.p2 {
   letter-spacing: 0.04em;
   padding: 0 0 0 0.2em; }
 
+
+  padding: 0 0 0 0.2em; }
+
 .toggle {
   width: 10em;
   z-index: 9999; }
@@ -135,6 +138,13 @@ p.p2 {
 
 .options button {
   position: relative; }
+
+.controls-text {
+  color: white;
+  display: none;
+  font-size: 0.6em;
+  margin-top: 0.5em;
+  text-align: center; }
 
 .options-lower {
   left: 50%;
