@@ -361,7 +361,7 @@ Enemy.prototype.behaviour = function() {
     } else if (this.angleDiff > 180) {
       this.angleDiff = this.angleDiff - 360;
     }
-    this.angleDiff = this.angleDiff.toFixed();
+    // this.angleDiff = this.angleDiff.toFixed(); // Keep as number
   }.bind(this);
 
   // Set a function to turn the rocket to face the calculated angleDiff
