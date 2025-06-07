@@ -247,33 +247,29 @@ function Enemy(token, role) {
   // Burst firing properties
   this.isBurstFiring = false;
   this.burstShotCount = 0;
-  this.defaultShotsPerBurst = 3;
-  this.defaultBurstPauseDuration = 20;
+  this.shotsPerBurst = 4; // Unified value (formerly offensiveShotsPerBurst)
+  this.burstPauseDuration = 15; // Unified value (formerly offensiveBurstPauseDuration)
   this.burstPauseTime = 0;
   // Reaction delay properties
   this.reactionDelayFrames = 0;
   this.minReactionDelay = 3; // Frames, tunable
   this.maxReactionDelay = 8; // Frames, tunable
-  // Tactical mode properties
-  this.currentTacticalMode = "OFFENSIVE"; // Default mode
-  this.modeSwitchCooldown = 0; // Frames until next possible mode switch
-  this.minModeDuration = 300; // Min frames AI stays in one mode (e.g., 5 seconds at 60fps)
-  this.maxModeDuration = 600; // Max frames AI stays in one mode (e.g., 10 seconds at 60fps)
-  // Mode-specific parameters
-  this.offensiveShotsPerBurst = 4;
-  this.offensiveBurstPauseDuration = 15;
-  this.defensiveShotsPerBurst = 2;
-  this.defensiveBurstPauseDuration = 30;
-  this.offensiveEngagementMinDist = 120;
-  this.offensiveEngagementMaxDist = 220;
-  this.defensiveEngagementMinDist = 220;
-  this.defensiveEngagementMaxDist = 320;
-  this.offensiveFleeMaxProbHealth = 0.45;
-  this.defensiveFleeMaxProbHealth = 0.55;
-  this.defaultFleeMinProbHealth = 0.20;
+  // Unified Engagement and Flee Parameters
+  this.engagementMinDist = 120; 
+  this.engagementMaxDist = 220; 
+  this.fleeMaxProbHealth = 0.50; 
+  this.defaultFleeMinProbHealth = 0.20; 
+  // Attack Vector Variation / Micro-Reposition Properties
+  this.attackVectorOffset = { x: 0, y: 0 };
+  this.offsetRecalculateCooldown = 0;
+  this.minOffsetRecalculateInterval = 120; 
+  this.maxOffsetRecalculateInterval = 300; 
+  this.currentOffsetDuration = 0;
+  this.maxOffsetDuration = 60; 
+  this.microRepositionChance = 0.1; 
   // Ramming properties
   this.rammingCooldown = 0;
-  this.minRammingCooldown = 900;
+  this.minRammingCooldown = 900; 
   this.maxRammingCooldown = 1800;
   this.rammingChargeDuration = 0;
   this.maxRammingChargeDuration = 120;
@@ -297,37 +293,12 @@ Enemy.prototype.behaviour = function() {
     // AI continues with its last set rotation/thrust/fire commands as they are not cleared here.
     return;
   }
-  console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Mode: " + this.currentTacticalMode + ", Health: " + this.health);
+  console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Health: " + this.health + ", OffsetXY: " + this.attackVectorOffset.x.toFixed(0) + "," + this.attackVectorOffset.y.toFixed(0) );
   // console.log(`AI BEHAVIOUR: Frame başlıyor. ID: ${this.id}, State: ${this.aiState}, Mode: ${this.currentTacticalMode}, Health: ${this.health}, Player Health: ${this.swornEnemy ? this.swornEnemy.health : 'N/A'}, Cooldowns (Mode/Ram): ${this.modeSwitchCooldown}/${this.rammingCooldown}`);
 
   // Ramming Cooldown Management
   if (this.rammingCooldown > 0) {
     this.rammingCooldown--;
-  }
-
-  // Tactical Mode Switching Logic
-  if (this.modeSwitchCooldown > 0) {
-    this.modeSwitchCooldown--;
-  }
-
-  if (this.modeSwitchCooldown <= 0) {
-    // Time to consider a mode switch
-    const newMode = (this.currentTacticalMode === "OFFENSIVE") ? "DEFENSIVE" : "OFFENSIVE";
-    this.currentTacticalMode = newMode;
-    // console.log(this.id, "switched to tactical mode:", this.currentTacticalMode); // For debugging
-
-    // Set cooldown for the next switch
-    this.modeSwitchCooldown = Math.floor(Math.random() * (this.maxModeDuration - this.minModeDuration + 1)) + this.minModeDuration;
-
-    // Trigger reaction delay for the mode switch itself
-    this.reactionDelayFrames = Math.floor(Math.random() * (this.maxReactionDelay - this.minReactionDelay + 1)) + this.minReactionDelay;
-
-    // Reset action flags as a new mode is engaged
-    this.rotateLeft = false;
-    this.rotateRight = false;
-    this.thruster = false;
-    this.fire = false;
-    return; // Exit behaviour early, action will pick up after delay
   }
 
   // Keep the direction within 360 degrees
@@ -396,25 +367,24 @@ Enemy.prototype.behaviour = function() {
     } else { // Target not in sight for shooting
         if (this.isBurstFiring) { // Was bursting, but lost preferred angle
             this.isBurstFiring = false; // Stop current burst
-             // Use mode-specific pause duration
-            this.burstPauseTime = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveBurstPauseDuration : this.defensiveBurstPauseDuration;
+            this.burstPauseTime = this.burstPauseDuration; // Use unified pause duration
         }
         this.fire = false;
         return;
     }
 
-    let currentShots = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveShotsPerBurst : this.defensiveShotsPerBurst;
-    let currentPause = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveBurstPauseDuration : this.defensiveBurstPauseDuration;
+    // let currentShots = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveShotsPerBurst : this.defensiveShotsPerBurst; // Removed
+    // let currentPause = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveBurstPauseDuration : this.defensiveBurstPauseDuration; // Removed
 
     if (this.isBurstFiring) {
-        if (this.burstShotCount < currentShots) {
+        if (this.burstShotCount < this.shotsPerBurst) { // Use unified shotsPerBurst
             // AI intends to fire. Actual shot depends on rocket's own shotTimeout.
             this.fire = true;
             // Note: burstShotCount is incremented in updateRocket when a shot is actually made.
         } else { // Burst is complete
             this.isBurstFiring = false;
             this.fire = false;
-            this.burstPauseTime = currentPause; // Start pause after burst
+            this.burstPauseTime = this.burstPauseDuration; // Use unified pauseDuration
         }
     } else {
         this.fire = false; // Not in a burst, not firing.
@@ -434,40 +404,35 @@ Enemy.prototype.behaviour = function() {
     }
 
     const predictionFactor = 12; // Tunable: how many frames ahead to predict
-    const predictedX = target.x + target.vx * predictionFactor;
-    const predictedY = target.y + target.vy * predictionFactor;
+    const predictedX = target.x + target.vx * predictionFactor + this.attackVectorOffset.x;
+    const predictedY = target.y + target.vy * predictionFactor + this.attackVectorOffset.y;
 
     findAngle(predictedX, predictedY);
     turnToFace();
-    manageShootingLogic(); // Replaced shootIfInRange
+    manageShootingLogic(); 
 
-    // Thruster logic based on tactical mode
-    let engagementMinDist = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveEngagementMinDist : this.defensiveEngagementMinDist;
-    let engagementMaxDist = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveEngagementMaxDist : this.defensiveEngagementMaxDist;
-
+    // Thruster logic using unified engagement distances
     if (Math.abs(this.angleDiff) > 15) { // If aiming is significantly off, prioritize turning
       this.thruster = true;
     } else { // Aiming is relatively good
-      if (this.distanceToPlayer > engagementMaxDist) { // Too far, get closer
+      if (this.distanceToPlayer > this.engagementMaxDist) { // Too far, get closer
         this.thruster = true;
-      } else if (this.distanceToPlayer < engagementMinDist) { // Player is too close
-        if (this.currentTacticalMode === "DEFENSIVE") {
-            // Defensive mode: Actively try to create distance
-            this.fire = false; // Optional: pause firing to focus on repositioning
-
-            // Calculate a point directly away from the player
-            const backOffDist = 50; // How far to project the immediate back-off point
-            const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
-            const backOffTargetX = this.x - backOffDist * Math.cos(angleToPlayer);
-            const backOffTargetY = this.y - backOffDist * Math.sin(angleToPlayer);
-
-            findAngle(backOffTargetX, backOffTargetY); // Aim towards this back-off point
-            // turnToFace() is called by the main attack logic after this block
-            this.thruster = true; // Thrust to move to the back-off point
-        } else { // Offensive mode and too close
-            this.thruster = false; // Hold position, focus on shooting if possible
+      } else if (this.distanceToPlayer < this.engagementMinDist) { // Player is too close
+        if (Math.random() < this.microRepositionChance) { // Small chance to actively reposition
+            this.fire = false; // Pause firing to focus on repositioning
+            const backOffDist = 30; 
+            if (this.swornEnemy) { 
+                const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
+                // Aim slightly to the side and back - corrected logic for direct back-off
+                const correctedBackOffTargetX = this.x - backOffDist * Math.cos(angleToPlayer);
+                const correctedBackOffTargetY = this.y - backOffDist * Math.sin(angleToPlayer);
+                findAngle(correctedBackOffTargetX, correctedBackOffTargetY);
+                this.thruster = true; 
+            } else { this.thruster = false; } // Fallback if no enemy
+        } else { // Default: Hold position
+            this.thruster = false; 
         }
-      } else { // Optimal distance for current mode
+      } else { // Optimal distance
         this.thruster = false; // Hold position
       }
     }
@@ -539,14 +504,14 @@ Enemy.prototype.behaviour = function() {
 
   if (this.health < 20) { // Critically low health
       determinedNextState = "FLEEING";
-  } else { // Not critically low, consider mode-specific flee probability
+  } else { // Not critically low, consider unified flee probability
       const healthPercentage = this.health / 100;
-      const modeSpecificFleeMaxProbHealth = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveFleeMaxProbHealth : this.defensiveFleeMaxProbHealth;
-      const minProbHealth = this.defaultFleeMinProbHealth; // Using the default min threshold
+      // const modeSpecificFleeMaxProbHealth = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveFleeMaxProbHealth : this.defensiveFleeMaxProbHealth; // Removed
+      const minProbHealth = this.defaultFleeMinProbHealth; 
       let fleeProbability = 0;
 
-      if (this.health < modeSpecificFleeMaxProbHealth * 100) {
-           fleeProbability = (modeSpecificFleeMaxProbHealth - healthPercentage) / (modeSpecificFleeMaxProbHealth - minProbHealth);
+      if (this.health < this.fleeMaxProbHealth * 100) { // Use unified fleeMaxProbHealth
+           fleeProbability = (this.fleeMaxProbHealth - healthPercentage) / (this.fleeMaxProbHealth - minProbHealth);
            fleeProbability = Math.max(0, Math.min(1, fleeProbability)); // Clamp
       }
 
@@ -561,7 +526,7 @@ Enemy.prototype.behaviour = function() {
       const asteroidThreat = this.closestAsteroidThreat;
       if (obstacles && asteroidThreat) {
           const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
-          if (asteroidDist < 100 && asteroidDist < playerDist) {
+          if (asteroidDist < 100 && asteroidDist < playerDist) { 
               determinedNextState = "DODGING_ASTEROID";
           }
       }
@@ -580,7 +545,7 @@ Enemy.prototype.behaviour = function() {
 
       if (canConsiderRam) {
           determinedNextState = "RAMMING";
-          this.rammingChargeDuration = this.maxRammingChargeDuration;
+          this.rammingChargeDuration = this.maxRammingChargeDuration; 
           this.rammingCooldown = Math.floor(Math.random() * (this.maxRammingCooldown - this.minRammingCooldown + 1)) + this.minRammingCooldown;
       }
   }
@@ -602,6 +567,41 @@ Enemy.prototype.behaviour = function() {
       return; // Exit behaviour early, action will pick up after delay
   }
 
+  // Attack Vector Variation Logic
+  if (this.aiState === "ATTACKING") { 
+      if (this.offsetRecalculateCooldown > 0) {
+          this.offsetRecalculateCooldown--;
+      }
+      if (this.currentOffsetDuration > 0) {
+          this.currentOffsetDuration--;
+      }
+
+      if (this.offsetRecalculateCooldown <= 0 && this.currentOffsetDuration <= 0) {
+          if (Math.random() < 0.5) { 
+              const offsetAmount = Math.random() * 100 + 50; 
+              if (this.swornEnemy) { 
+                  const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
+                  const perpendicularAngle = angleToPlayer + (Math.random() < 0.5 ? Math.PI / 2 : -Math.PI / 2);
+                  this.attackVectorOffset.x = offsetAmount * Math.cos(perpendicularAngle);
+                  this.attackVectorOffset.y = offsetAmount * Math.sin(perpendicularAngle);
+                  this.currentOffsetDuration = Math.floor(Math.random() * (this.maxOffsetDuration - 30 + 1)) + 30; 
+              }
+          } else {
+              this.attackVectorOffset.x = 0;
+              this.attackVectorOffset.y = 0;
+              this.currentOffsetDuration = 0; 
+          }
+          this.offsetRecalculateCooldown = Math.floor(Math.random() * (this.maxOffsetRecalculateInterval - this.minOffsetRecalculateInterval + 1)) + this.minOffsetRecalculateInterval;
+      } else if (this.currentOffsetDuration <= 0 && (this.attackVectorOffset.x !== 0 || this.attackVectorOffset.y !== 0)) {
+          this.attackVectorOffset.x = 0;
+          this.attackVectorOffset.y = 0;
+      }
+  } else { 
+      this.attackVectorOffset.x = 0;
+      this.attackVectorOffset.y = 0;
+      this.currentOffsetDuration = 0;
+  }
+
   // Execute behavior based on AI state (if no reaction delay from state change)
   switch (this.aiState) {
     case "ATTACKING":
@@ -611,7 +611,7 @@ Enemy.prototype.behaviour = function() {
     case "FLEEING":
       flee(this.closestPlayerTarget);
       // if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to FLEEING state.`); }
-      this.fire = false;
+      this.fire = false; 
       break;
     case "DODGING_ASTEROID":
       let didDodge = false;
@@ -631,7 +631,7 @@ Enemy.prototype.behaviour = function() {
       this.fire = false; // No shooting while ramming
 
       if (this.rammingChargeDuration > 0 && this.distanceToPlayer < (this.offensiveEngagementMaxDist * 1.5)) {
-          const predictionFactor = 10;
+          const predictionFactor = 10; 
           const predictedX = this.swornEnemy.x + this.swornEnemy.vx * predictionFactor;
           const predictedY = this.swornEnemy.y + this.swornEnemy.vy * predictionFactor;
 
@@ -642,8 +642,8 @@ Enemy.prototype.behaviour = function() {
           this.rammingChargeDuration--;
       } else {
           // Ramming charge ended
-          this.aiState = "ATTACKING";
-          this.rammingChargeDuration = 0;
+          this.aiState = "ATTACKING"; 
+          this.rammingChargeDuration = 0; 
       }
       break;
     default:
@@ -725,7 +725,7 @@ function updateRocket() {
       this.shots.push(
         new Shot(position[0][0], position[0][1], shotCreationDirection, this.id)
       );
-
+      
       if (this instanceof Enemy) {
         // console.log(`AI FIRED SHOT: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, Bursting=${this.isBurstFiring}, BurstCount=${this.burstShotCount + 1}, TargetAngleDiff=${this.angleDiff}`);
         if (this.isBurstFiring) { // burstShotCount is incremented here, so log shows count *before* this shot
