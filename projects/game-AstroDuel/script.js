@@ -1130,6 +1130,17 @@ function gameOver(target) {
   popup = document.getElementById("results");
   // Show the popup UI to the player
   openPopup();
+
+  // Get reference to the Main Menu button on the results screen
+  const resultsMainMenuButton = document.querySelector("#results #mainMenuButton");
+  // Check if it exists to prevent errors if HTML is out of sync
+  if (resultsMainMenuButton) {
+    resultsMainMenuButton.addEventListener('click', function handleGoToMainMenu() {
+      closePopup(); // Close the results popup
+      popup = document.getElementById('popup'); // IMPORTANT: Point back to the main menu popup
+      openPopup(); // Open the main menu popup
+    }, { once: true }); // Use { once: true } to auto-remove listener after first click
+  }
 }
 
 // Define what to do when the page loads
