@@ -191,13 +191,6 @@ a.start-button:hover {
   /* It will still inherit other styles like background, color, font, padding, border from a.start-button and .start-button */
 }
 
-#backButtonResults {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
 .popup-results {
   display: none;
   left: 50%;
