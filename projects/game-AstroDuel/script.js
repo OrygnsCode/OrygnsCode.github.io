@@ -19,11 +19,12 @@ const space = document.querySelector(".space");
 // On the start screen there are buttons to toggle whether the player is a computer or human
 const playerOneToggle = document.querySelector("#playerOne");
 const playerTwoToggle = document.querySelector("#playerTwo");
-// Control instruction elements
-const playerOneControls = document.querySelector("#playerOneControls");
-const playerTwoControls = document.querySelector("#playerTwoControls");
 // There is also a toggle button for the asteroids to create variety in the game
 const asteroidsToggle = document.querySelector("#obstacles");
+
+// Control instruction text
+const playerOneControlsText = "Controls W, A, S, D, Z to fire";
+const playerTwoControlsText = "Controls ↑, ↓, ←, →, Space to shoot";
 // The gutter hides the new asteroids being added to the game so it is best to keep the rocket on screen to avoid being hit
 const gutter = 150;
 // For the popup boxes there is a background overlay
@@ -935,22 +936,12 @@ function switchObstacles() {
 // Button event listeners
 playerOneToggle.addEventListener("click", function() {
   playerOne = toggleOption(playerOne);
-  this.textContent = switchPlayer(playerOne);
-  if (playerOne) { // Computer
-    playerOneControls.style.display = "none";
-  } else { // Human
-    playerOneControls.style.display = "block";
-  }
+  this.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
 });
 
 playerTwoToggle.addEventListener("click", function() {
   playerTwo = toggleOption(playerTwo);
-  this.textContent = switchPlayer(playerTwo);
-  if (playerTwo) { // Computer
-    playerTwoControls.style.display = "none";
-  } else { // Human
-    playerTwoControls.style.display = "block";
-  }
+  this.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
 });
 asteroidsToggle.addEventListener("click", function() {
   obstacles = toggleOption(obstacles);
@@ -1151,17 +1142,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // Open the popup UI for the player
   openPopup();
 
-  // Set initial visibility of controls based on default player types
-  if (playerOne) { // Computer
-    playerOneControls.style.display = "none";
-  } else { // Human
-    playerOneControls.style.display = "block";
-  }
-  if (playerTwo) { // Computer
-    playerTwoControls.style.display = "none";
-  } else { // Human
-    playerTwoControls.style.display = "block";
-  }
+  // Set initial button content based on default player types
+  playerOneToggle.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
+  playerTwoToggle.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
 
   // Define keyboard functions
   document.addEventListener(

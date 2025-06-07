@@ -116,10 +116,7 @@ p.p2 {
 
 .vs {
   font-size: 5em;
-  letter-spacing: 0.04em;
-  padding: 0 0 0 0.2em; }
-
-
+  letter-spacing: 0.06em;
   padding: 0 0 0 0.2em; }
 
 .toggle {
@@ -139,12 +136,14 @@ p.p2 {
 .options button {
   position: relative; }
 
-.controls-text {
-  color: white;
-  display: none;
-  font-size: 0.6em;
-  margin-top: 0.5em;
-  text-align: center; }
+.control-instr {
+  display: block;
+  font-size: 0.7em;
+  font-weight: normal;
+  line-height: 1.1;
+  margin-top: 0.4em;
+  /* Color will inherit from parent button */
+}
 
 .options-lower {
   left: 50%;
@@ -201,9 +200,11 @@ button {
   display: inline-block;
   font-size: 22px;
   font-weight: bold;
+  line-height: 1.2; /* Added for main button text */
   margin: 20px 15px 10px;
+  min-height: 4.5em; /* Added min-height */
   outline: none;
-  padding: 15px 32px;
+  padding: 20px 32px;
   position: relative;
   text-align: center;
   text-decoration: none;
