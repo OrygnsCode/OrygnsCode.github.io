@@ -385,7 +385,7 @@ Enemy.prototype.behaviour = function() {
     }
 
     // Check if AI is aiming adequately (angleDiff is set by findAngle called in attack)
-    if (Math.abs(this.angleDiff) < 10) { // Consider target "in sight" for shooting, tunable angle
+    if (Math.abs(this.angleDiff) < 15) { // Consider target "in sight" for shooting, tunable angle
         if (!this.isBurstFiring) { // Start a new burst
             this.isBurstFiring = true;
             this.burstShotCount = 0; // Reset count for the new burst
@@ -751,8 +751,8 @@ function collisionPrevention() {
     player2.vx -= repelX * 5;
     player2.vy -= repelY * 5;
     // Reduce the health of both rockets as a consequence of the impact on the shield
-    player1.health -= 5;
-    player2.health -= 5;
+    player1.health = Math.max(0, player1.health - 5);
+    player2.health = Math.max(0, player2.health - 5);
   }
 }
 
@@ -873,7 +873,8 @@ function updateAsteroid(num) {
       ]);
       // If the proximity is less than the radius then there has been a collision and reduce the health based on the radius of the asteroid
       if (proximityToRocket < asteroids[num].radius) {
-        target.health -= (asteroids[num].radius / 4).toFixed();
+        let damage = parseFloat((asteroids[num].radius / 4).toFixed(2));
+        target.health = Math.max(0, target.health - damage);
         asteroids[num].explode();
         asteroids.splice(num, 1);
         return;
@@ -963,7 +964,7 @@ function updateShot(slug) {
       // If the rocket area is the same as the area calculated above then the shot has hit the target
       if (rocketArea == area) {
         slug.hit = true;
-        target.health--;
+        target.health = Math.max(0, target.health - 1);
       }
     }
     // Only check for collisions with the oposing player
@@ -1015,8 +1016,18 @@ function renderShot() {
 // Show the shield health of both players but only update it if there has been a change
 function renderScore(target) {
   let count = target.score.innerHTML;
-  if (playing && target.health < count) {
-    target.score.innerHTML = target.health;
+  // Ensure health is not displayed as negative, and update if current health is less than displayed or if it's the initial setup.
+  let currentHealthDisplay = Math.max(0, target.health);
+  if (playing && currentHealthDisplay < parseInt(count)) { // Check against integer value of displayed count
+    target.score.innerHTML = currentHealthDisplay;
+  } else if (parseInt(count) === 100 && target.health < 100) { // Handle initial update from 100
+     target.score.innerHTML = currentHealthDisplay;
+  } else if (!playing && target.health === 100) { // Ensure initial display is correct before game starts
+     target.score.innerHTML = 100;
+  }
+  // More robust update: always set to current clamped health if it differs from display
+  if (target.score.innerHTML != currentHealthDisplay.toString()) {
+      target.score.innerHTML = currentHealthDisplay;
   }
 }
 
@@ -1169,8 +1180,8 @@ function startGame() {
     player2.swornEnemy = player1;
   }
   // Reset the scoreboard
-  shield_p1.innerHTML = player1.health;
-  shield_p2.innerHTML = player2.health;
+  shield_p1.innerHTML = Math.max(0, player1.health);
+  shield_p2.innerHTML = Math.max(0, player2.health);
   scoreboard.style.opacity = 1;
   // Hide the explosion
   crash.style.opacity = 0;
