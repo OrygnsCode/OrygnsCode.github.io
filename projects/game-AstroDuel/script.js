@@ -247,8 +247,8 @@ function Enemy(token, role) {
   // Burst firing properties
   this.isBurstFiring = false;
   this.burstShotCount = 0;
-  this.defaultShotsPerBurst = 3; 
-  this.defaultBurstPauseDuration = 20; 
+  this.defaultShotsPerBurst = 3;
+  this.defaultBurstPauseDuration = 20;
   this.burstPauseTime = 0;
   // Reaction delay properties
   this.reactionDelayFrames = 0;
@@ -268,12 +268,12 @@ function Enemy(token, role) {
   this.offensiveEngagementMaxDist = 220;
   this.defensiveEngagementMinDist = 220;
   this.defensiveEngagementMaxDist = 320;
-  this.offensiveFleeMaxProbHealth = 0.45; 
+  this.offensiveFleeMaxProbHealth = 0.45;
   this.defensiveFleeMaxProbHealth = 0.55;
-  this.defaultFleeMinProbHealth = 0.20; 
+  this.defaultFleeMinProbHealth = 0.20;
   // Ramming properties
   this.rammingCooldown = 0;
-  this.minRammingCooldown = 900; 
+  this.minRammingCooldown = 900;
   this.maxRammingCooldown = 1800;
   this.rammingChargeDuration = 0;
   this.maxRammingChargeDuration = 120;
@@ -297,7 +297,8 @@ Enemy.prototype.behaviour = function() {
     // AI continues with its last set rotation/thrust/fire commands as they are not cleared here.
     return;
   }
-  console.log(`AI BEHAVIOUR: Frame başlıyor. ID: ${this.id}, State: ${this.aiState}, Mode: ${this.currentTacticalMode}, Health: ${this.health}, Player Health: ${this.swornEnemy ? this.swornEnemy.health : 'N/A'}, Cooldowns (Mode/Ram): ${this.modeSwitchCooldown}/${this.rammingCooldown}`);
+  console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Mode: " + this.currentTacticalMode + ", Health: " + this.health);
+  // console.log(`AI BEHAVIOUR: Frame başlıyor. ID: ${this.id}, State: ${this.aiState}, Mode: ${this.currentTacticalMode}, Health: ${this.health}, Player Health: ${this.swornEnemy ? this.swornEnemy.health : 'N/A'}, Cooldowns (Mode/Ram): ${this.modeSwitchCooldown}/${this.rammingCooldown}`);
 
   // Ramming Cooldown Management
   if (this.rammingCooldown > 0) {
@@ -320,7 +321,7 @@ Enemy.prototype.behaviour = function() {
 
     // Trigger reaction delay for the mode switch itself
     this.reactionDelayFrames = Math.floor(Math.random() * (this.maxReactionDelay - this.minReactionDelay + 1)) + this.minReactionDelay;
-    
+
     // Reset action flags as a new mode is engaged
     this.rotateLeft = false;
     this.rotateRight = false;
@@ -379,6 +380,7 @@ Enemy.prototype.behaviour = function() {
 
   // AI shooting logic including burst fire
   const manageShootingLogic = function() {
+    console.log("AI_DEBUG_LOG: --- manageShootingLogic START --- ID: " + this.id + ", AngleDiff: " + (this.angleDiff ? this.angleDiff.toFixed(2) : "N/A") + ", Pause: " + this.burstPauseTime + ", Bursting: " + this.isBurstFiring);
     if (this.burstPauseTime > 0) {
         this.burstPauseTime--;
         this.fire = false;
@@ -417,8 +419,8 @@ Enemy.prototype.behaviour = function() {
     } else {
         this.fire = false; // Not in a burst, not firing.
     }
-    // Summary log for manageShootingLogic
-    console.log(`AI SHOOT_LOGIC Final: ID=${this.id}, Fire=${this.fire}, angleDiff=${this.angleDiff ? this.angleDiff.toFixed(2) : 'N/A'}, burstPause=${this.burstPauseTime}, isBursting=${this.isBurstFiring}, burstCount=${this.burstShotCount}, shotTimeout=${this.shotTimeout}, Mode=${this.currentTacticalMode}`);
+    // Summary log for manageShootingLogic (commented out for this specific test)
+    // console.log(`AI SHOOT_LOGIC Final: ID=${this.id}, Fire=${this.fire}, angleDiff=${this.angleDiff ? this.angleDiff.toFixed(2) : 'N/A'}, burstPause=${this.burstPauseTime}, isBursting=${this.isBurstFiring}, burstCount=${this.burstShotCount}, shotTimeout=${this.shotTimeout}, Mode=${this.currentTacticalMode}`);
   }.bind(this);
 
 
@@ -452,7 +454,7 @@ Enemy.prototype.behaviour = function() {
         if (this.currentTacticalMode === "DEFENSIVE") {
             // Defensive mode: Actively try to create distance
             this.fire = false; // Optional: pause firing to focus on repositioning
-            
+
             // Calculate a point directly away from the player
             const backOffDist = 50; // How far to project the immediate back-off point
             const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
@@ -559,7 +561,7 @@ Enemy.prototype.behaviour = function() {
       const asteroidThreat = this.closestAsteroidThreat;
       if (obstacles && asteroidThreat) {
           const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
-          if (asteroidDist < 100 && asteroidDist < playerDist) { 
+          if (asteroidDist < 100 && asteroidDist < playerDist) {
               determinedNextState = "DODGING_ASTEROID";
           }
       }
@@ -578,7 +580,7 @@ Enemy.prototype.behaviour = function() {
 
       if (canConsiderRam) {
           determinedNextState = "RAMMING";
-          this.rammingChargeDuration = this.maxRammingChargeDuration; 
+          this.rammingChargeDuration = this.maxRammingChargeDuration;
           this.rammingCooldown = Math.floor(Math.random() * (this.maxRammingCooldown - this.minRammingCooldown + 1)) + this.minRammingCooldown;
       }
   }
@@ -608,8 +610,8 @@ Enemy.prototype.behaviour = function() {
       break;
     case "FLEEING":
       flee(this.closestPlayerTarget);
-      if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to FLEEING state.`); }
-      this.fire = false; 
+      // if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to FLEEING state.`); }
+      this.fire = false;
       break;
     case "DODGING_ASTEROID":
       let didDodge = false;
@@ -621,7 +623,7 @@ Enemy.prototype.behaviour = function() {
           attack(this.closestPlayerTarget);
       }
       if (didDodge) { // Only force fire to false if actively dodging.
-           if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to DODGING state.`); }
+           // if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to DODGING state.`); }
            this.fire = false;
       }
       break;
@@ -629,7 +631,7 @@ Enemy.prototype.behaviour = function() {
       this.fire = false; // No shooting while ramming
 
       if (this.rammingChargeDuration > 0 && this.distanceToPlayer < (this.offensiveEngagementMaxDist * 1.5)) {
-          const predictionFactor = 10; 
+          const predictionFactor = 10;
           const predictedX = this.swornEnemy.x + this.swornEnemy.vx * predictionFactor;
           const predictedY = this.swornEnemy.y + this.swornEnemy.vy * predictionFactor;
 
@@ -640,8 +642,8 @@ Enemy.prototype.behaviour = function() {
           this.rammingChargeDuration--;
       } else {
           // Ramming charge ended
-          this.aiState = "ATTACKING"; 
-          this.rammingChargeDuration = 0; 
+          this.aiState = "ATTACKING";
+          this.rammingChargeDuration = 0;
       }
       break;
     default:
@@ -723,9 +725,9 @@ function updateRocket() {
       this.shots.push(
         new Shot(position[0][0], position[0][1], shotCreationDirection, this.id)
       );
-      
+
       if (this instanceof Enemy) {
-        console.log(`AI FIRED SHOT: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, Bursting=${this.isBurstFiring}, BurstCount=${this.burstShotCount + 1}, TargetAngleDiff=${this.angleDiff}`);
+        // console.log(`AI FIRED SHOT: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, Bursting=${this.isBurstFiring}, BurstCount=${this.burstShotCount + 1}, TargetAngleDiff=${this.angleDiff}`);
         if (this.isBurstFiring) { // burstShotCount is incremented here, so log shows count *before* this shot
             // this.burstShotCount++; // This was the original position, moved below for correct logging
         }
@@ -736,7 +738,7 @@ function updateRocket() {
       }
     } else { // AI wants to fire, but weapon not ready
       if (this instanceof Enemy) {
-        console.log(`AI WANTED TO FIRE but weapon not ready: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, shotTimeout=${this.shotTimeout}`);
+        // console.log(`AI WANTED TO FIRE but weapon not ready: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, shotTimeout=${this.shotTimeout}`);
       }
       // Otherwise increase the timeout
       this.shotTimeout++;
