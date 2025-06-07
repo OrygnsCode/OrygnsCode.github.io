@@ -116,7 +116,7 @@ p.p2 {
 
 .vs {
   font-size: 5em;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   padding: 0 0 0 0.2em; }
 
 .toggle {
@@ -140,7 +140,8 @@ p.p2 {
   display: block;
   font-size: 0.7em;
   font-weight: normal;
-  margin-top: 0.3em;
+  line-height: 1.1;
+  margin-top: 0.4em;
   /* Color will inherit from parent button */
 }
 
@@ -199,9 +200,11 @@ button {
   display: inline-block;
   font-size: 22px;
   font-weight: bold;
+  line-height: 1.2; /* Added for main button text */
   margin: 20px 15px 10px;
+  min-height: 4.5em; /* Added min-height */
   outline: none;
-  padding: 20px 32px; /* Increased top/bottom padding */
+  padding: 20px 32px;
   position: relative;
   text-align: center;
   text-decoration: none;
