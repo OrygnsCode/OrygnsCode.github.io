@@ -247,8 +247,8 @@ function Enemy(token, role) {
   // Burst firing properties
   this.isBurstFiring = false;
   this.burstShotCount = 0;
-  this.defaultShotsPerBurst = 3;
-  this.defaultBurstPauseDuration = 20;
+  this.defaultShotsPerBurst = 3; 
+  this.defaultBurstPauseDuration = 20; 
   this.burstPauseTime = 0;
   // Reaction delay properties
   this.reactionDelayFrames = 0;
@@ -268,12 +268,12 @@ function Enemy(token, role) {
   this.offensiveEngagementMaxDist = 220;
   this.defensiveEngagementMinDist = 220;
   this.defensiveEngagementMaxDist = 320;
-  this.offensiveFleeMaxProbHealth = 0.45;
+  this.offensiveFleeMaxProbHealth = 0.45; 
   this.defensiveFleeMaxProbHealth = 0.55;
-  this.defaultFleeMinProbHealth = 0.20;
+  this.defaultFleeMinProbHealth = 0.20; 
   // Ramming properties
   this.rammingCooldown = 0;
-  this.minRammingCooldown = 900;
+  this.minRammingCooldown = 900; 
   this.maxRammingCooldown = 1800;
   this.rammingChargeDuration = 0;
   this.maxRammingChargeDuration = 120;
@@ -319,7 +319,7 @@ Enemy.prototype.behaviour = function() {
 
     // Trigger reaction delay for the mode switch itself
     this.reactionDelayFrames = Math.floor(Math.random() * (this.maxReactionDelay - this.minReactionDelay + 1)) + this.minReactionDelay;
-
+    
     // Reset action flags as a new mode is engaged
     this.rotateLeft = false;
     this.rotateRight = false;
@@ -449,7 +449,7 @@ Enemy.prototype.behaviour = function() {
         if (this.currentTacticalMode === "DEFENSIVE") {
             // Defensive mode: Actively try to create distance
             this.fire = false; // Optional: pause firing to focus on repositioning
-
+            
             // Calculate a point directly away from the player
             const backOffDist = 50; // How far to project the immediate back-off point
             const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
@@ -556,7 +556,7 @@ Enemy.prototype.behaviour = function() {
       const asteroidThreat = this.closestAsteroidThreat;
       if (obstacles && asteroidThreat) {
           const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
-          if (asteroidDist < 100 && asteroidDist < playerDist) {
+          if (asteroidDist < 100 && asteroidDist < playerDist) { 
               determinedNextState = "DODGING_ASTEROID";
           }
       }
@@ -575,7 +575,7 @@ Enemy.prototype.behaviour = function() {
 
       if (canConsiderRam) {
           determinedNextState = "RAMMING";
-          this.rammingChargeDuration = this.maxRammingChargeDuration;
+          this.rammingChargeDuration = this.maxRammingChargeDuration; 
           this.rammingCooldown = Math.floor(Math.random() * (this.maxRammingCooldown - this.minRammingCooldown + 1)) + this.minRammingCooldown;
       }
   }
@@ -615,7 +615,7 @@ Enemy.prototype.behaviour = function() {
       this.fire = false; // No shooting while ramming
 
       if (this.rammingChargeDuration > 0 && this.distanceToPlayer < (this.offensiveEngagementMaxDist * 1.5)) {
-          const predictionFactor = 10;
+          const predictionFactor = 10; 
           const predictedX = this.swornEnemy.x + this.swornEnemy.vx * predictionFactor;
           const predictedY = this.swornEnemy.y + this.swornEnemy.vy * predictionFactor;
 
@@ -626,8 +626,8 @@ Enemy.prototype.behaviour = function() {
           this.rammingChargeDuration--;
       } else {
           // Ramming charge ended
-          this.aiState = "ATTACKING";
-          this.rammingChargeDuration = 0;
+          this.aiState = "ATTACKING"; 
+          this.rammingChargeDuration = 0; 
       }
       break;
     default:
