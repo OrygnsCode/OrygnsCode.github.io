@@ -445,11 +445,22 @@ Enemy.prototype.behaviour = function() {
     } else { // Aiming is relatively good
       if (this.distanceToPlayer > engagementMaxDist) { // Too far, get closer
         this.thruster = true;
-      } else if (this.distanceToPlayer < engagementMinDist) { // Too close
+      } else if (this.distanceToPlayer < engagementMinDist) { // Player is too close
         if (this.currentTacticalMode === "DEFENSIVE") {
-          this.thruster = false; // In defensive mode, stop or ideally back off (not implemented)
+            // Defensive mode: Actively try to create distance
+            this.fire = false; // Optional: pause firing to focus on repositioning
+            
+            // Calculate a point directly away from the player
+            const backOffDist = 50; // How far to project the immediate back-off point
+            const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
+            const backOffTargetX = this.x - backOffDist * Math.cos(angleToPlayer);
+            const backOffTargetY = this.y - backOffDist * Math.sin(angleToPlayer);
+
+            findAngle(backOffTargetX, backOffTargetY); // Aim towards this back-off point
+            // turnToFace() is called by the main attack logic after this block
+            this.thruster = true; // Thrust to move to the back-off point
         } else { // Offensive mode and too close
-          this.thruster = false; // Hold position or slight adjustment
+            this.thruster = false; // Hold position, focus on shooting if possible
         }
       } else { // Optimal distance for current mode
         this.thruster = false; // Hold position
@@ -873,7 +884,8 @@ function updateAsteroid(num) {
       ]);
       // If the proximity is less than the radius then there has been a collision and reduce the health based on the radius of the asteroid
       if (proximityToRocket < asteroids[num].radius) {
-        let damage = parseFloat((asteroids[num].radius / 4).toFixed(2));
+        let rawDamage = asteroids[num].radius / 4;
+        let damage = Math.round(rawDamage); // Round to the nearest whole number
         target.health = Math.max(0, target.health - damage);
         asteroids[num].explode();
         asteroids.splice(num, 1);
