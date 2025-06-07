@@ -179,6 +179,18 @@ a.start-button {
   /* Inherits background and margin-top from .start-button */
 }
 
+a.start-button:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+#backButton {
+  display: flex;
+  align-items: center; /* For vertical centering of content */
+  justify-content: center; /* For horizontal centering of content */
+  text-align: center; /* To ensure the text itself is centered if it wraps */
+  /* It will still inherit other styles like background, color, font, padding, border from a.start-button and .start-button */
+}
+
 .popup-results {
   display: none;
   left: 50%;
