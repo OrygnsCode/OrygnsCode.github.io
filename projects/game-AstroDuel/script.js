@@ -21,6 +21,10 @@ const playerOneToggle = document.querySelector("#playerOne");
 const playerTwoToggle = document.querySelector("#playerTwo");
 // There is also a toggle button for the asteroids to create variety in the game
 const asteroidsToggle = document.querySelector("#obstacles");
+
+// Control instruction text
+const playerOneControlsText = "Controls W, A, S, D, Z to fire";
+const playerTwoControlsText = "Controls ↑, ↓, ←, →, Space to shoot";
 // The gutter hides the new asteroids being added to the game so it is best to keep the rocket on screen to avoid being hit
 const gutter = 150;
 // For the popup boxes there is a background overlay
@@ -932,12 +936,12 @@ function switchObstacles() {
 // Button event listeners
 playerOneToggle.addEventListener("click", function() {
   playerOne = toggleOption(playerOne);
-  this.textContent = switchPlayer(playerOne);
+  this.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
 });
 
 playerTwoToggle.addEventListener("click", function() {
   playerTwo = toggleOption(playerTwo);
-  this.textContent = switchPlayer(playerTwo);
+  this.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
 });
 asteroidsToggle.addEventListener("click", function() {
   obstacles = toggleOption(obstacles);
@@ -1137,6 +1141,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
   placeElements();
   // Open the popup UI for the player
   openPopup();
+
+  // Set initial button content based on default player types
+  playerOneToggle.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
+  playerTwoToggle.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
+
   // Define keyboard functions
   document.addEventListener(
     "keydown",
