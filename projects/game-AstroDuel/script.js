@@ -239,6 +239,46 @@ function Enemy(token, role) {
   this.closestDistance = 0;
   // Create a random reaction if the target is too close
   this.fightOrFlight = 0;
+  // AI state
+  this.aiState = "ATTACKING";
+  this.closestPlayerTarget = null;
+  this.closestAsteroidThreat = null;
+  this.distanceToPlayer = 0;
+  // Burst firing properties
+  this.isBurstFiring = false;
+  this.burstShotCount = 0;
+  this.defaultShotsPerBurst = 3;
+  this.defaultBurstPauseDuration = 20;
+  this.burstPauseTime = 0;
+  // Reaction delay properties
+  this.reactionDelayFrames = 0;
+  this.minReactionDelay = 3; // Frames, tunable
+  this.maxReactionDelay = 8; // Frames, tunable
+  // Tactical mode properties
+  this.currentTacticalMode = "OFFENSIVE"; // Default mode
+  this.modeSwitchCooldown = 0; // Frames until next possible mode switch
+  this.minModeDuration = 300; // Min frames AI stays in one mode (e.g., 5 seconds at 60fps)
+  this.maxModeDuration = 600; // Max frames AI stays in one mode (e.g., 10 seconds at 60fps)
+  // Mode-specific parameters
+  this.offensiveShotsPerBurst = 4;
+  this.offensiveBurstPauseDuration = 15;
+  this.defensiveShotsPerBurst = 2;
+  this.defensiveBurstPauseDuration = 30;
+  this.offensiveEngagementMinDist = 120;
+  this.offensiveEngagementMaxDist = 220;
+  this.defensiveEngagementMinDist = 220;
+  this.defensiveEngagementMaxDist = 320;
+  this.offensiveFleeMaxProbHealth = 0.45;
+  this.defensiveFleeMaxProbHealth = 0.55;
+  this.defaultFleeMinProbHealth = 0.20;
+  // Ramming properties
+  this.rammingCooldown = 0;
+  this.minRammingCooldown = 900;
+  this.maxRammingCooldown = 1800;
+  this.rammingChargeDuration = 0;
+  this.maxRammingChargeDuration = 120;
+  this.ramHealthThreshold = 40;
+  this.ramConsiderHealthAdvantage = 15;
 }
 
 // Setup the Enemy prototype
@@ -251,16 +291,50 @@ Object.defineProperty(Enemy.prototype, "constructor", {
 
 // Give the enemy player a set of functions which creates a behaviour
 Enemy.prototype.behaviour = function() {
+  // Apply reaction delay
+  if (this.reactionDelayFrames > 0) {
+    this.reactionDelayFrames--;
+    // AI continues with its last set rotation/thrust/fire commands as they are not cleared here.
+    return;
+  }
+
+  // Ramming Cooldown Management
+  if (this.rammingCooldown > 0) {
+    this.rammingCooldown--;
+  }
+
+  // Tactical Mode Switching Logic
+  if (this.modeSwitchCooldown > 0) {
+    this.modeSwitchCooldown--;
+  }
+
+  if (this.modeSwitchCooldown <= 0) {
+    // Time to consider a mode switch
+    const newMode = (this.currentTacticalMode === "OFFENSIVE") ? "DEFENSIVE" : "OFFENSIVE";
+    this.currentTacticalMode = newMode;
+    // console.log(this.id, "switched to tactical mode:", this.currentTacticalMode); // For debugging
+
+    // Set cooldown for the next switch
+    this.modeSwitchCooldown = Math.floor(Math.random() * (this.maxModeDuration - this.minModeDuration + 1)) + this.minModeDuration;
+
+    // Trigger reaction delay for the mode switch itself
+    this.reactionDelayFrames = Math.floor(Math.random() * (this.maxReactionDelay - this.minReactionDelay + 1)) + this.minReactionDelay;
+
+    // Reset action flags as a new mode is engaged
+    this.rotateLeft = false;
+    this.rotateRight = false;
+    this.thruster = false;
+    this.fire = false;
+    return; // Exit behaviour early, action will pick up after delay
+  }
+
   // Keep the direction within 360 degrees
   if (this.direction > 360) {
     this.direction -= 360;
   } else if (this.direction < 0) {
     this.direction += 360;
   }
-  // If the enemy is "safe" then give it a fight or flight instinct
-  if (this.safe) {
-    this.fightOrFlight = randomise(2);
-  }
+
   // Set a function to create random numbers to make less predictable behaviour
   function randomise(max) {
     return Math.floor(Math.random() * max);
@@ -271,16 +345,12 @@ Enemy.prototype.behaviour = function() {
     this.newPosition.y = randomise(canvas.height);
   }.bind(this);
 
-  // Set function to find the angle of the target from the enemy's rocket's position
-  const findAngle = function(target) {
-    const dx = this.x - target.x;
-    const dy = this.y - target.y;
+  // Set function to find the angle to the given coordinates from the enemy's rocket's position
+  const findAngle = function(targetX, targetY) {
+    const dx = this.x - targetX;
+    const dy = this.y - targetY;
     let angle = Math.atan2(dy, dx);
-    if (this.safe) {
-      this.newPosition.x = this.x - dx;
-      this.newPosition.y = this.y - dy;
-    }
-    // Set the newDirection based on the calculated angle of the given target
+    // Set the newDirection based on the calculated angle
     this.newDirection = 180 - angle * (180 / Math.PI);
     // The enemy needs to work out the quickest way to turn to face the target
     this.angleDiff = this.newDirection - this.direction;
@@ -291,154 +361,267 @@ Enemy.prototype.behaviour = function() {
     }
     this.angleDiff = this.angleDiff.toFixed();
   }.bind(this);
-  // Set a function to turn the rocket to face the target
-  const turnToFace = function(target) {
-    if (this.targetFound) {
-      return;
-    } else if (this.angleDiff > 5) {
+
+  // Set a function to turn the rocket to face the calculated angleDiff
+  const turnToFace = function() {
+    if (this.angleDiff > 5) {
       this.rotateLeft = true;
       this.rotateRight = false;
-      return;
-    } else if (this.angleDiff < 5) {
+    } else if (this.angleDiff < -5) { // Corrected condition for turning right
       this.rotateLeft = false;
       this.rotateRight = true;
-      return;
     } else {
-      this.targetFound = true;
       this.rotateLeft = false;
       this.rotateRight = false;
-      return;
     }
   }.bind(this);
-  // Try to mimic human behaviour so only shoot if the target is in range
-  const shootIfInRange = function() {
-    if (this.angleDiff < 7 && this.angleDiff > -7) {
-      this.fire = true;
+
+  // AI shooting logic including burst fire
+  const manageShootingLogic = function() {
+    if (this.burstPauseTime > 0) {
+        this.burstPauseTime--;
+        this.fire = false;
+        return;
+    }
+
+    // Check if AI is aiming adequately (angleDiff is set by findAngle called in attack)
+    if (Math.abs(this.angleDiff) < 15) { // Consider target "in sight" for shooting, tunable angle
+        if (!this.isBurstFiring) { // Start a new burst
+            this.isBurstFiring = true;
+            this.burstShotCount = 0; // Reset count for the new burst
+        }
+    } else { // Target not in sight for shooting
+        if (this.isBurstFiring) { // Was bursting, but lost preferred angle
+            this.isBurstFiring = false; // Stop current burst
+             // Use mode-specific pause duration
+            this.burstPauseTime = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveBurstPauseDuration : this.defensiveBurstPauseDuration;
+        }
+        this.fire = false;
+        return;
+    }
+
+    let currentShots = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveShotsPerBurst : this.defensiveShotsPerBurst;
+    let currentPause = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveBurstPauseDuration : this.defensiveBurstPauseDuration;
+
+    if (this.isBurstFiring) {
+        if (this.burstShotCount < currentShots) {
+            // AI intends to fire. Actual shot depends on rocket's own shotTimeout.
+            this.fire = true;
+            // Note: burstShotCount is incremented in updateRocket when a shot is actually made.
+        } else { // Burst is complete
+            this.isBurstFiring = false;
+            this.fire = false;
+            this.burstPauseTime = currentPause; // Start pause after burst
+        }
     } else {
-      this.fire = false;
+        this.fire = false; // Not in a burst, not firing.
     }
   }.bind(this);
-  // Vary the thruster usage
-  const move = function() {
-    if (this.moveInterval <= 0) {
-      if (this.thruster == false) {
-        this.thruster = true;
-        this.moveInterval = randomise(12) + 6;
-      } else {
-        this.thruster = false;
-        this.moveInterval = randomise(30) + 80;
-      }
-    } else {
-      this.moveInterval--;
-    }
-  }.bind(this);
+
+
   // Set the attack function in bursts
   const attack = function(target) {
     if (this.searchInterval <= 0) {
-      this.targetFound = false;
-      this.fire = false;
+      this.fire = false; // Stop firing when re-evaluating
       this.searchInterval = randomise(30) + 35;
     } else {
       this.searchInterval--;
     }
-    // First find the angle
-    findAngle(target);
-    // Then shoot if in range
-    if (this.targetFound) {
-      shootIfInRange();
-      // Don't move towards the target
-      this.thruster = false;
-    } else {
-      // Otherwise move towards the target
-      turnToFace(target);
-      this.thruster = true;
-    }
-    move();
-  }.bind(this);
 
-  // Find a new direction
-  const changeDirection = function() {
-    randomPosition();
-    this.safe = false;
+    const predictionFactor = 12; // Tunable: how many frames ahead to predict
+    const predictedX = target.x + target.vx * predictionFactor;
+    const predictedY = target.y + target.vy * predictionFactor;
+
+    findAngle(predictedX, predictedY);
+    turnToFace();
+    manageShootingLogic(); // Replaced shootIfInRange
+
+    // Thruster logic based on tactical mode
+    let engagementMinDist = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveEngagementMinDist : this.defensiveEngagementMinDist;
+    let engagementMaxDist = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveEngagementMaxDist : this.defensiveEngagementMaxDist;
+
+    if (Math.abs(this.angleDiff) > 15) { // If aiming is significantly off, prioritize turning
+      this.thruster = true;
+    } else { // Aiming is relatively good
+      if (this.distanceToPlayer > engagementMaxDist) { // Too far, get closer
+        this.thruster = true;
+      } else if (this.distanceToPlayer < engagementMinDist) { // Too close
+        if (this.currentTacticalMode === "DEFENSIVE") {
+          this.thruster = false; // In defensive mode, stop or ideally back off (not implemented)
+        } else { // Offensive mode and too close
+          this.thruster = false; // Hold position or slight adjustment
+        }
+      } else { // Optimal distance for current mode
+        this.thruster = false; // Hold position
+      }
+    }
   }.bind(this);
 
   // Define a flee function
-  const flee = function() {
-    // If the enemy was "safe" then it should change direction!
-    if (this.safe) {
-      // To help change direction there should be a new position
-      changeDirection();
-      // The enemy needs to use the thruster to flee
-      this.thruster = true;
-    }
-    // The enemy should then find out what the new angle is
-    findAngle(this.newPosition);
-    // The enemy turns to face the new direction and moves towards it
-    turnToFace(this.newPosition);
-    move();
+  const flee = function(threat) {
+    const fleeDist = 200; // How far to project the escape point
+    const angleToThreat = Math.atan2(threat.y - this.y, threat.x - this.x);
+    const fleeX = this.x - fleeDist * Math.cos(angleToThreat);
+    const fleeY = this.y - fleeDist * Math.sin(angleToThreat);
+
+    findAngle(fleeX, fleeY);
+    turnToFace();
+    this.thruster = true; // Always move when fleeing
+
     // The panic interval gives the chance to find a new position if the enemy doesn't feel like it can find a "safe" position
     if (this.panicInterval <= 0) {
-      // Setting safe to true will cause the algoritm to find a new position on the next iteration
-      this.safe = true;
-      // Then the panic interval should be reset to a new randomised value
+      // this.safe was part of older logic, consider if it's still needed or if state changes cover this.
+      // For now, mimicking previous reset.
       this.panicInterval = randomise(60) + 30;
     } else {
-      // Otherwise the panic interval is just counting down to zero
       this.panicInterval--;
     }
   }.bind(this);
-  // Define an ability for the Enemy to find the closest target
-  const findClosest = function(target) {
-    // The following calculates the distance between the target and the Enemy
-    let dist_x = this.x - target.x;
-    let dist_y = this.y - target.y;
-    this.proximity = Math.sqrt(dist_x * dist_x + dist_y * dist_y);
+
+  const dodge = function(asteroidThreat) {
+    const dodgeDist = 150; // How far to project the escape point
+    const angleToAsteroid = Math.atan2(asteroidThreat.y - this.y, asteroidThreat.x - this.x);
+    const dodgeX = this.x - dodgeDist * Math.cos(angleToAsteroid);
+    const dodgeY = this.y - dodgeDist * Math.sin(angleToAsteroid);
+
+    findAngle(dodgeX, dodgeY);
+    turnToFace();
+    this.thruster = true; // Always move when dodging
   }.bind(this);
-  // While checking for the closest distance we need to set the distance which is the closest
-  const setClosest = function() {
-    this.closestDistance = this.proximity;
-  }.bind(this);
-  // First option should always be the sworn enemy
-  findClosest(this.swornEnemy);
-  // Set this as a default value
-  this.closestTarget = this.swornEnemy;
-  // Set the distance
-  setClosest();
-  // Make similar checks on the other objects in the game
-  if (obstacles) {
-    for (let i = 0; i < asteroids.length; i++) {
-      findClosest(asteroids[i]);
-      if (this.proximity < this.closestDistance) {
-        this.closestTarget = asteroids[i];
-        setClosest();
+
+
+  // Define an ability for the Enemy to find the closest entities
+  const findClosestEntities = function() {
+    // Calculate distance to the sworn enemy (player)
+    let dist_x_player = this.x - this.swornEnemy.x;
+    let dist_y_player = this.y - this.swornEnemy.y;
+    this.distanceToPlayer = Math.sqrt(dist_x_player * dist_x_player + dist_y_player * dist_y_player);
+    this.closestPlayerTarget = this.swornEnemy; // swornEnemy is always the player
+
+    this.closestAsteroidThreat = null;
+    let closestAsteroidDistance = Infinity;
+
+    if (obstacles) {
+      for (let i = 0; i < asteroids.length; i++) {
+        let dist_x_asteroid = this.x - asteroids[i].x;
+        let dist_y_asteroid = this.y - asteroids[i].y;
+        let currentAsteroidDistance = Math.sqrt(dist_x_asteroid * dist_x_asteroid + dist_y_asteroid * dist_y_asteroid);
+        if (currentAsteroidDistance < closestAsteroidDistance) {
+          closestAsteroidDistance = currentAsteroidDistance;
+          this.closestAsteroidThreat = asteroids[i];
+        }
       }
     }
+    // Overall closestDistance for legacy compatibility if needed, but prefer specific distances
+    this.closestDistance = this.distanceToPlayer;
+  }.bind(this);
+
+  // Determine AI State
+  findClosestEntities();
+
+  let determinedNextState = null;
+
+  if (this.health < 20) { // Critically low health
+      determinedNextState = "FLEEING";
+  } else { // Not critically low, consider mode-specific flee probability
+      const healthPercentage = this.health / 100;
+      const modeSpecificFleeMaxProbHealth = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveFleeMaxProbHealth : this.defensiveFleeMaxProbHealth;
+      const minProbHealth = this.defaultFleeMinProbHealth; // Using the default min threshold
+      let fleeProbability = 0;
+
+      if (this.health < modeSpecificFleeMaxProbHealth * 100) {
+           fleeProbability = (modeSpecificFleeMaxProbHealth - healthPercentage) / (modeSpecificFleeMaxProbHealth - minProbHealth);
+           fleeProbability = Math.max(0, Math.min(1, fleeProbability)); // Clamp
+      }
+
+      if (Math.random() < fleeProbability) {
+          determinedNextState = "FLEEING";
+      }
   }
-  // Define what the Enemy should do with the variables it has calculated
-  if (this.closestDistance < 150) {
-    this.fire = true;
-    // If too close to the target then it should consider to attack or flee
-    if (this.fightOrFlight === 0) {
-      attack(this.closestTarget);
-    } else {
-      flee();
-    }
-    // From a bit further away the more likely option could be to flee
-  } else if (this.closestDistance < 300 || !this.safe) {
-    flee();
-    // Fire in case things get in the way
-    this.fire = true;
-    // If the Enemy feels safe then it will attack
-  } else if (this.safe) {
-    // Switch off the fire option
-    this.fire = false;
-    attack(this.closestTarget);
-    // If there is some distance between the Enemy and the target then it can consider itself "safe" and attack from a distance
-  } else if (this.closestDistance > 500) {
-    this.safe = true;
-    this.fire = false;
-    this.thruster = false;
-    attack(this.closestTarget);
+
+  // If not already decided to flee based on health probability:
+  if (!determinedNextState) {
+      const playerDist = this.distanceToPlayer;
+      const asteroidThreat = this.closestAsteroidThreat;
+      if (obstacles && asteroidThreat) {
+          const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
+          if (asteroidDist < 100 && asteroidDist < playerDist) {
+              determinedNextState = "DODGING_ASTEROID";
+          }
+      }
+  }
+
+  // Ramming Condition Check (before defaulting to ATTACKING)
+  if (!determinedNextState && this.rammingCooldown <= 0 && this.health >= this.ramHealthThreshold) {
+      const playerHealth = this.swornEnemy.health;
+      let canConsiderRam = false;
+
+      if (this.health > playerHealth + this.ramConsiderHealthAdvantage) {
+          canConsiderRam = true;
+      } else if (this.distanceToPlayer < this.offensiveEngagementMaxDist && Math.random() < 0.05) {
+           canConsiderRam = true;
+      }
+
+      if (canConsiderRam) {
+          determinedNextState = "RAMMING";
+          this.rammingChargeDuration = this.maxRammingChargeDuration;
+          this.rammingCooldown = Math.floor(Math.random() * (this.maxRammingCooldown - this.minRammingCooldown + 1)) + this.minRammingCooldown;
+      }
+  }
+
+  // Default to ATTACKING if no other state was chosen
+  if (!determinedNextState) {
+      determinedNextState = "ATTACKING";
+  }
+
+  // Apply reaction delay if state is changing
+  if (this.aiState !== determinedNextState) {
+      this.aiState = determinedNextState;
+      this.reactionDelayFrames = Math.floor(Math.random() * (this.maxReactionDelay - this.minReactionDelay + 1)) + this.minReactionDelay;
+      // When delay is set, clear any pending rotation/thrust/fire from previous state logic
+      this.rotateLeft = false;
+      this.rotateRight = false;
+      this.thruster = false;
+      this.fire = false;
+      return; // Exit behaviour early, action will pick up after delay
+  }
+
+  // Execute behavior based on AI state (if no reaction delay from state change)
+  switch (this.aiState) {
+    case "ATTACKING":
+      // console.log(this.id, "is ATTACKING", this.closestPlayerTarget.id);
+      attack(this.closestPlayerTarget);
+      break;
+    case "FLEEING":
+      // console.log(this.id, "is FLEEING from", this.closestPlayerTarget.id);
+      flee(this.closestPlayerTarget);
+      break;
+    case "DODGING_ASTEROID":
+      // console.log(this.id, "is DODGING_ASTEROID", this.closestAsteroidThreat);
+      dodge(this.closestAsteroidThreat);
+      break;
+    case "RAMMING":
+      this.fire = false; // No shooting while ramming
+
+      if (this.rammingChargeDuration > 0 && this.distanceToPlayer < (this.offensiveEngagementMaxDist * 1.5)) {
+          const predictionFactor = 10;
+          const predictedX = this.swornEnemy.x + this.swornEnemy.vx * predictionFactor;
+          const predictedY = this.swornEnemy.y + this.swornEnemy.vy * predictionFactor;
+
+          findAngle(predictedX, predictedY);
+          turnToFace();
+          this.thruster = true; // Full thrust
+
+          this.rammingChargeDuration--;
+      } else {
+          // Ramming charge ended
+          this.aiState = "ATTACKING";
+          this.rammingChargeDuration = 0;
+      }
+      break;
+    default:
+      // console.log(this.id, "is in default ATTACKING state");
+      attack(this.closestPlayerTarget);
   }
 };
 
@@ -505,12 +688,21 @@ function updateRocket() {
     if (this.shotTimeout >= shootingRate) {
       // Get the points for the rocket to work out where the rocket is firing from
       let position = this.getPoints();
+      let shotCreationDirection = this.direction;
+      if (this instanceof Enemy) {
+        const maxAccuracyOffset = 4; // Degrees, tunable
+        const accuracyError = (Math.random() - 0.5) * 2 * maxAccuracyOffset;
+        shotCreationDirection += accuracyError;
+      }
       // Add a new shot taking into account the direction the shot is being fired and who fired the shot
       this.shots.push(
-        new Shot(position[0][0], position[0][1], this.direction, this.id)
+        new Shot(position[0][0], position[0][1], shotCreationDirection, this.id)
       );
       // Reset the timeout
       this.shotTimeout = 0;
+      if (this instanceof Enemy && this.isBurstFiring) {
+        this.burstShotCount++;
+      }
     } else {
       // Otherwise increase the timeout
       this.shotTimeout++;
@@ -559,8 +751,8 @@ function collisionPrevention() {
     player2.vx -= repelX * 5;
     player2.vy -= repelY * 5;
     // Reduce the health of both rockets as a consequence of the impact on the shield
-    player1.health -= 5;
-    player2.health -= 5;
+    player1.health = Math.max(0, player1.health - 5);
+    player2.health = Math.max(0, player2.health - 5);
   }
 }
 
@@ -681,7 +873,8 @@ function updateAsteroid(num) {
       ]);
       // If the proximity is less than the radius then there has been a collision and reduce the health based on the radius of the asteroid
       if (proximityToRocket < asteroids[num].radius) {
-        target.health -= (asteroids[num].radius / 4).toFixed();
+        let damage = parseFloat((asteroids[num].radius / 4).toFixed(2));
+        target.health = Math.max(0, target.health - damage);
         asteroids[num].explode();
         asteroids.splice(num, 1);
         return;
@@ -771,7 +964,7 @@ function updateShot(slug) {
       // If the rocket area is the same as the area calculated above then the shot has hit the target
       if (rocketArea == area) {
         slug.hit = true;
-        target.health--;
+        target.health = Math.max(0, target.health - 1);
       }
     }
     // Only check for collisions with the oposing player
@@ -823,8 +1016,18 @@ function renderShot() {
 // Show the shield health of both players but only update it if there has been a change
 function renderScore(target) {
   let count = target.score.innerHTML;
-  if (playing && target.health < count) {
-    target.score.innerHTML = target.health;
+  // Ensure health is not displayed as negative, and update if current health is less than displayed or if it's the initial setup.
+  let currentHealthDisplay = Math.max(0, target.health);
+  if (playing && currentHealthDisplay < parseInt(count)) { // Check against integer value of displayed count
+    target.score.innerHTML = currentHealthDisplay;
+  } else if (parseInt(count) === 100 && target.health < 100) { // Handle initial update from 100
+     target.score.innerHTML = currentHealthDisplay;
+  } else if (!playing && target.health === 100) { // Ensure initial display is correct before game starts
+     target.score.innerHTML = 100;
+  }
+  // More robust update: always set to current clamped health if it differs from display
+  if (target.score.innerHTML != currentHealthDisplay.toString()) {
+      target.score.innerHTML = currentHealthDisplay;
   }
 }
 
@@ -977,8 +1180,8 @@ function startGame() {
     player2.swornEnemy = player1;
   }
   // Reset the scoreboard
-  shield_p1.innerHTML = player1.health;
-  shield_p2.innerHTML = player2.health;
+  shield_p1.innerHTML = Math.max(0, player1.health);
+  shield_p2.innerHTML = Math.max(0, player2.health);
   scoreboard.style.opacity = 1;
   // Hide the explosion
   crash.style.opacity = 0;
