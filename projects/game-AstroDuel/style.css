@@ -362,7 +362,7 @@ button:active {
   }
 
   /* General button adjustments in popups for smaller screens */
-  .options button,
+  .options button, 
   .start-button, /* Catches #start, #restart, #mainMenuButton, #backButton (if it were a button) */
   a.start-button, /* Explicitly for #backButton as it's an <a> */
   .popup-results button { /* Redundant if .start-button covers it, but specific */
@@ -380,7 +380,7 @@ button:active {
   .player-one { /* These are the large SVG containers on the start screen */
     height: 60vh;
     width: 60vw;
-    left: -15%;
+    left: -15%; 
   }
 
   .player-two {
