@@ -1382,10 +1382,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   if (isMobile) {
     if (mobileControls) mobileControls.style.display = 'block'; // Show mobile controls container
-    // Set initial position of the joystick stick to the center of the base
-    if (joystickBase && joystickStick) {
-      joystickStick.style.transform = `translate(${joystickBase.offsetWidth/2 - joystickStick.offsetWidth / 2}px, ${joystickBase.offsetHeight/2 - joystickStick.offsetHeight / 2}px)`;
-    }
+    // CSS will now handle initial centering of the joystick stick.
 
     // Force Player 1 to be Human and Player 2 to be Computer on mobile & update toggles
     playerOne = false; // false = Human for playerOne
@@ -1627,8 +1624,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
     joystickArea.addEventListener('touchend', function(event) {
       event.preventDefault();
       joystickActive = false;
-      // Reset stick to center of base
-      joystickStick.style.transform = `translate(${joystickBase.offsetWidth/2 - joystickStick.offsetWidth / 2}px, ${joystickBase.offsetHeight/2 - joystickStick.offsetHeight / 2}px)`;
+      // Reset stick to center of base by reverting to CSS defined transform
+      if (joystickStick) joystickStick.style.transform = '';
       // Reset player controls
       if (player1) { // Ensure player1 exists
         player1.thruster = false;
@@ -1640,7 +1637,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
     joystickArea.addEventListener('touchcancel', function(event) { // Handle unexpected touch end
       event.preventDefault();
       joystickActive = false;
-      joystickStick.style.transform = `translate(${joystickBase.offsetWidth/2 - joystickStick.offsetWidth / 2}px, ${joystickBase.offsetHeight/2 - joystickStick.offsetHeight / 2}px)`;
+      // Reset stick to center of base by reverting to CSS defined transform
+      if (joystickStick) joystickStick.style.transform = '';
       if (player1) {
         player1.thruster = false;
         player1.rotateLeft = false;
