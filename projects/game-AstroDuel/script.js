@@ -1579,17 +1579,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
       if (event.targetTouches.length === 1) { // Single touch
         joystickActive = true;
         const touch = event.targetTouches[0];
-        const rect = joystickBase.getBoundingClientRect();
-        // Record initial touch relative to joystick base center for precise stick positioning
-        joystickStartX = rect.left + rect.width / 2;
-        joystickStartY = rect.top + rect.height / 2;
+        const areaRect = joystickArea.getBoundingClientRect(); // Get the bounding rect of the touchable area
 
-        // Initial stick position calculation
-        let currentX = touch.clientX;
-        let currentY = touch.clientY;
+        // Calculate touch position relative to joystickArea's top-left corner
+        const touchXInArea = touch.clientX - areaRect.left;
+        const touchYInArea = touch.clientY - areaRect.top;
 
-        let deltaX = currentX - joystickStartX;
-        let deltaY = currentY - joystickStartY;
+        // Calculate delta from the visual center of joystickArea
+        let deltaX = touchXInArea - (areaRect.width / 2);
+        let deltaY = touchYInArea - (areaRect.height / 2);
+        
         let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
         if (distance > joystickMaxDistance) {
@@ -1605,11 +1604,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
       event.preventDefault();
       if (joystickActive && event.targetTouches.length === 1) {
         const touch = event.targetTouches[0];
-        let currentX = touch.clientX;
-        let currentY = touch.clientY;
+        const areaRect = joystickArea.getBoundingClientRect(); // Get the bounding rect of the touchable area
 
-        let deltaX = currentX - joystickStartX;
-        let deltaY = currentY - joystickStartY;
+        // Calculate touch position relative to joystickArea's top-left corner
+        const touchXInArea = touch.clientX - areaRect.left;
+        const touchYInArea = touch.clientY - areaRect.top;
+
+        // Calculate delta from the visual center of joystickArea
+        let deltaX = touchXInArea - (areaRect.width / 2);
+        let deltaY = touchYInArea - (areaRect.height / 2);
+
         let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
         if (distance > joystickMaxDistance) {
