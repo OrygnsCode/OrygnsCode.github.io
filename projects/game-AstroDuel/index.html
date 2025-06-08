@@ -3,6 +3,12 @@
 </head>
 <body>
   <div class="container">
+    <div id="rotation-prompt" class="screen-overlay" style="display: none; z-index: 10000;">
+      <div class="popup-text" style="text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <h2>Please Rotate Your Device</h2>
+        <p>This game is best played in landscape mode.</p>
+      </div>
+    </div>
     <div id="overlay" class="screen-overlay"></div>
     <div id="contenders">
     <svg xmlns="http://www.w3.org/2000/svg" version="1" viewbox="0 0 741 1255" width="67.7" height="67.7" id="player1" class="player-one">
@@ -104,6 +110,18 @@
   </div>
   <!--STAR END-->
   <div class="space"></div>
+
+  <!-- On-Screen Controls -->
+  <div id="mobile-controls" style="display: none; position: fixed; bottom: 0; width: 100%; z-index: 2000;">
+    <div id="joystick-area" style="position: absolute; bottom: 20px; left: 20px; width: 150px; height: 150px; display: flex; justify-content: center; align-items: center;">
+      <div id="joystick-base" style="width: 100px; height: 100px; background-color: rgba(128, 128, 128, 0.5); border-radius: 50%;">
+        <div id="joystick-stick" style="width: 50px; height: 50px; background-color: rgba(80, 80, 80, 0.8); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+      </div>
+    </div>
+    <div id="fire-button-area" style="position: absolute; bottom: 40px; right: 40px;">
+      <button id="mobile-fire-button" style="width: 80px; height: 80px; background-color: rgba(255, 0, 0, 0.5); color: white; border-radius: 50%; border: 2px solid white; font-size: 18px; display: flex; justify-content: center; align-items: center;">FIRE</button>
+    </div>
+  </div>
 </div>
 <div class="hidden-assets">
   <svg xmlns="http://www.w3.org/2000/svg" version="1" viewbox="0 0 741 1255" width="67.7" height="67.7" id="flicker">
