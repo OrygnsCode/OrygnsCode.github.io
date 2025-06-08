@@ -292,7 +292,7 @@ Enemy.prototype.behaviour = function() {
     // AI continues with its last set rotation/thrust/fire commands as they are not cleared here.
     return;
   }
-  // console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Health: " + this.health + ", OffsetXY: " + this.attackVectorOffset.x.toFixed(0) + "," + this.attackVectorOffset.y.toFixed(0) );
+  // console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Health: " + this.health + ", OffsetXY: " + this.attackVectorOffset.x.toFixed(0) + "," + this.attackVectorOffset.y.toFixed(0) ); // Commented out per plan 01J0KKN3F9QYV8CVG3331SE2Q1
 
   // Ramming Cooldown Management
   if (this.rammingCooldown > 0) {
@@ -349,7 +349,7 @@ Enemy.prototype.behaviour = function() {
 
   // AI shooting logic including burst fire
   const manageShootingLogic = function() {
-    // console.log("AI_DEBUG_LOG: --- manageShootingLogic START --- ID: " + this.id + ", AngleDiff: " + (this.angleDiff ? this.angleDiff.toFixed(2) : "N/A") + ", Pause: " + this.burstPauseTime + ", Bursting: " + this.isBurstFiring);
+    // console.log("AI_DEBUG_LOG: --- manageShootingLogic START --- ID: " + this.id + ", AngleDiff: " + (this.angleDiff ? this.angleDiff.toFixed(2) : "N/A") + ", Pause: " + this.burstPauseTime + ", Bursting: " + this.isBurstFiring); // Commented out per plan 01J0KKN3F9QYV8CVG3331SE2Q1
     if (this.burstPauseTime > 0) {
         this.burstPauseTime--;
         this.fire = false;
@@ -488,12 +488,12 @@ Enemy.prototype.behaviour = function() {
   const playerDist = this.distanceToPlayer; // Ensure this is available if needed by other states
   const asteroidThreat = this.closestAsteroidThreat;
   if (obstacles && asteroidThreat) {
-          const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
-          if (asteroidDist < 100 && asteroidDist < playerDist) { 
-              determinedNextState = "DODGING_ASTEROID";
-          }
+        const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
+        if (asteroidDist < 100 && asteroidDist < playerDist) { 
+            determinedNextState = "DODGING_ASTEROID";
       }
-  }
+    }
+    // Corrected structure: No erroneous brace here, this 'if' block for DODGING_ASTEROID is self-contained.
 
   // Ramming Condition Check (before defaulting to ATTACKING)
   if (!determinedNextState && this.rammingCooldown <= 0 && this.health >= this.ramHealthThreshold) {
