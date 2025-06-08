@@ -1588,7 +1588,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         // Calculate delta from the visual center of joystickArea
         let deltaX = touchXInArea - (areaRect.width / 2);
         let deltaY = touchYInArea - (areaRect.height / 2);
-
+        
         let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
         if (distance > joystickMaxDistance) {
