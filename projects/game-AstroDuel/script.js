@@ -1596,7 +1596,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           deltaX = (deltaX / distance) * joystickMaxDistance;
           deltaY = (deltaY / distance) * joystickMaxDistance;
         }
-        joystickStick.style.transform = `translate(${joystickBase.offsetWidth/2 + deltaX - joystickStick.offsetWidth / 2}px, ${joystickBase.offsetHeight/2 + deltaY - joystickStick.offsetHeight / 2}px)`;
+        if (joystickStick) joystickStick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
         updatePlayerRocketFromJoystick(deltaX, deltaY);
       }
     }, { passive: false });
@@ -1616,7 +1616,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           deltaX = (deltaX / distance) * joystickMaxDistance;
           deltaY = (deltaY / distance) * joystickMaxDistance;
         }
-        joystickStick.style.transform = `translate(${joystickBase.offsetWidth/2 + deltaX - joystickStick.offsetWidth / 2}px, ${joystickBase.offsetHeight/2 + deltaY - joystickStick.offsetHeight / 2}px)`;
+        if (joystickStick) joystickStick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
         updatePlayerRocketFromJoystick(deltaX, deltaY);
       }
     }, { passive: false });
