@@ -255,19 +255,19 @@ function Enemy(token, role) {
   this.minReactionDelay = 3; // Frames, tunable
   this.maxReactionDelay = 8; // Frames, tunable
   // Unified Engagement Parameters (Flee parameters removed)
-  this.engagementMinDist = 120;
-  this.engagementMaxDist = 220;
+  this.engagementMinDist = 120; 
+  this.engagementMaxDist = 220; 
   // Attack Vector Variation / Micro-Reposition Properties
   this.attackVectorOffset = { x: 0, y: 0 };
   this.offsetRecalculateCooldown = 0;
-  this.minOffsetRecalculateInterval = 120;
-  this.maxOffsetRecalculateInterval = 300;
+  this.minOffsetRecalculateInterval = 120; 
+  this.maxOffsetRecalculateInterval = 300; 
   this.currentOffsetDuration = 0;
-  this.maxOffsetDuration = 60;
-  this.microRepositionChance = 0.25;
+  this.maxOffsetDuration = 60; 
+  this.microRepositionChance = 0.25; 
   // Ramming properties
   this.rammingCooldown = 0;
-  this.minRammingCooldown = 900;
+  this.minRammingCooldown = 900; 
   this.maxRammingCooldown = 1800;
   this.rammingChargeDuration = 0;
   this.maxRammingChargeDuration = 120;
@@ -407,7 +407,7 @@ Enemy.prototype.behaviour = function() {
 
     findAngle(predictedX, predictedY);
     turnToFace();
-    manageShootingLogic();
+    manageShootingLogic(); 
 
     // Thruster logic using unified engagement distances
     if (Math.abs(this.angleDiff) > 15) { // If aiming is significantly off, prioritize turning
@@ -418,17 +418,17 @@ Enemy.prototype.behaviour = function() {
       } else if (this.distanceToPlayer < this.engagementMinDist) { // Player is too close
         if (Math.random() < this.microRepositionChance) { // Small chance to actively reposition
             this.fire = false; // Pause firing to focus on repositioning
-            const backOffDist = 30;
-            if (this.swornEnemy) {
+            const backOffDist = 30; 
+            if (this.swornEnemy) { 
                 const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
                 // Aim slightly to the side and back - corrected logic for direct back-off
                 const correctedBackOffTargetX = this.x - backOffDist * Math.cos(angleToPlayer);
                 const correctedBackOffTargetY = this.y - backOffDist * Math.sin(angleToPlayer);
                 findAngle(correctedBackOffTargetX, correctedBackOffTargetY);
-                this.thruster = true;
+                this.thruster = true; 
             } else { this.thruster = false; } // Fallback if no enemy
         } else { // Default: Hold position
-            this.thruster = false;
+            this.thruster = false; 
         }
       } else { // Optimal distance
         this.thruster = false; // Hold position
@@ -489,7 +489,7 @@ Enemy.prototype.behaviour = function() {
   const asteroidThreat = this.closestAsteroidThreat;
   if (obstacles && asteroidThreat) {
         const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
-        if (asteroidDist < 100 && asteroidDist < playerDist) {
+        if (asteroidDist < 100 && asteroidDist < playerDist) { 
             determinedNextState = "DODGING_ASTEROID";
       }
     }
@@ -508,7 +508,7 @@ Enemy.prototype.behaviour = function() {
 
       if (canConsiderRam) {
           determinedNextState = "RAMMING";
-          this.rammingChargeDuration = this.maxRammingChargeDuration;
+          this.rammingChargeDuration = this.maxRammingChargeDuration; 
           this.rammingCooldown = Math.floor(Math.random() * (this.maxRammingCooldown - this.minRammingCooldown + 1)) + this.minRammingCooldown;
       }
   }
@@ -531,7 +531,7 @@ Enemy.prototype.behaviour = function() {
   }
 
   // Attack Vector Variation Logic
-  if (this.aiState === "ATTACKING") {
+  if (this.aiState === "ATTACKING") { 
       if (this.offsetRecalculateCooldown > 0) {
           this.offsetRecalculateCooldown--;
       }
@@ -540,26 +540,26 @@ Enemy.prototype.behaviour = function() {
       }
 
       if (this.offsetRecalculateCooldown <= 0 && this.currentOffsetDuration <= 0) {
-          if (Math.random() < 0.5) {
-              const offsetAmount = Math.random() * 100 + 50;
-              if (this.swornEnemy) {
+          if (Math.random() < 0.5) { 
+              const offsetAmount = Math.random() * 100 + 50; 
+              if (this.swornEnemy) { 
                   const angleToPlayer = Math.atan2(this.swornEnemy.y - this.y, this.swornEnemy.x - this.x);
                   const perpendicularAngle = angleToPlayer + (Math.random() < 0.5 ? Math.PI / 2 : -Math.PI / 2);
                   this.attackVectorOffset.x = offsetAmount * Math.cos(perpendicularAngle);
                   this.attackVectorOffset.y = offsetAmount * Math.sin(perpendicularAngle);
-                  this.currentOffsetDuration = Math.floor(Math.random() * (this.maxOffsetDuration - 30 + 1)) + 30;
+                  this.currentOffsetDuration = Math.floor(Math.random() * (this.maxOffsetDuration - 30 + 1)) + 30; 
               }
           } else {
               this.attackVectorOffset.x = 0;
               this.attackVectorOffset.y = 0;
-              this.currentOffsetDuration = 0;
+              this.currentOffsetDuration = 0; 
           }
           this.offsetRecalculateCooldown = Math.floor(Math.random() * (this.maxOffsetRecalculateInterval - this.minOffsetRecalculateInterval + 1)) + this.minOffsetRecalculateInterval;
       } else if (this.currentOffsetDuration <= 0 && (this.attackVectorOffset.x !== 0 || this.attackVectorOffset.y !== 0)) {
           this.attackVectorOffset.x = 0;
           this.attackVectorOffset.y = 0;
       }
-  } else {
+  } else { 
       this.attackVectorOffset.x = 0;
       this.attackVectorOffset.y = 0;
       this.currentOffsetDuration = 0;
@@ -574,7 +574,7 @@ Enemy.prototype.behaviour = function() {
     // case "FLEEING": // FLEEING state case removed
       // flee(this.closestPlayerTarget);
       // if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to FLEEING state.`); }
-      // this.fire = false;
+      // this.fire = false; 
       // break;
     case "DODGING_ASTEROID":
       let didDodge = false;
@@ -594,7 +594,7 @@ Enemy.prototype.behaviour = function() {
       this.fire = false; // No shooting while ramming
 
       if (this.rammingChargeDuration > 0 && this.distanceToPlayer < (this.offensiveEngagementMaxDist * 1.5)) {
-          const predictionFactor = 10;
+          const predictionFactor = 10; 
           const predictedX = this.swornEnemy.x + this.swornEnemy.vx * predictionFactor;
           const predictedY = this.swornEnemy.y + this.swornEnemy.vy * predictionFactor;
 
@@ -605,8 +605,8 @@ Enemy.prototype.behaviour = function() {
           this.rammingChargeDuration--;
       } else {
           // Ramming charge ended
-          this.aiState = "ATTACKING";
-          this.rammingChargeDuration = 0;
+          this.aiState = "ATTACKING"; 
+          this.rammingChargeDuration = 0; 
       }
       break;
     default:
@@ -688,7 +688,7 @@ function updateRocket() {
       this.shots.push(
         new Shot(position[0][0], position[0][1], shotCreationDirection, this.id)
       );
-
+      
       if (this instanceof Enemy) {
         // console.log(`AI FIRED SHOT: ID=${this.id}, Mode=${this.currentTacticalMode}, State=${this.aiState}, Bursting=${this.isBurstFiring}, BurstCount=${this.burstShotCount + 1}, TargetAngleDiff=${this.angleDiff}`);
         if (this.isBurstFiring) { // burstShotCount is incremented here, so log shows count *before* this shot
