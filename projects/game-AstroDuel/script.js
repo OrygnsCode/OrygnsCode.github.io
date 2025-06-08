@@ -254,11 +254,9 @@ function Enemy(token, role) {
   this.reactionDelayFrames = 0;
   this.minReactionDelay = 3; // Frames, tunable
   this.maxReactionDelay = 8; // Frames, tunable
-  // Unified Engagement and Flee Parameters
+  // Unified Engagement Parameters (Flee parameters removed)
   this.engagementMinDist = 120; 
   this.engagementMaxDist = 220; 
-  this.fleeMaxProbHealth = 0.50; 
-  this.defaultFleeMinProbHealth = 0.20; 
   // Attack Vector Variation / Micro-Reposition Properties
   this.attackVectorOffset = { x: 0, y: 0 };
   this.offsetRecalculateCooldown = 0;
@@ -266,7 +264,7 @@ function Enemy(token, role) {
   this.maxOffsetRecalculateInterval = 300; 
   this.currentOffsetDuration = 0;
   this.maxOffsetDuration = 60; 
-  this.microRepositionChance = 0.1; 
+  this.microRepositionChance = 0.25; 
   // Ramming properties
   this.rammingCooldown = 0;
   this.minRammingCooldown = 900; 
@@ -275,11 +273,7 @@ function Enemy(token, role) {
   this.maxRammingChargeDuration = 120;
   this.ramHealthThreshold = 40;
   this.ramConsiderHealthAdvantage = 15;
-  // Sticky Fleeing Properties
-  this.fleeGracePeriodActive = false;
-  this.fleeGracePeriodDuration = 0;
-  this.minFleeGraceDuration = 60;  // 1 second at 60fps
-  this.maxFleeGraceDuration = 120; // 2 seconds at 60fps
+  // Removed FleeGracePeriod properties
 }
 
 // Setup the Enemy prototype
@@ -298,8 +292,7 @@ Enemy.prototype.behaviour = function() {
     // AI continues with its last set rotation/thrust/fire commands as they are not cleared here.
     return;
   }
-  console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Health: " + this.health + ", OffsetXY: " + this.attackVectorOffset.x.toFixed(0) + "," + this.attackVectorOffset.y.toFixed(0) );
-  // console.log(`AI BEHAVIOUR: Frame başlıyor. ID: ${this.id}, State: ${this.aiState}, Mode: ${this.currentTacticalMode}, Health: ${this.health}, Player Health: ${this.swornEnemy ? this.swornEnemy.health : 'N/A'}, Cooldowns (Mode/Ram): ${this.modeSwitchCooldown}/${this.rammingCooldown}`);
+  // console.log("AI_DEBUG_LOG: --- Enemy.prototype.behaviour START --- ID: " + this.id + ", State: " + this.aiState + ", Health: " + this.health + ", OffsetXY: " + this.attackVectorOffset.x.toFixed(0) + "," + this.attackVectorOffset.y.toFixed(0) );
 
   // Ramming Cooldown Management
   if (this.rammingCooldown > 0) {
@@ -356,7 +349,7 @@ Enemy.prototype.behaviour = function() {
 
   // AI shooting logic including burst fire
   const manageShootingLogic = function() {
-    console.log("AI_DEBUG_LOG: --- manageShootingLogic START --- ID: " + this.id + ", AngleDiff: " + (this.angleDiff ? this.angleDiff.toFixed(2) : "N/A") + ", Pause: " + this.burstPauseTime + ", Bursting: " + this.isBurstFiring);
+    // console.log("AI_DEBUG_LOG: --- manageShootingLogic START --- ID: " + this.id + ", AngleDiff: " + (this.angleDiff ? this.angleDiff.toFixed(2) : "N/A") + ", Pause: " + this.burstPauseTime + ", Bursting: " + this.isBurstFiring);
     if (this.burstPauseTime > 0) {
         this.burstPauseTime--;
         this.fire = false;
@@ -443,26 +436,9 @@ Enemy.prototype.behaviour = function() {
     }
   }.bind(this);
 
-  // Define a flee function
-  const flee = function(threat) {
-    const fleeDist = 200; // How far to project the escape point
-    const angleToThreat = Math.atan2(threat.y - this.y, threat.x - this.x);
-    const fleeX = this.x - fleeDist * Math.cos(angleToThreat);
-    const fleeY = this.y - fleeDist * Math.sin(angleToThreat);
-
-    findAngle(fleeX, fleeY);
-    turnToFace();
-    this.thruster = true; // Always move when fleeing
-
-    // The panic interval gives the chance to find a new position if the enemy doesn't feel like it can find a "safe" position
-    if (this.panicInterval <= 0) {
-      // this.safe was part of older logic, consider if it's still needed or if state changes cover this.
-      // For now, mimicking previous reset.
-      this.panicInterval = randomise(60) + 30;
-    } else {
-      this.panicInterval--;
-    }
-  }.bind(this);
+  // const flee = function(threat) { // Flee function removed as FLEEING state is removed
+  // ... (entire flee function commented out or deleted) ...
+  // }.bind(this);
 
   const dodge = function(asteroidThreat) {
     const dodgeDist = 150; // How far to project the escape point
@@ -507,56 +483,11 @@ Enemy.prototype.behaviour = function() {
 
   let determinedNextState = null;
 
-  // Sticky Fleeing Logic - Part 1: Check if grace period is active
-  if (this.fleeGracePeriodActive) {
-      if (this.fleeGracePeriodDuration > 0) {
-          determinedNextState = "FLEEING"; // Force FLEEING if grace period is active
-          this.fleeGracePeriodDuration--;
-      } else {
-          this.fleeGracePeriodActive = false; // Grace period ended
-          console.log("AI_DEBUG_LOG: Flee grace period ENDED for ID: " + this.id);
-      }
-  }
-
-  // Only proceed with other state checks if grace period didn't dictate FLEEING
-  if (!determinedNextState) { 
-      let shouldFleeByHealth = false;
-      if (this.health < 20) { // Critically low health
-          shouldFleeByHealth = true;
-      } else if (this.health < this.fleeMaxProbHealth * 100) { // Use unified fleeMaxProbHealth
-          const healthPercentage = this.health / 100;
-          const minProbHealth = this.defaultFleeMinProbHealth;
-          let fleeProbability = 0;
-          // Ensure (this.fleeMaxProbHealth - minProbHealth) is not zero to avoid division by zero
-          if ((this.fleeMaxProbHealth - minProbHealth) > 0) {
-             fleeProbability = (this.fleeMaxProbHealth - healthPercentage) / (this.fleeMaxProbHealth - minProbHealth);
-             fleeProbability = Math.max(0, Math.min(1, fleeProbability)); // Clamp
-          } else if (healthPercentage < this.fleeMaxProbHealth) { // If max and min are same, flee if below threshold
-             fleeProbability = 1;
-          }
-
-
-          if (Math.random() < fleeProbability) {
-              shouldFleeByHealth = true;
-          }
-      }
-
-      if (shouldFleeByHealth) {
-          // Sticky Fleeing Logic - Part 2: Activate grace period if newly fleeing
-          if (this.aiState !== "FLEEING" && !this.fleeGracePeriodActive) { 
-              this.fleeGracePeriodActive = true;
-              this.fleeGracePeriodDuration = Math.floor(Math.random() * (this.maxFleeGraceDuration - this.minFleeGraceDuration + 1)) + this.minFleeGraceDuration;
-              console.log("AI_DEBUG_LOG: Flee grace period STARTED. Duration: " + this.fleeGracePeriodDuration + ", ID: " + this.id);
-          }
-          determinedNextState = "FLEEING";
-      }
-  }
-  
-  // If not already decided to flee (either by grace period or new health check):
-  if (!determinedNextState) { 
-      const playerDist = this.distanceToPlayer;
-      const asteroidThreat = this.closestAsteroidThreat;
-      if (obstacles && asteroidThreat) {
+  // Fleeing logic (including grace period and health checks) is removed.
+  // DODGING_ASTEROID check is now the first priority after basic setup.
+  const playerDist = this.distanceToPlayer; // Ensure this is available if needed by other states
+  const asteroidThreat = this.closestAsteroidThreat;
+  if (obstacles && asteroidThreat) {
           const asteroidDist = Math.sqrt(Math.pow(this.x - asteroidThreat.x, 2) + Math.pow(this.y - asteroidThreat.y, 2));
           if (asteroidDist < 100 && asteroidDist < playerDist) { 
               determinedNextState = "DODGING_ASTEROID";
@@ -640,11 +571,11 @@ Enemy.prototype.behaviour = function() {
       // console.log(this.id, "is ATTACKING", this.closestPlayerTarget.id);
       attack(this.closestPlayerTarget);
       break;
-    case "FLEEING":
-      flee(this.closestPlayerTarget);
+    // case "FLEEING": // FLEEING state case removed
+      // flee(this.closestPlayerTarget);
       // if (this.fire) { console.log(`AI LOG: ID=${this.id} Overriding fire=true to fire=false due to FLEEING state.`); }
-      this.fire = false; 
-      break;
+      // this.fire = false; 
+      // break;
     case "DODGING_ASTEROID":
       let didDodge = false;
       if (this.closestAsteroidThreat) {
