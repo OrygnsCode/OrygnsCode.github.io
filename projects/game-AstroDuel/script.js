@@ -275,6 +275,11 @@ function Enemy(token, role) {
   this.maxRammingChargeDuration = 120;
   this.ramHealthThreshold = 40;
   this.ramConsiderHealthAdvantage = 15;
+  // Sticky Fleeing Properties
+  this.fleeGracePeriodActive = false;
+  this.fleeGracePeriodDuration = 0;
+  this.minFleeGraceDuration = 60;  // 1 second at 60fps
+  this.maxFleeGraceDuration = 120; // 2 seconds at 60fps
 }
 
 // Setup the Enemy prototype
@@ -502,26 +507,53 @@ Enemy.prototype.behaviour = function() {
 
   let determinedNextState = null;
 
-  if (this.health < 20) { // Critically low health
-      determinedNextState = "FLEEING";
-  } else { // Not critically low, consider unified flee probability
-      const healthPercentage = this.health / 100;
-      // const modeSpecificFleeMaxProbHealth = (this.currentTacticalMode === "OFFENSIVE") ? this.offensiveFleeMaxProbHealth : this.defensiveFleeMaxProbHealth; // Removed
-      const minProbHealth = this.defaultFleeMinProbHealth; 
-      let fleeProbability = 0;
-
-      if (this.health < this.fleeMaxProbHealth * 100) { // Use unified fleeMaxProbHealth
-           fleeProbability = (this.fleeMaxProbHealth - healthPercentage) / (this.fleeMaxProbHealth - minProbHealth);
-           fleeProbability = Math.max(0, Math.min(1, fleeProbability)); // Clamp
-      }
-
-      if (Math.random() < fleeProbability) {
-          determinedNextState = "FLEEING";
+  // Sticky Fleeing Logic - Part 1: Check if grace period is active
+  if (this.fleeGracePeriodActive) {
+      if (this.fleeGracePeriodDuration > 0) {
+          determinedNextState = "FLEEING"; // Force FLEEING if grace period is active
+          this.fleeGracePeriodDuration--;
+      } else {
+          this.fleeGracePeriodActive = false; // Grace period ended
+          console.log("AI_DEBUG_LOG: Flee grace period ENDED for ID: " + this.id);
       }
   }
 
-  // If not already decided to flee based on health probability:
-  if (!determinedNextState) {
+  // Only proceed with other state checks if grace period didn't dictate FLEEING
+  if (!determinedNextState) { 
+      let shouldFleeByHealth = false;
+      if (this.health < 20) { // Critically low health
+          shouldFleeByHealth = true;
+      } else if (this.health < this.fleeMaxProbHealth * 100) { // Use unified fleeMaxProbHealth
+          const healthPercentage = this.health / 100;
+          const minProbHealth = this.defaultFleeMinProbHealth;
+          let fleeProbability = 0;
+          // Ensure (this.fleeMaxProbHealth - minProbHealth) is not zero to avoid division by zero
+          if ((this.fleeMaxProbHealth - minProbHealth) > 0) {
+             fleeProbability = (this.fleeMaxProbHealth - healthPercentage) / (this.fleeMaxProbHealth - minProbHealth);
+             fleeProbability = Math.max(0, Math.min(1, fleeProbability)); // Clamp
+          } else if (healthPercentage < this.fleeMaxProbHealth) { // If max and min are same, flee if below threshold
+             fleeProbability = 1;
+          }
+
+
+          if (Math.random() < fleeProbability) {
+              shouldFleeByHealth = true;
+          }
+      }
+
+      if (shouldFleeByHealth) {
+          // Sticky Fleeing Logic - Part 2: Activate grace period if newly fleeing
+          if (this.aiState !== "FLEEING" && !this.fleeGracePeriodActive) { 
+              this.fleeGracePeriodActive = true;
+              this.fleeGracePeriodDuration = Math.floor(Math.random() * (this.maxFleeGraceDuration - this.minFleeGraceDuration + 1)) + this.minFleeGraceDuration;
+              console.log("AI_DEBUG_LOG: Flee grace period STARTED. Duration: " + this.fleeGracePeriodDuration + ", ID: " + this.id);
+          }
+          determinedNextState = "FLEEING";
+      }
+  }
+  
+  // If not already decided to flee (either by grace period or new health check):
+  if (!determinedNextState) { 
       const playerDist = this.distanceToPlayer;
       const asteroidThreat = this.closestAsteroidThreat;
       if (obstacles && asteroidThreat) {
