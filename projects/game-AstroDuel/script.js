@@ -1,4 +1,12 @@
 // Game parameters
+
+// Mobile device detection
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+}
+let isMobile = isMobileDevice();
+console.log('isMobile:', isMobile);
+
 let canvas, centerPoint, ctx, game_mode, playing, player1, player2, start;
 // The scoreboard is used to keep track of the health of the players at the top of the screen
 const scoreboard = document.querySelector(".scoreboard");
@@ -29,6 +37,13 @@ const playerTwoControlsText = "Controls ↑, ↓, ←, →, Space to shoot";
 const gutter = 150;
 // For the popup boxes there is a background overlay
 const overlay = document.getElementById("overlay");
+const rotationPrompt = document.getElementById('rotation-prompt');
+// Mobile Controls Elements
+const mobileControls = document.getElementById('mobile-controls');
+const joystickArea = document.getElementById('joystick-area');
+const joystickBase = document.getElementById('joystick-base');
+const joystickStick = document.getElementById('joystick-stick');
+const mobileFireButton = document.getElementById('mobile-fire-button');
 // The popup messages has its own selector so that they can be toggled from the start screen to the end game screen
 let popup = document.getElementById("popup");
 const contenders = document.getElementById("contenders");
@@ -62,6 +77,14 @@ const turnRate = 5;
 // Shooting parameters
 const shootingRate = 10;
 const shootingSpeed = 12;
+
+// Joystick state variables
+let joystickActive = false;
+let joystickStartX = 0;
+let joystickStartY = 0;
+let joystickStickOffsetX = 0;
+let joystickStickOffsetY = 0;
+const joystickMaxDistance = 50; // Max distance the stick can move from base center
 
 // Function to handle SVG files
 function importSVG(name) {
@@ -1353,12 +1376,35 @@ document.addEventListener("DOMContentLoaded", function(event) {
   calculateSizes();
   // Place the background elements
   placeElements();
+  checkOrientation(); // Initial orientation check
   // Open the popup UI for the player
   openPopup();
 
-  // Set initial button content based on default player types
-  playerOneToggle.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
-  playerTwoToggle.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
+  if (isMobile) {
+    if (mobileControls) mobileControls.style.display = 'block'; // Show mobile controls container
+    // CSS will now handle initial centering of the joystick stick.
+
+    // Force Player 1 to be Human and Player 2 to be Computer on mobile & update toggles
+    playerOne = false; // false = Human for playerOne
+    playerTwo = true;  // true = Computer for playerTwo
+
+    if (playerOneToggle) {
+      playerOneToggle.innerHTML = "Human"; // No keyboard controls text
+      playerOneToggle.disabled = true;
+    }
+    if (playerTwoToggle) {
+      playerTwoToggle.innerHTML = "Computer"; // No controls text needed
+      playerTwoToggle.disabled = true;
+    }
+  } else {
+    // Set initial button content based on default player types for NON-MOBILE
+    if (playerOneToggle) {
+        playerOneToggle.innerHTML = playerOne ? "Computer" : "Human<br><span class='control-instr'>" + playerOneControlsText + "</span>";
+    }
+    if (playerTwoToggle) {
+        playerTwoToggle.innerHTML = playerTwo ? "Computer" : "Human<br><span class='control-instr'>" + playerTwoControlsText + "</span>";
+    }
+  }
 
   // Define keyboard functions
   document.addEventListener(
@@ -1524,4 +1570,170 @@ document.addEventListener("DOMContentLoaded", function(event) {
       gameOver("resized");
     }
   });
+  window.addEventListener('resize', checkOrientation); // Listen for orientation changes
+
+  // Joystick and Fire Button Event Listeners for Mobile
+  if (isMobile && joystickArea) {
+    joystickArea.addEventListener('touchstart', function(event) {
+      event.preventDefault(); // Prevent page scrolling
+      if (event.targetTouches.length === 1) { // Single touch
+        joystickActive = true;
+        const touch = event.targetTouches[0];
+        const rect = joystickBase.getBoundingClientRect();
+        // Record initial touch relative to joystick base center for precise stick positioning
+        joystickStartX = rect.left + rect.width / 2;
+        joystickStartY = rect.top + rect.height / 2;
+
+        // Initial stick position calculation
+        let currentX = touch.clientX;
+        let currentY = touch.clientY;
+
+        let deltaX = currentX - joystickStartX;
+        let deltaY = currentY - joystickStartY;
+        let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance > joystickMaxDistance) {
+          deltaX = (deltaX / distance) * joystickMaxDistance;
+          deltaY = (deltaY / distance) * joystickMaxDistance;
+        }
+        if (joystickStick) joystickStick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+        updatePlayerRocketFromJoystick(deltaX, deltaY);
+      }
+    }, { passive: false });
+
+    joystickArea.addEventListener('touchmove', function(event) {
+      event.preventDefault();
+      if (joystickActive && event.targetTouches.length === 1) {
+        const touch = event.targetTouches[0];
+        let currentX = touch.clientX;
+        let currentY = touch.clientY;
+
+        let deltaX = currentX - joystickStartX;
+        let deltaY = currentY - joystickStartY;
+        let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance > joystickMaxDistance) {
+          deltaX = (deltaX / distance) * joystickMaxDistance;
+          deltaY = (deltaY / distance) * joystickMaxDistance;
+        }
+        if (joystickStick) joystickStick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+        updatePlayerRocketFromJoystick(deltaX, deltaY);
+      }
+    }, { passive: false });
+
+    joystickArea.addEventListener('touchend', function(event) {
+      event.preventDefault();
+      joystickActive = false;
+      // Reset stick to center of base by reverting to CSS defined transform
+      if (joystickStick) joystickStick.style.transform = '';
+      // Reset player controls
+      if (player1) { // Ensure player1 exists
+        player1.thruster = false;
+        player1.rotateLeft = false;
+        player1.rotateRight = false;
+      }
+    });
+
+    joystickArea.addEventListener('touchcancel', function(event) { // Handle unexpected touch end
+      event.preventDefault();
+      joystickActive = false;
+      // Reset stick to center of base by reverting to CSS defined transform
+      if (joystickStick) joystickStick.style.transform = '';
+      if (player1) {
+        player1.thruster = false;
+        player1.rotateLeft = false;
+        player1.rotateRight = false;
+      }
+    });
+  }
+
+  if (isMobile && mobileFireButton) {
+    mobileFireButton.addEventListener('touchstart', function(event) {
+      event.preventDefault(); // Prevent default actions like zoom
+      if (player1 && playing) { // Ensure player1 exists and game is active
+        player1.fire = true;
+      }
+    }, { passive: false });
+
+    mobileFireButton.addEventListener('touchend', function(event) {
+      event.preventDefault();
+      if (player1) { // Ensure player1 exists
+        player1.fire = false;
+      }
+    });
+    mobileFireButton.addEventListener('touchcancel', function(event) { // Handle unexpected touch end
+      event.preventDefault();
+      if (player1) {
+        player1.fire = false;
+      }
+    });
+  }
 });
+
+function updatePlayerRocketFromJoystick(deltaX, deltaY) {
+  if (!player1 || !playing) return; // Ensure player1 exists and game is active
+
+  const angleRad = Math.atan2(-deltaY, deltaX); // Note: -deltaY because canvas Y is inverted from typical math Y
+  let targetAngleDeg = angleRad * (180 / Math.PI); // Angle in degrees, 0 is right, 90 is up
+
+  // Normalize targetAngleDeg to be positive (0-360) if needed, though atan2 usually gives -180 to 180
+  if (targetAngleDeg < 0) {
+      targetAngleDeg += 360;
+  }
+
+  // Player's current direction (player1.direction is 90 up, 0 right, 180 left, 270 down)
+  const currentDirectionDeg = player1.direction;
+
+  // Calculate difference in angle
+  let angleDifference = targetAngleDeg - currentDirectionDeg;
+
+  // Normalize angleDifference to be between -180 and 180
+  if (angleDifference > 180) {
+      angleDifference -= 360;
+  } else if (angleDifference < -180) {
+      angleDifference += 360;
+  }
+
+  // --- Control Logic ---
+  const deadZone = 0.15 * joystickMaxDistance; // Only activate if stick moved sufficiently
+  const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+  if (distance > deadZone) {
+      player1.thruster = true; // Apply thrust if joystick is moved beyond deadzone
+
+      // Rotation:
+      // Prioritize turning towards the target angle.
+      // If the angle difference is significant, rotate.
+      // The `turnRate` is a property of the rocket.
+      const rotationThreshold = 5; // Degrees. Start rotating if difference is more than this.
+
+      if (angleDifference > rotationThreshold) {
+          player1.rotateLeft = true; // Counter-clockwise to increase direction value
+          player1.rotateRight = false;
+      } else if (angleDifference < -rotationThreshold) {
+          player1.rotateLeft = false;
+          player1.rotateRight = true; // Clockwise to decrease direction value
+      } else {
+          // Within threshold, so facing desired direction
+          player1.rotateLeft = false;
+          player1.rotateRight = false;
+      }
+  } else {
+      // Joystick is near center (within deadzone)
+      player1.thruster = false;
+      player1.rotateLeft = false;
+      player1.rotateRight = false;
+  }
+}
+
+function checkOrientation() {
+  if (isMobile) { // Use the isMobile variable
+    if (window.innerHeight > window.innerWidth) { // Portrait mode
+      if (rotationPrompt) rotationPrompt.style.display = 'flex'; // Show prompt
+      if (canvas) canvas.style.display = 'none'; // Optionally hide game canvas
+    } else { // Landscape mode
+      if (rotationPrompt) rotationPrompt.style.display = 'none'; // Hide prompt
+      if (canvas) canvas.style.display = 'block'; // Ensure game canvas is visible
+    }
+  }
+}

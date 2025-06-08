@@ -271,3 +271,126 @@ button:active {
     transform: scale(10); } }
 
 /*# sourceMappingURL=style.css.map */
+
+#rotation-prompt {
+  background-color: rgba(0, 0, 0, 0.85); /* Darker or distinct background */
+  color: white;
+  display: none; /* Initially hidden */
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  text-align: center;
+  /* z-index is set inline in HTML for now, can be moved here */
+}
+
+/* Mobile Controls Container - JavaScript will set display: flex or block */
+#mobile-controls {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 2000;
+  /* display: none; by default, JS will show it */
+}
+
+#joystick-area {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: rgba(255, 255, 255, 0.1); Optional: for visualizing touch area */
+  /* border-radius: 10px; Optional */
+}
+
+#joystick-base {
+  width: 100px;
+  height: 100px;
+  background-color: rgba(128, 128, 128, 0.5);
+  border-radius: 50%;
+  position: relative; /* For joystick-stick positioning */
+  display: flex; /* To center the stick if it's a direct child and not absolutely positioned initially */
+  justify-content: center;
+  align-items: center;
+}
+
+#joystick-stick {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(80, 80, 80, 0.8);
+  border-radius: 50%;
+  position: absolute; /* Will be positioned by JS relative to base */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center it initially */
+  /* This will be dynamically positioned by JavaScript */
+}
+
+#fire-button-area {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+}
+
+#mobile-fire-button {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(255, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Ensure it's not using the global button styles if they conflict */
+  padding: 0; /* Override default button padding if necessary */
+  line-height: 1; /* For text centering */
+  /* Override other button styles if needed */
+  margin: 0;
+  top: 0;
+}
+
+@media (max-width: 600px) {
+  .vs { /* Targets h2.vs in popup */
+    font-size: 3em; /* Reduced from 5em */
+  }
+
+  .popup-text h3 { /* Result messages */
+    font-size: 1.5em; /* Reduced from 2em */
+  }
+
+  /* General button adjustments in popups for smaller screens */
+  .options button,
+  .start-button, /* Catches #start, #restart, #mainMenuButton, #backButton (if it were a button) */
+  a.start-button, /* Explicitly for #backButton as it's an <a> */
+  .popup-results button { /* Redundant if .start-button covers it, but specific */
+    font-size: 16px; /* Reduced from 22px */
+    padding: 12px 18px; /* Reduced padding */
+    min-height: auto; /* Remove large min-height */
+  }
+
+  .toggle { /* Specifically player/obstacle toggles */
+    width: 8em; /* Reduced from 10em */
+    /* Ensure font-size and padding from above are suitable, or add specifics here */
+  }
+
+  /* Player graphics on start screen */
+  .player-one { /* These are the large SVG containers on the start screen */
+    height: 60vh;
+    width: 60vw;
+    left: -15%;
+  }
+
+  .player-two {
+    height: 60vh;
+    width: 60vw;
+    left: 30%; /* Adjusted from 35% to ensure better centering/spacing */
+  }
+
+  .counter { /* Scoreboard text */
+    font-size: 1.5em; /* Reduced from 2em */
+    padding: 0.25em 0 0 0.5em; /* Adjust padding if needed */
+  }
+}
