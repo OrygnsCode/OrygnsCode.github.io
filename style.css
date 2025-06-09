@@ -68,7 +68,7 @@ header {
     z-index: 1000;
     /* Re-adding sticky behavior if it was intended, but position:relative is key for nav */
     /* For now, let's assume sticky is still desired. If not, remove position: sticky */
-     position: sticky;
+     position: sticky; 
 }
 
 header h1 {
@@ -191,10 +191,10 @@ header nav a:focus { /* Added focus state for accessibility */
 /* Ensure nav elements (if any besides switch) are spaced out */
 /* This might not be needed if nav is only holding the switch and is absolutely positioned */
 /* header nav > * {
-    margin-left: 15px;
+    margin-left: 15px; 
 }
 header nav > *:first-child {
-    margin-left: 0;
+    margin-left: 0; 
 } */
 
 
@@ -404,8 +404,8 @@ footer a:focus { /* Added focus state */
         font-size: 1.6em; /* Further reduce h1 size */
         /* Padding already adjusted in the 768px media query, should inherit */
         /* If further adjustment needed:
-        padding-left: 55px;
-        padding-right: 55px;
+        padding-left: 55px; 
+        padding-right: 55px; 
         */
     }
     /* header nav { right: 15px; } already set */
