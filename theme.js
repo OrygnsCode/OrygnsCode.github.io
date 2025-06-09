@@ -1,60 +1,64 @@
 $(document).ready(function() {
-    // Apply theme on page load
     const currentTheme = localStorage.getItem('theme');
-    if (currentTheme === 'dark') {
-        $('body').addClass('dark-mode');
-        // Initialize switch to 'night' state visually
-        gsap.set("#sun", {opacity: 0, x: -157});
-        gsap.set("#cloud", {opacity: 0});
-        gsap.set("#moon", {opacity: 1, x: -157, rotation:0}); // rotation:0 or -360 depending on desired start
-        gsap.set(".star", {opacity: 1});
-        $('#night').css({'background': '#224f6d', 'border-color': '#cad4d8'});
-        $('#background').css({'background': '#0d1f2b'});
-        $('#day').css({'pointer-events': 'none'});
-        $('#night').css({'pointer-events': 'all'});
-    } else {
-        $('body').removeClass('dark-mode');
-        // Initialize switch to 'day' state
+
+    function initializeDayState(animate) {
+        if (animate) {
+            gsap.to("#sun", 1, {x: 0, opacity: 1, ease: Power1.easeInOut});
+            gsap.to("#cloud", 1, {opacity: 1, ease: Power1.easeInOut}); // Assuming cloud is part of day
+            gsap.to("#moon", 1, {opacity: 0, x: 30, rotate: 360, transformOrigin: "center", ease: Power1.easeInOut});
+            gsap.to(".star", 1, {opacity: 0, ease: Power1.easeInOut});
+        } else {
+            gsap.set("#sun, #cloud", {x: 0, opacity: 1});
+            gsap.set("#moon", {x: 30, opacity: 0, rotate: 0}); // Start rotated if needed or just 0
+            gsap.set(".star", {opacity: 0, x:0, y: -5}); // Stars start hidden, centered with moon's target
+        }
         $('#day').css({'pointer-events': 'all'});
         $('#night').css({'pointer-events': 'none'});
-        localStorage.setItem('theme', 'light'); // Default to light if no theme set
+        $('body').removeClass('dark-mode');
     }
 
-    // GSAP Timelines for animations
-    var tl = gsap.timeline({defaults:{ease: "power2.out"}})
-    var tr = gsap.timeline({defaults:{ease: "power2.out"}})
+    function initializeNightState(animate) {
+        if (animate) {
+            gsap.to("#sun", 1, {x: -30, opacity: 0, ease: Power1.easeInOut});
+            gsap.to("#cloud", .5, {opacity: 0, ease: Power1.easeInOut}); // Assuming cloud is part of day
+            gsap.to("#moon", 1, {x: 0, rotate: -360, transformOrigin: "center", opacity: 1, ease: Power1.easeInOut});
+            gsap.to(".star", .5, {opacity: 1, x:0, y:-5, ease: Power1.easeInOut}); // Stars centered with moon
+        } else {
+            gsap.set("#moon, .star", {x: 0, opacity: 1});
+            gsap.set(".star", {y: -5});
+            gsap.set("#sun, #cloud", {x: -30, opacity: 0});
+            gsap.set("#moon", {rotate: 0}); // Ensure moon rotation is reset
+        }
+        $('#night').css({'background': '#224f6d', 'border-color': '#cad4d8'}); // Style for night button base
+        $('#day').css({'pointer-events': 'none'});
+        $('#night').css({'pointer-events': 'all'});
+        $('body').addClass('dark-mode');
+    }
+
+    if (currentTheme === 'dark') {
+        initializeNightState(false); // Initialize to night state, no animation
+    } else {
+        initializeDayState(false); // Initialize to day state, no animation
+        // localStorage.setItem('theme', 'light'); // Set if not already set, or ensure it is
+    }
 
     $("#day").click(function(){
-        $('body').addClass('dark-mode');
+        initializeNightState(true); // Animate to night state
         localStorage.setItem('theme', 'dark');
-
-        tr.to("#sun",{opacity:0, x: -157, duration:.6})
-        tr.to("#cloud",{opacity:0, duration:.6}, "<")
-        tr.to("#moon",{opacity:1, x: -157, duration:.6, rotation:0}, "<") // Ensure moon rotation is reset if it was > 0
-        tr.to(".star",{opacity:1, duration:.6}, "<")
-        // Change background colors for night
-        $('#night').css({'background': '#224f6d', 'border-color': '#cad4d8'});
-        $('#background').css({'background': '#0d1f2b'});
+        $(this).css({"pointer-events": "none"});
         setTimeout(function(){
-            $('#day').css({'pointer-events': 'none'});
-            $('#night').css({'pointer-events': 'all'});
-        }, 600); // Match duration of the longest animation
+            $("#night").css({"pointer-events": "all"})
+        }, 1000);
     });
 
     $("#night").click(function(){
-        $('body').removeClass('dark-mode');
+        initializeDayState(true); // Animate to day state
         localStorage.setItem('theme', 'light');
-
-        tl.to("#moon",{opacity:0, x:0, duration:.6, rotation: 360}) // Rotate moon during transition
-        tl.to(".star",{opacity:0, duration:.6}, "<")
-        tl.to("#sun",{opacity:1, x: -73, duration:.6}, "<") // Sun moves to its original position
-        tl.to("#cloud",{opacity:1, duration:.6}, "<")
-        // Change background colors for day
-        $('#day').css({'background': '#9cd6ef', 'border-color': '#65c0e7'}); // Reset day colors
-        $('#background').css({'background': '#d3edf8'}); // Reset background for day
+        // Reset night's inline styles if they were specific to dark mode and not covered by class
+         $('#night').css({'background': '#9cd6ef', 'border-color': '#65c0e7'}); // Reset to day's version of night button
+        $(this).css({"pointer-events": "none"});
         setTimeout(function(){
-            $('#day').css({'pointer-events': 'all'});
-            $('#night').css({'pointer-events': 'none'});
-        }, 600); // Match duration of the longest animation
+            $("#day").css({"pointer-events": "all"})
+        }, 1000);
     });
 });

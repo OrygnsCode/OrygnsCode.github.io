@@ -434,16 +434,6 @@ svg {
   /* background: #9cd6ef; border: 6px solid #65c0e7; These are set by JS, but initial state might be needed if not day */
 }
 
-#background {
-  width: 100%;
-  height: 100vh;
-  position: absolute;
-  background: #d3edf8;
-  z-index: -1; /* Ensure it's behind all content */
-  top: 0; /* Added top:0 */
-  left: 0; /* Added left:0 */
-}
-
 #darkmode {
     position: absolute; /* Position it like #day and #night */
     top: 50%;
