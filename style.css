@@ -58,7 +58,9 @@ header {
     color: var(--text-color);
     padding: 15px 20px; /* Adjusted padding */
     transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
-    text-align: center;
+    display: flex; /* Changed from text-align: center */
+    justify-content: space-between; /* Align h1 and nav */
+    align-items: center; /* Vertically align h1 and nav */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     position: sticky;
     top: 0;
@@ -70,13 +72,64 @@ header h1 {
     font-size: 2.2em;
     font-weight: 700;
     color: var(--primary-color);
+    /* Ensure h1 doesn't take full width if nav is also present */
+    flex-grow: 1; /* Allow h1 to take available space if needed, but nav will push it */
 }
+
+/* Adjust nav to align with h1 and contain the switch */
+header nav {
+    margin-top: 0; /* Reset margin, flex alignment handles it */
+    display: flex; /* To align items if nav had other links + switch */
+    align-items: center;
+}
+
+/* Theme Switch Styles */
+#theme-switch-container {
+    width: 50px; /* Slightly smaller width */
+    height: 26px; /* Slightly smaller height */
+    background-color: var(--secondary-color); /* Use secondary color for background */
+    border-radius: 13px; /* half of height for pill shape */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* This will put icons at ends, will adjust with visibility */
+    padding: 3px; /* Padding around icons */
+    position: relative; /* For icon positioning if needed, or for a potential knob */
+    transition: background-color 0.3s ease;
+}
+
+#sun-icon,
+#moon-icon {
+    font-size: 16px; /* Adjust icon size */
+    color: var(--light-bg); /* Light icons on darker switch bg */
+    /* Absolute positioning can be used for overlay effects, but for simple show/hide, flex is fine */
+    transition: color 0.3s ease, opacity 0.3s ease; /* Smooth transition for icon changes */
+}
+
+/* Initial state: Sun visible, Moon hidden */
+#moon-icon {
+    display: none;
+}
+#sun-icon {
+    display: inline; /* Or flex, block as needed by parent */
+}
+
+/* Dark mode: Sun hidden, Moon visible */
+body.dark-mode #sun-icon {
+    display: none;
+}
+body.dark-mode #moon-icon {
+    display: inline; /* Or flex, block */
+    color: var(--dark-text-color); /* Ensure moon icon is light in dark mode if switch bg changes */
+}
+
+/* If switch background needs to change in dark mode explicitly */
+body.dark-mode #theme-switch-container {
+    background-color: var(--dark-secondary-color); /* Example: use dark theme's secondary color */
+}
+
 
 /* Basic Navigation Styling (Future Proofing) */
-header nav {
-    margin-top: 10px;
-}
-
 header nav ul {
     list-style: none;
     padding: 0;
@@ -95,7 +148,7 @@ header nav a {
     color: var(--text-color);
     padding: 8px 15px; /* Increased padding for better click area */
     border-bottom: 2px solid transparent;
-    transition: color 0.3s ease, border-bottom-color 0.3s ease, background-color 0.3s ease; /* Added background-color transition */
+    transition: color 0.3s ease, border-bottom-color 0.3s ease, background-color 0.3s ease;
     font-weight: 500; /* Medium weight for nav links */
     border-radius: 4px; /* Slight radius for hover effect */
 }
@@ -103,8 +156,15 @@ header nav a {
 header nav a:hover,
 header nav a:focus { /* Added focus state for accessibility */
     color: var(--primary-color);
-    /* border-bottom-color: var(--primary-color); */ /* Alternative hover: underline */
     background-color: rgba(0, 123, 255, 0.1); /* Subtle background on hover/focus */
+}
+
+/* Ensure nav elements (if any besides switch) are spaced out */
+header nav > * {
+    margin-left: 15px; /* Add some spacing between nav items, if any */
+}
+header nav > *:first-child {
+    margin-left: 0; /* No margin for the first item in nav (which is the switch now) */
 }
 
 
@@ -258,10 +318,21 @@ footer a:focus { /* Added focus state */
         margin-bottom: 25px;
     }
 }
-
+/* Adjustments for smaller screens if needed */
 @media (max-width: 768px) {
+    header {
+        padding: 10px 15px; /* Slightly reduce header padding */
+    }
     header h1 {
-        font-size: 2em;
+        font-size: 1.8em; /* Slightly reduce h1 size */
+    }
+    #theme-switch-container { /* Make switch slightly smaller if needed */
+        width: 45px;
+        height: 24px;
+        border-radius: 12px;
+    }
+    #sun-icon, #moon-icon {
+        font-size: 14px;
     }
     header nav ul {
         justify-content: space-around; /* Better for limited space */
@@ -297,14 +368,13 @@ footer a:focus { /* Added focus state */
         font-size: 15px;
     }
     header {
-        padding: 10px 15px; /* Reduced header padding */
+        /* On very small screens, header padding was 10px 15px */
+        /* display: flex already set, space-between might be tight */
     }
     header h1 {
-        font-size: 1.8em;
+        font-size: 1.6em; /* Further reduce h1 size */
     }
-    header nav {
-        margin-top: 8px;
-    }
+    /* header nav { margin-top: 0; } already set */
     header nav li {
         margin: 3px 5px; /* Tighter spacing for nav items */
     }
