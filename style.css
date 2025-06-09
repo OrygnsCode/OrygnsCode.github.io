@@ -8,6 +8,26 @@
     --header-bg: #ffffff; /* Header background */
     --footer-bg: #343a40; /* Darker grey for footer */
     --font-family-base: 'Poppins', sans-serif;
+
+    /* Dark Theme Palette */
+    --dark-primary-color: #007bff; /* Keeping primary blue, or choose a lighter shade if needed e.g., #409eff */
+    --dark-secondary-color: #8a929a; /* Lighter Grey for dark mode */
+    --dark-text-color: #e9ecef; /* Light Grey for text */
+    --dark-body-bg: #121212; /* Very Dark Grey/Black */
+    --dark-light-bg: #1e1e1e; /* Dark Grey for elements */
+    --dark-header-bg: #1c1c1c; /* Slightly lighter than body for header */
+    --dark-footer-bg: #232323; /* Slightly lighter than body for footer */
+}
+
+body.dark-mode {
+    --primary-color: var(--dark-primary-color);
+    --secondary-color: var(--dark-secondary-color);
+    --text-color: var(--dark-text-color);
+    --body-bg: var(--dark-body-bg);
+    --light-bg: var(--dark-light-bg);
+    --header-bg: var(--dark-header-bg);
+    --footer-bg: var(--dark-footer-bg);
+    /* Note: --font-family-base generally remains the same for both themes */
 }
 
 body {
@@ -18,6 +38,7 @@ body {
     color: var(--text-color);
     font-size: 16px; /* Base font size */
     line-height: 1.7; /* Improved line height */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
 }
 
 /* Animations */
@@ -36,6 +57,7 @@ header {
     background-color: var(--header-bg);
     color: var(--text-color);
     padding: 15px 20px; /* Adjusted padding */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     position: sticky;
@@ -94,7 +116,7 @@ main {
 
 .hero {
     background-color: var(--primary-color);
-    color: var(--light-bg);
+    color: var(--light-bg); /* This will be light text on dark primary in dark mode if primary isn't changed much */
     padding: 4rem 2rem;
     text-align: center;
     margin-bottom: 40px;
@@ -143,6 +165,7 @@ h2 {
     background-color: var(--light-bg);
     padding: 25px;
     border-radius: 8px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease-out, transform 0.3s ease-out; /* Added background-color to transition */
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     border-bottom: none;
     margin-bottom: 0;
@@ -161,18 +184,20 @@ h2 {
     color: var(--text-color);
     font-size: 1.4em;
     margin-bottom: 0.75rem;
+    transition: color 0.3s ease; /* Smooth transition for theme change */
 }
 
 .project-item p {
     font-size: 1em;
     margin-bottom: 1.5rem;
     flex-grow: 1;
+    /* color will inherit from body or .project-item if set directly */
 }
 
 .project-item a {
     display: inline-block;
     background-color: var(--primary-color);
-    color: #ffffff;
+    color: #ffffff; /* This should be a light color, works for dark primary too */
     padding: 12px 20px;
     text-decoration: none;
     border-radius: 5px;
@@ -192,21 +217,24 @@ footer {
     text-align: center;
     padding: 30px 20px;
     background-color: var(--footer-bg);
-    color: var(--body-bg);
+    color: #e9ecef; /* Light grey text, good for dark footer backgrounds in both themes */
     margin-top: 40px;
     font-size: 0.9em;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
 }
 
 footer a {
-    color: var(--primary-color);
+    color: var(--primary-color); /* Will adapt with theme */
     text-decoration: none;
-    transition: color 0.3s ease; /* Added transition */
+    transition: color 0.3s ease;
 }
 
 footer a:hover,
 footer a:focus { /* Added focus state */
     text-decoration: underline;
-    color: #0056b3; /* Example: Darken color on hover, or use a lighter shade if primary is dark */
+    color: #0056b3; /* This is a hardcoded color, consider var(--secondary-color) or a new var if it needs to change with theme */
+    /* If #0056b3 is a darker version of primary, it might need adjustment for dark mode */
+    /* For now, leaving as is, but it's a potential refinement point. */
 }
 
 /* --- Media Queries for Responsiveness --- */
