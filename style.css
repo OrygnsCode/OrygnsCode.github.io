@@ -68,7 +68,7 @@ header {
     z-index: 1000;
     /* Re-adding sticky behavior if it was intended, but position:relative is key for nav */
     /* For now, let's assume sticky is still desired. If not, remove position: sticky */
-     position: sticky; 
+     position: sticky;
 }
 
 header h1 {
@@ -191,10 +191,10 @@ header nav a:focus { /* Added focus state for accessibility */
 /* Ensure nav elements (if any besides switch) are spaced out */
 /* This might not be needed if nav is only holding the switch and is absolutely positioned */
 /* header nav > * {
-    margin-left: 15px; 
+    margin-left: 15px;
 }
 header nav > *:first-child {
-    margin-left: 0; 
+    margin-left: 0;
 } */
 
 
@@ -361,9 +361,23 @@ footer a:focus { /* Added focus state */
     header nav { /* Adjust nav position for new header padding */
         right: 15px;
     }
-    /* Switch container size was already adjusted for this breakpoint (45px), should be fine */
-    /* #theme-switch-container { ... } */
-    /* #sun-icon, #moon-icon { ... } */
+    #theme-switch-container { /* Make switch slightly smaller */
+        width: 45px;
+        height: 24px;
+        border-radius: 12px;
+        padding: 2px;
+    }
+    #switch-knob { /* Adjust knob for smaller switch */
+        /* width and height are fixed at 20px from base style, which is correct (24px height - 2*2px padding) */
+        top: 2px; /* Align with new padding */
+        left: 2px; /* Align with new padding */
+    }
+    body.dark-mode #switch-knob { /* Adjust translation for smaller switch */
+        transform: translateX(21px); /* 45 (width) - 20 (knob) - 2 (left pad) - 2 (right pad) = 21px */
+    }
+    #sun-icon, #moon-icon { /* Icon size already adjusted in this media query by previous step, if that was applied */
+        font-size: 14px; /* Confirming icon size reduction */
+    }
     header nav ul {
         justify-content: space-around; /* Better for limited space */
     }
@@ -404,8 +418,8 @@ footer a:focus { /* Added focus state */
         font-size: 1.6em; /* Further reduce h1 size */
         /* Padding already adjusted in the 768px media query, should inherit */
         /* If further adjustment needed:
-        padding-left: 55px; 
-        padding-right: 55px; 
+        padding-left: 55px;
+        padding-right: 55px;
         */
     }
     /* header nav { right: 15px; } already set */
