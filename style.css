@@ -87,76 +87,13 @@ header h1 {
 /* Nav is now absolutely positioned */
 header nav {
     position: absolute;
-    right: 20px; /* Corresponds to header's padding-right */
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    /* display: flex; not strictly needed if only switch is in nav, but fine */
-    /* align-items: center; not strictly needed if only switch is in nav, but fine */
-    /* margin-top: 0; not needed for absolute positioning */
+    width: 70px; /* Width to contain the scaled switch + some padding */
+    height: 40px; /* Height to contain the scaled switch + some padding */
+    /* display: flex; align-items: center; justify-content: center; /* Optional: to help center if needed */
 }
-
-/* Theme Switch Styles */
-/* No changes needed here unless it's for fitting within the new nav positioning */
-#theme-switch-container {
-    width: 50px; /* Slightly smaller width */
-    height: 26px; /* Slightly smaller height */
-    background-color: var(--secondary-color); /* Use secondary color for background */
-    border-radius: 13px; /* half of height for pill shape */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Icons at either end of the switch */
-    padding: 3px; /* Padding for icons and knob positioning */
-    position: relative; /* Crucial for absolute positioning of the knob */
-    transition: background-color 0.3s ease; /* Already present, good */
-}
-
-#switch-knob {
-    position: absolute;
-    width: 20px; /* Knob size - should be height of container minus padding x2 */
-    height: 20px; /* Knob size - assuming container height 26px, padding 3px, so 26-6=20 */
-    background-color: #ffffff; /* Always white knob */
-    border-radius: 50%; /* Circular knob */
-    top: 3px; /* Align with top padding */
-    left: 3px; /* Initial position (left side) */
-    transition: transform 0.3s ease;
-    z-index: 1; /* Ensure knob is above icons if they were not display:none */
-}
-
-body.dark-mode #switch-knob {
-    transform: translateX(24px); /* Move knob to the right: 50 (width) - 20 (knob) - 3 (left pad) - 3 (right pad) = 24px */
-}
-
-#sun-icon,
-#moon-icon {
-    font-size: 16px; /* Adjust icon size */
-    color: var(--light-bg); /* Light icons on darker switch bg */
-    transition: color 0.3s ease, opacity 0.3s ease; /* Smooth transition for icon changes */
-    z-index: 0; /* Ensure icons are below the knob */
-}
-
-/* Initial state: Sun visible, Moon hidden */
-#moon-icon {
-    display: none;
-}
-#sun-icon {
-    display: inline; /* Or flex, block as needed by parent */
-}
-
-/* Dark mode: Sun hidden, Moon visible */
-body.dark-mode #sun-icon {
-    display: none;
-}
-body.dark-mode #moon-icon {
-    display: inline; /* Or flex, block */
-    color: var(--dark-text-color); /* Ensure moon icon is light in dark mode if switch bg changes */
-}
-
-/* If switch background needs to change in dark mode explicitly */
-body.dark-mode #theme-switch-container {
-    background-color: var(--dark-secondary-color); /* Example: use dark theme's secondary color */
-}
-
 
 /* Basic Navigation Styling (Future Proofing) */
 header nav ul {
@@ -372,12 +309,8 @@ footer a:focus { /* Added focus state */
         top: 2px; /* Align with new padding */
         left: 2px; /* Align with new padding */
     }
-    body.dark-mode #switch-knob { /* Adjust translation for smaller switch */
-        transform: translateX(21px); /* 45 (width) - 20 (knob) - 2 (left pad) - 2 (right pad) = 21px */
-    }
-    #sun-icon, #moon-icon { /* Icon size already adjusted in this media query by previous step, if that was applied */
-        font-size: 14px; /* Confirming icon size reduction */
-    }
+/* body.dark-mode #switch-knob removed */
+/* #sun-icon, #moon-icon removed */
     header nav ul {
         justify-content: space-around; /* Better for limited space */
     }
@@ -467,4 +400,61 @@ footer a:focus { /* Added focus state */
     footer {
         padding: 20px 15px;
     }
+}
+
+svg {
+  transform: scale(.7);
+  z-index: 2;
+  pointer-events: none;
+}
+
+#day, #night {
+  width: 240px;
+  height: 110px;
+  /* background: white; remove this line, it's overridden by specific background below */
+  position: absolute;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 100px;
+  background: #9cd6ef; /* Default for #day */
+  border: 6px solid #65c0e7; /* Default for #day */
+  /* Attempt to center them within the nav area */
+  /* The nav is approx 50px wide and 26px tall based on old switch. */
+  /* New switch is 240px wide. This will be too big for current nav. */
+  /* For now, let's position them at top-left of nav and scale them down significantly. */
+  /* This will require further refinement in the testing phase. */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.25); /* Center and significantly scale down */
+
+}
+
+#night {
+  pointer-events: none;
+  /* background: #9cd6ef; border: 6px solid #65c0e7; These are set by JS, but initial state might be needed if not day */
+}
+
+#darkmode {
+    position: absolute; /* Position it like #day and #night */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.15); /* Even smaller scale for the large SVG */
+    /* The media query has svg { transform: scale(.95); } which will apply to this too. */
+    /* This might need to be #darkmode specific: @media (max-width: 720px) { #darkmode { transform: scale(.2); } } */
+}
+
+@media (max-width: 720px) {
+  #day, #night {
+    /* Original new CSS had width: 320px, height: 150px */
+    /* With the new scaling, these might not be hit effectively. */
+    /* Keeping original transform scale, adjust base size if needed later */
+    width: 320px; /* Base size before scaling */
+    height: 150px; /* Base size before scaling */
+  }
+  svg {
+    /* Original new CSS had transform: scale(.95) */
+    /* This will be relative to its container. */
+    /* The main #day, #night also has a transform. Let's adjust svg's scale within its parent. */
+    transform: scale(.95); /* This should be fine if SVG is child of #day/#night or similar */
+  }
 }
