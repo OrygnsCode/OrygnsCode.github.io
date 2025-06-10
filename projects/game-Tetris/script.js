@@ -307,7 +307,8 @@ function drawUI() {
     ctx.fillText('Tetris',3,3);
     ctx.font = '0.8px monospace';
     ctx.fillText('Back to', 3, 4.2);
-    ctx.fillText('OrygnsCode Home', 3, 5.0);
+    ctx.fillText('OrygnsCode', 3, 5.0);
+    ctx.fillText('Home', 3, 5.8);
     ctx.font = '1px monospace'; // Reset font for subsequent text
     // Instructions
     ctx.fillText('← / → = Move Horizontally',6,25);
@@ -393,8 +394,8 @@ cnv.addEventListener('click', function(event) {
     const y2_1 = text1YBaseline;
     const clickedLine1 = clickX >= x1_1 && clickX <= x2_1 && clickY >= y1_1 && clickY <= y2_1;
 
-    // Line 2: "OrygnsCode Home"
-    const text2 = "OrygnsCode Home";
+    // Line 2: "OrygnsCode"
+    const text2 = "OrygnsCode";
     const text2YBaseline = 5.0;
     const text2Width = ctx.measureText(text2).width;
     const x1_2 = commonTextX;
@@ -403,9 +404,19 @@ cnv.addEventListener('click', function(event) {
     const y2_2 = text2YBaseline;
     const clickedLine2 = clickX >= x1_2 && clickX <= x2_2 && clickY >= y1_2 && clickY <= y2_2;
 
+    // Line 3: "Home"
+    const text3 = "Home";
+    const text3YBaseline = 5.8;
+    const text3Width = ctx.measureText(text3).width;
+    const x1_3 = commonTextX;
+    const y1_3 = text3YBaseline - commonTextHeight;
+    const x2_3 = commonTextX + text3Width;
+    const y2_3 = text3YBaseline;
+    const clickedLine3 = clickX >= x1_3 && clickX <= x2_3 && clickY >= y1_3 && clickY <= y2_3;
+
     ctx.font = previousFont; // Restore previous font
 
-    if (clickedLine1 || clickedLine2) {
+    if (clickedLine1 || clickedLine2 || clickedLine3) {
         const homeLink = document.getElementById('homeLink');
         if (homeLink) {
             homeLink.click();
