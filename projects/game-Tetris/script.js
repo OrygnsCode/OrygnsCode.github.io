@@ -305,6 +305,9 @@ function drawUI() {
     ctx.textAlign = 'left';
     // Title or something
     ctx.fillText('Tetris',3,3);
+    ctx.font = '0.8px monospace';
+    ctx.fillText('Back to OrygnsCode Home', 3, 4.2);
+    ctx.font = '1px monospace'; // Reset font for subsequent text
     // Instructions
     ctx.fillText('← / → = Move Horizontally',6,25);
     ctx.fillText('↑ = Rotate    // SHIFT = Switch',6,26);
@@ -366,3 +369,33 @@ function randomPiece() {
 // ---------------------------------------------------------
 
 init();
+
+// --- Clickable Link for "Back to OrygnsCode Home" ---
+cnv.addEventListener('click', function(event) {
+    const clickX = event.offsetX / 20; // Scale factor is 20
+    const clickY = event.offsetY / 20; // Scale factor is 20
+
+    const linkText = 'Back to OrygnsCode Home';
+    const textX = 3;
+    const textBaselineY = 4.2;
+    const textFont = '0.8px monospace';
+    const textHeight = 0.8; // Approximate height based on font size
+
+    // Set font for accurate measurement
+    const previousFont = ctx.font; // Store previous font
+    ctx.font = textFont;
+    const textWidth = ctx.measureText(linkText).width;
+    ctx.font = previousFont; // Restore previous font
+
+    const x1 = textX;
+    const y1 = textBaselineY - textHeight; // Top edge of the text
+    const x2 = textX + textWidth;         // Right edge of the text
+    const y2 = textBaselineY;              // Bottom edge of the text (baseline)
+
+    if (clickX >= x1 && clickX <= x2 && clickY >= y1 && clickY <= y2) {
+        const homeLink = document.getElementById('homeLink');
+        if (homeLink) {
+            homeLink.click();
+        }
+    }
+});
