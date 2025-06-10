@@ -2,7 +2,7 @@
 // - Canvas Context -
 var cnv = document.getElementById('cnv'),
     ctx = cnv.getContext('2d');
-ctx.scale(20, 20);
+let currentScale = 20; // Will be recalculated
 
 // Color palette for the blocks
 var palettes = {
@@ -160,6 +160,21 @@ var lastTime = 0;
 var dropCount = 0;
 var dropInterval = 1000;
 
+// --- Resize and Scale ------------------------------------
+function resizeCanvasAndScale() {
+    cnv.width = window.innerWidth;
+    cnv.height = window.innerHeight;
+
+    // Determine the new scale factor to fit a 30x30 logical unit space
+    // This logical space was derived from the original 600px canvas / original scale of 20
+    currentScale = Math.min(cnv.width / 30, cnv.height / 30);
+
+    // Reset the transformation matrix to identity before applying the new scale
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(currentScale, currentScale);
+}
+
+window.addEventListener('resize', resizeCanvasAndScale);
 // ---------------------------------------------------------
 
 // --- Input Handling --------------------------------------
@@ -185,6 +200,7 @@ document.addEventListener('keydown', function(e){
 
 // --- Functions -------------------------------------------
 function init() {
+    resizeCanvasAndScale(); // Initial call to set size and scale
     reset();
     frameFunction();
 }
@@ -220,7 +236,8 @@ function frameFunction(time = 0) {
 
 function coverFrame() {
     ctx.fillStyle = 'rgba(0,10,30,1)';
-    ctx.fillRect(0,0,cnv.width, cnv.height);
+    // Use logical units for clearing, assuming 0,0 is top-left of logical space
+    ctx.fillRect(0, 0, 30, 30);
 }
 
 function createMatrix(w,h) {
