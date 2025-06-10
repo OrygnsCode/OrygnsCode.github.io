@@ -306,7 +306,8 @@ function drawUI() {
     // Title or something
     ctx.fillText('Tetris',3,3);
     ctx.font = '0.8px monospace';
-    ctx.fillText('Back to OrygnsCode Home', 3, 4.2);
+    ctx.fillText('Back to', 3, 4.2);
+    ctx.fillText('OrygnsCode Home', 3, 5.0);
     ctx.font = '1px monospace'; // Reset font for subsequent text
     // Instructions
     ctx.fillText('← / → = Move Horizontally',6,25);
@@ -375,24 +376,36 @@ cnv.addEventListener('click', function(event) {
     const clickX = event.offsetX / 20; // Scale factor is 20
     const clickY = event.offsetY / 20; // Scale factor is 20
 
-    const linkText = 'Back to OrygnsCode Home';
-    const textX = 3;
-    const textBaselineY = 4.2;
     const textFont = '0.8px monospace';
-    const textHeight = 0.8; // Approximate height based on font size
+    const commonTextX = 3;
+    const commonTextHeight = 0.8; // Approximation
 
-    // Set font for accurate measurement
-    const previousFont = ctx.font; // Store previous font
-    ctx.font = textFont;
-    const textWidth = ctx.measureText(linkText).width;
+    const previousFont = ctx.font;
+    ctx.font = textFont; // Set font for measurements
+
+    // Line 1: "Back to"
+    const text1 = "Back to";
+    const text1YBaseline = 4.2;
+    const text1Width = ctx.measureText(text1).width;
+    const x1_1 = commonTextX;
+    const y1_1 = text1YBaseline - commonTextHeight;
+    const x2_1 = commonTextX + text1Width;
+    const y2_1 = text1YBaseline;
+    const clickedLine1 = clickX >= x1_1 && clickX <= x2_1 && clickY >= y1_1 && clickY <= y2_1;
+
+    // Line 2: "OrygnsCode Home"
+    const text2 = "OrygnsCode Home";
+    const text2YBaseline = 5.0;
+    const text2Width = ctx.measureText(text2).width;
+    const x1_2 = commonTextX;
+    const y1_2 = text2YBaseline - commonTextHeight;
+    const x2_2 = commonTextX + text2Width;
+    const y2_2 = text2YBaseline;
+    const clickedLine2 = clickX >= x1_2 && clickX <= x2_2 && clickY >= y1_2 && clickY <= y2_2;
+
     ctx.font = previousFont; // Restore previous font
 
-    const x1 = textX;
-    const y1 = textBaselineY - textHeight; // Top edge of the text
-    const x2 = textX + textWidth;         // Right edge of the text
-    const y2 = textBaselineY;              // Bottom edge of the text (baseline)
-
-    if (clickX >= x1 && clickX <= x2 && clickY >= y1 && clickY <= y2) {
+    if (clickedLine1 || clickedLine2) {
         const homeLink = document.getElementById('homeLink');
         if (homeLink) {
             homeLink.click();
