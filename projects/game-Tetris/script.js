@@ -305,7 +305,6 @@ function drawUI() {
     ctx.textAlign = 'left';
     // Title or something
     ctx.fillText('Tetris',3,3);
-    ctx.fillText('sort of',3,4);
     // Instructions
     ctx.fillText('← / → = Move Horizontally',6,25);
     ctx.fillText('↑ = Rotate    // SHIFT = Switch',6,26);
