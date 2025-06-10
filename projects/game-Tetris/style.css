@@ -1,28 +1,20 @@
 * { box-sizing: border-box; transition: 0.3s cubic-bezier(0.6,0,0.2,1); }
-body {
-    transition: 0s;
-    background-color: #BBC;
-    margin: 0; /* Added */
-    padding: 0; /* Added */
-    overflow: hidden; /* Added to prevent scrollbars */
-}
+body { transition: 0s; background-color: #BBC}
 
 .canvas-container {
     position: absolute;
-    top: 0; /* Changed from 50% */
-    left: 0; /* Changed from 50% */
-    transform: none; /* Changed from translate(-50%,-50%) */
-    height: 100vh; /* Changed from 720px */
-    width: 100vw; /* Changed from 720px */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    height: 720px;
+    width: 720px;
 }
 
 #cnv {
     height: 100%;
     width: 100%;
-    display: block; /* Added to prevent potential small space under canvas */
 }
 
-/*
 @media screen and (max-height: 800px) {
     .canvas-container {
         transform: translate(-50%,-50%) scale(0.8);
@@ -34,4 +26,3 @@ body {
         transform: translate(-50%,-50%) scale(0.7);
     }
 }
-*/
