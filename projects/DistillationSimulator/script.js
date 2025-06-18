@@ -2,12 +2,12 @@
 
 class ProfessionalDistillationSimulator {
     constructor() {
-        this.feedRate = 100;
-        this.feedComposition = 0.5;
-        this.qValue = 1.0;
-        this.refluxRatio = 1.5;
+        this.feedRate = 100; 
+        this.feedComposition = 0.5; 
+        this.qValue = 1.0; 
+        this.refluxRatio = 1.5; 
         this.distillateComposition = 0.95;
-        this.bottomsComposition = 0.05;
+        this.bottomsComposition = 0.05; 
         this.relativeVolatility = 2.5;
 
         this.minimumRefluxRatio = null;
@@ -16,17 +16,17 @@ class ProfessionalDistillationSimulator {
         this.feedPlateLocation = null;
         this.operatingLinesIntersection = { x: null, y: null };
         this.errorMessage = null;
-        this.tooltipElement = null;
+        this.tooltipElement = null; 
         this.stageData = [];
 
         // New properties for D, B, loads, R/Rmin
-        this.distillateFlowRate = null;
-        this.bottomsFlowRate = null;
-        this.condenserLoadFactor = null;
-        this.reboilerLoadFactor = null;
-        this.refluxRatioToMinRefluxRatio = null;
+        this.distillateFlowRate = null; 
+        this.bottomsFlowRate = null;    
+        this.condenserLoadFactor = null; 
+        this.reboilerLoadFactor = null;  
+        this.refluxRatioToMinRefluxRatio = null; 
 
-        this.componentData = { /* ... */
+        this.componentData = { /* ... */ 
             "benzene-toluene": { name: "Benzene-Toluene", alpha_A_B: 2.4, antoine_A: { A: 6.90565, B: 1211.033, C: 220.79 }, antoine_B: { A: 6.95464, B: 1344.800, C: 219.482 } },
             "ethanol-water": { name: "Ethanol-Water", alpha_A_B: 2.8, antoine_A: { A: 8.20417, B: 1642.89, C: 230.30 }, antoine_B: { A: 8.07131, B: 1730.63, C: 233.426 } },
             "methanol-water": { name: "Methanol-Water", alpha_A_B: 3.5, antoine_A: { A: 8.08097, B: 1582.271, C: 239.726 }, antoine_B: { A: 8.07131, B: 1730.63, C: 233.426 } },
@@ -36,7 +36,7 @@ class ProfessionalDistillationSimulator {
         this.svg = null; this.xScale = null; this.yScale = null;
         this.width = 0; this.height = 0;
         this.margin = { top: 30, right: 30, bottom: 50, left: 60 };
-        this.colors = { /* ... */
+        this.colors = { /* ... */ 
             equilibrium: "var(--primary-color)", yEqualsX: "grey", rol: "var(--accent-color)",
             sol: "var(--success-color)", qLine: "purple", plateStep: "rgba(0, 0, 0, 0.6)",
             keyPoints: "red", axisText: "var(--text-color)"
@@ -44,35 +44,35 @@ class ProfessionalDistillationSimulator {
         this.init();
     }
 
-    init() { /* ... same as before ... */
-        this.populateComponentSelector(); this.setupTabs(); this.setupEventListeners(); this.setupTooltips();
+    init() { /* ... same as before ... */ 
+        this.populateComponentSelector(); this.setupTabs(); this.setupEventListeners(); this.setupTooltips(); 
         if (this.componentData[this.currentComponentSystem]) { this.relativeVolatility = this.componentData[this.currentComponentSystem].alpha_A_B; }
         this.syncInputsToUI(); this.setupVisualization(); this.updateComponentDataUI(); this.calculateAndDraw();
         if (window.MathJax) window.MathJax.typesetPromise().catch(err => console.error('MathJax initial typeset error:', err));
     }
-
-    setupTooltips() { /* ... same as before ... */
+    
+    setupTooltips() { /* ... same as before ... */ 
         const tooltipDiv = document.createElement('div'); tooltipDiv.classList.add('tooltip-popup'); tooltipDiv.setAttribute('id', 'infoTooltip');
         document.body.appendChild(tooltipDiv); this.tooltipElement = tooltipDiv;
         const infoIcons = document.querySelectorAll('.info-icon');
         infoIcons.forEach(icon => {
-            icon.setAttribute('tabindex', '0');
+            icon.setAttribute('tabindex', '0'); 
             icon.addEventListener('mouseenter', (e) => this.showTooltip(e)); icon.addEventListener('mouseleave', () => this.hideTooltip());
             icon.addEventListener('focus', (e) => this.showTooltip(e)); icon.addEventListener('blur', () => this.hideTooltip());
             icon.addEventListener('keydown', (e) => { if (e.key === 'Escape') { this.hideTooltip(); if (icon.offsetParent) icon.blur(); }});
         });
     }
-    showTooltip(event) { /* ... same as before ... */
+    showTooltip(event) { /* ... same as before ... */ 
         const icon = event.currentTarget; const tooltipText = icon.dataset.tooltip;
         if (!tooltipText || !this.tooltipElement) return; this.tooltipElement.textContent = tooltipText;
-        this.tooltipElement.style.visibility = 'hidden'; this.tooltipElement.classList.add('visible');
+        this.tooltipElement.style.visibility = 'hidden'; this.tooltipElement.classList.add('visible'); 
         const tooltipWidth = this.tooltipElement.offsetWidth; const tooltipHeight = this.tooltipElement.offsetHeight;
         const iconRect = icon.getBoundingClientRect();
         let top = iconRect.top + window.scrollY - tooltipHeight - 10; let left = iconRect.left + window.scrollX + (iconRect.width / 2) - (tooltipWidth / 2);
         if (left < 5) left = 5; if (left + tooltipWidth > window.innerWidth - 5) left = window.innerWidth - tooltipWidth - 5;
         if (top < window.scrollY + 5) { top = iconRect.bottom + window.scrollY + 10; }
         this.tooltipElement.style.left = `${left}px`; this.tooltipElement.style.top = `${top}px`;
-        this.tooltipElement.style.visibility = 'visible';
+        this.tooltipElement.style.visibility = 'visible'; 
     }
     hideTooltip() { /* ... same as before ... */ if (!this.tooltipElement) return; this.tooltipElement.classList.remove('visible'); this.tooltipElement.textContent = ''; }
     populateComponentSelector() { /* ... same as before ... */ const sE=document.getElementById('component-select');if(!sE)return;sE.innerHTML='';for(const k in this.componentData){const o=document.createElement('option');o.value=k;o.textContent=this.componentData[k].name;sE.appendChild(o)}const cO=document.createElement('option');cO.value="custom";cO.textContent="Custom Alpha";sE.appendChild(cO);sE.value=this.currentComponentSystem}
@@ -89,7 +89,7 @@ class ProfessionalDistillationSimulator {
     drawOperatingLines() { /* ... same as before ... */ if(!this.svg||!this.xScale||this.operatingLinesIntersection.x===null)return;this.svg.selectAll(".q-line, .rol-line, .sol-line").remove();const{x:xi,y:yi}=this.operatingLinesIntersection;const zF=this.feedComposition,xD=this.distillateComposition,xB=this.bottomsComposition;this.svg.append("line").attr("class","q-line").attr("x1",this.xScale(zF)).attr("y1",this.yScale(zF)).attr("x2",this.xScale(xi)).attr("y2",this.yScale(yi)).attr("stroke",this.colors.qLine).attr("stroke-dasharray","4,2").attr("stroke-width",1.5);this.svg.append("line").attr("class","rol-line").attr("x1",this.xScale(xD)).attr("y1",this.yScale(xD)).attr("x2",this.xScale(xi)).attr("y2",this.yScale(yi)).attr("stroke",this.colors.rol).attr("stroke-width",1.5);this.svg.append("line").attr("class","sol-line").attr("x1",this.xScale(xB)).attr("y1",this.yScale(xB)).attr("x2",this.xScale(xi)).attr("y2",this.yScale(yi)).attr("stroke",this.colors.sol).attr("stroke-width",1.5)}
     drawTheoreticalPlates() { /* ... same as before ... */ if(!this.svg||!this.xScale||this.operatingLinesIntersection.x===null)return;this.svg.selectAll(".plate-step").remove();this.stageData=[];this.feedPlateLocation=0;let p=0,cX=this.distillateComposition,cY=this.distillateComposition;const R=this.actualRefluxRatio,xD=this.distillateComposition,xB=this.bottomsComposition,{x:xi,y:yi}=this.operatingLinesIntersection;let mS,cS;if(Math.abs(xi-xB)<1e-9){mS=Infinity;cS=xB}else{mS=(yi-xB)/(xi-xB);cS=xB-mS*xB}while(cX>xB+1e-6&&cY>xB+1e-6&&p<50){p++;let pX=cX;cX=this.findXForYOnEquilibrium(cY);this.svg.append("line").attr("class","plate-step").attr("x1",this.xScale(pX)).attr("y1",this.yScale(cY)).attr("x2",this.xScale(cX)).attr("y2",this.yScale(cY)).attr("stroke",this.colors.plateStep).attr("stroke-width",.5);this.stageData.push({stage:p,x:cX,y:cY});if(cX<=xB+1e-6)break;let pY=cY;if(this.feedPlateLocation===0&&cX<xi+1e-6&&cY>yi-1e-6)this.feedPlateLocation=p;if(this.feedPlateLocation===0||cX>=xi-1e-6)cY=R/(R+1)*cX+xD/(R+1);else{if(mS===Infinity)cY=xB;else cY=mS*cX+cS}this.svg.append("line").attr("class","plate-step").attr("x1",this.xScale(cX)).attr("y1",this.yScale(pY)).attr("x2",this.xScale(cX)).attr("y2",this.yScale(cY)).attr("stroke",this.colors.plateStep).attr("stroke-width",.5);if(cY<=xB+1e-6)break}this.numberOfTheoreticalPlates=p}
     drawKeyPoints() { /* ... same as before ... */ if(!this.svg||!this.xScale||this.errorMessage)return;const kPD=[];if(this.distillateComposition!==null)kPD.push({x:this.distillateComposition,y:this.distillateComposition,l:"xD",c:this.colors.rol});if(this.bottomsComposition!==null)kPD.push({x:this.bottomsComposition,y:this.bottomsComposition,l:"xB",c:this.colors.sol});if(this.feedComposition!==null)kPD.push({x:this.feedComposition,y:this.feedComposition,l:"zF",c:this.colors.qLine});if(this.operatingLinesIntersection&&isFinite(this.operatingLinesIntersection.x)&&isFinite(this.operatingLinesIntersection.y))kPD.push({x:this.operatingLinesIntersection.x,y:this.operatingLinesIntersection.y,l:"Int",c:this.colors.keyPoints});const kPG=this.svg.select(".key-points-group");kPG.selectAll("circle").remove();kPG.selectAll("circle").data(kPD).enter().append("circle").attr("cx",d=>this.xScale(d.x)).attr("cy",d=>this.yScale(d.y)).attr("r",5).attr("fill",d=>d.c).attr("stroke","black").attr("stroke-width",.5).style("opacity",.8)}
-
+    
     calculateFlowRatesAndLoads() {
         this.distillateFlowRate = null; this.bottomsFlowRate = null;
         this.condenserLoadFactor = null; this.reboilerLoadFactor = null;
@@ -137,11 +137,11 @@ class ProfessionalDistillationSimulator {
         }
     }
 
-    calculateAndDraw() {
-        this.errorMessage = null;
+    calculateAndDraw() { 
+        this.errorMessage = null; 
         if (this.svg) this.svg.selectAll(".plate-step, .q-line, .rol-line, .sol-line, .key-points-group circle").remove();
         else this.setupVisualization();
-
+        
         const stageDataContainer = document.getElementById('stageDataTableContainer');
         if (stageDataContainer && stageDataContainer.style.display !== 'none') {
             stageDataContainer.style.display = 'none';
@@ -156,20 +156,20 @@ class ProfessionalDistillationSimulator {
         else if (this.relativeVolatility <= 0) { this.errorMessage = "Relative volatility (α) must be positive.";}
         if (this.errorMessage) { this.updateResultsDisplay(); return; }
 
-        this.actualRefluxRatio = this.refluxRatio;
+        this.actualRefluxRatio = this.refluxRatio; 
         this.calculateMinimumRefluxRatio(); if (this.errorMessage) { this.updateResultsDisplay(); return; }
         this.calculateFlowRatesAndLoads(); if (this.errorMessage) { this.updateResultsDisplay(); return; } // Call new method
         this.calculateOperatingLinesIntersection(); if (this.errorMessage) { this.updateResultsDisplay(); return; }
-
-        if (!this.svg || this.width <= 0 || this.height <= 0) {
-            this.setupVisualization();
+        
+        if (!this.svg || this.width <= 0 || this.height <= 0) { 
+            this.setupVisualization(); 
             if (this.width <= 0 || this.height <= 0) { this.errorMessage = "Diagram container error."; this.updateResultsDisplay(); return; }
         }
-        this.drawEquilibriumCurve(); this.drawOperatingLines(); this.drawTheoreticalPlates(); this.drawKeyPoints();
+        this.drawEquilibriumCurve(); this.drawOperatingLines(); this.drawTheoreticalPlates(); this.drawKeyPoints(); 
         this.updateResultsDisplay(); this.updateLegend();
     }
 
-    updateResultsDisplay() {
+    updateResultsDisplay() { 
         const resultsDiv=document.querySelector('.results-grid');if(!resultsDiv)return;resultsDiv.innerHTML='';
         if(this.errorMessage){resultsDiv.innerHTML=`<div class="error-message" style="color:var(--error-color);grid-column:1/-1">${this.errorMessage}</div>`;return}
         function c(l,v,u=''){const i=document.createElement('div');i.innerHTML=`<strong>${l}:</strong> ${v} ${u}`;return i}
@@ -180,16 +180,16 @@ class ProfessionalDistillationSimulator {
         resultsDiv.appendChild(c('Bott. Comp. (x<sub>B</sub>)',this.bottomsComposition.toFixed(2)));
         resultsDiv.appendChild(c('Rel. Vol. (α)',this.relativeVolatility.toFixed(2)));
         resultsDiv.appendChild(c('Reflux Ratio (R)',this.actualRefluxRatio.toFixed(2)));
-
+        
         let rMV='N/A';
         if(this.minimumRefluxRatio!==null){if(isFinite(this.minimumRefluxRatio)&&!isNaN(this.minimumRefluxRatio))rMV=this.minimumRefluxRatio.toFixed(2);else if(this.minimumRefluxRatio===Infinity)rMV='Infinity'}
         resultsDiv.appendChild(c('Min. Reflux (R<sub>min</sub>)',rMV));
-
+        
         resultsDiv.appendChild(c('Distillate Rate (D)', (this.distillateFlowRate !== null && !isNaN(this.distillateFlowRate)) ? this.distillateFlowRate.toFixed(2) : 'N/A', (this.distillateFlowRate !== null && !isNaN(this.distillateFlowRate)) ? 'mol/hr' : ''));
         resultsDiv.appendChild(c('Bottoms Rate (B)', (this.bottomsFlowRate !== null && !isNaN(this.bottomsFlowRate)) ? this.bottomsFlowRate.toFixed(2) : 'N/A', (this.bottomsFlowRate !== null && !isNaN(this.bottomsFlowRate)) ? 'mol/hr' : ''));
         resultsDiv.appendChild(c('Condenser Load Factor', (this.condenserLoadFactor !== null && !isNaN(this.condenserLoadFactor)) ? this.condenserLoadFactor.toFixed(2) : 'N/A', (this.condenserLoadFactor !== null && !isNaN(this.condenserLoadFactor)) ? '(rel. units)' : ''));
         resultsDiv.appendChild(c('Reboiler Load Factor', (this.reboilerLoadFactor !== null && !isNaN(this.reboilerLoadFactor)) ? this.reboilerLoadFactor.toFixed(2) : 'N/A', (this.reboilerLoadFactor !== null && !isNaN(this.reboilerLoadFactor)) ? '(rel. units)' : ''));
-
+        
         let rRminValueText = 'N/A';
         if (this.refluxRatioToMinRefluxRatio === Infinity) { rRminValueText = 'Infinity (R<sub>min</sub> ≈ 0)'; }
         else if (this.refluxRatioToMinRefluxRatio !== null && !isNaN(this.refluxRatioToMinRefluxRatio) && isFinite(this.refluxRatioToMinRefluxRatio)) { rRminValueText = this.refluxRatioToMinRefluxRatio.toFixed(2); }
@@ -197,7 +197,7 @@ class ProfessionalDistillationSimulator {
 
         resultsDiv.appendChild(c('Total Plates (N<sub>total</sub>)',this.numberOfTheoreticalPlates!==null?this.numberOfTheoreticalPlates:'N/A'));
         resultsDiv.appendChild(c('Feed Plate # (N<sub>feed</sub>)',this.feedPlateLocation!==null&&this.feedPlateLocation>0?this.feedPlateLocation:'N/A'));
-
+        
         if(window.MathJax){window.MathJax.typesetPromise([resultsDiv]).catch(e=>console.error('MathJax err: '+e.message))}}
     updateLegend() { /* ... same as before ... */ const lD=document.querySelector('.visualization-panel .legend');if(!lD)return;lD.innerHTML='';const lI=[{label:"Equilibrium Curve",color:this.colors.equilibrium,class:"legend-eq"},{label:"y = x Line",color:this.colors.yEqualsX,class:"legend-diag"},{label:"Rectifying Op. Line",color:this.colors.rol,class:"legend-rol"},{label:"Stripping Op. Line",color:this.colors.sol,class:"legend-sol"},{label:"q-Line",color:this.colors.qLine,class:"legend-qline"},{label:"Plate Steps",color:this.colors.plateStep,class:"legend-plates"},{label:"Key Points",color:this.colors.keyPoints,class:"legend-keypoints"}];const sId='dynamic-legend-styles';let sS=document.getElementById(sId);if(!sS){sS=document.createElement('style');sS.id=sId;document.head.appendChild(sS)}let cR="";lI.forEach(i=>{const s=document.createElement('span');s.classList.add(i.class);s.textContent=i.label;s.dataset.color=i.color;lD.appendChild(s);cR+=`.${i.class}::before { background-color: ${i.color} !important; content: ''; width: 12px; height: 12px; border: 1px solid #ccc; display: inline-block; margin-right: 5px; vertical-align: middle; }\n`});sS.innerHTML=cR}
     handleResize() { /* ... same as before ... */ if(document.getElementById('simulator-content').classList.contains('active')){this.setupVisualization();this.calculateAndDraw()}}

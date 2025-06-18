@@ -39,7 +39,7 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-
+    
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* Ensure body takes at least full viewport height */
@@ -418,13 +418,13 @@ body > footer a:hover {
 }
 
 .tooltip-popup {
-    position: absolute;
+    position: absolute; 
     background-color: #333; /* Dark background for contrast */
     color: white;
     padding: 8px 12px;
     border-radius: var(--border-radius, 4px);
-    font-size: 0.875em;
-    font-weight: normal;
+    font-size: 0.875em; 
+    font-weight: normal; 
     line-height: 1.4;
     z-index: 1010; /* Ensure it's above most other elements */
     max-width: 280px; /* Prevent very wide tooltips */
