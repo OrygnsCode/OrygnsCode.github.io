@@ -462,3 +462,125 @@ body > footer a:hover {
 #stageDataTableContainer h4 { /* Ensure heading has some margin */
     margin-bottom: 10px;
 }
+
+/* Enhanced Styling for #theory-content */
+#theory-content {
+    line-height: 1.7;
+    padding-bottom: 40px;
+}
+
+#theory-content h3 { /* e.g., "Theory of the McCabe-Thiele Method" */
+    color: var(--primary-color);
+    font-size: 1.8em;
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 12px;
+}
+
+#theory-content h4 { /* e.g., "1. Purpose", "2. Core Assumptions" */
+    color: var(--secondary-color);
+    font-size: 1.45em;
+    margin-top: 35px;
+    margin-bottom: 18px;
+}
+
+#theory-content p {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+/* Specific styling for paragraphs containing MathJax display equations */
+#theory-content p > .MathJax_Display,
+#theory-content p > mjx-container[display="true"] { /* For MathJax v3 */
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+}
+
+#theory-content ol,
+#theory-content ul {
+    margin-left: 20px;
+    margin-bottom: 18px;
+    padding-left: 25px;
+}
+
+#theory-content li {
+    margin-bottom: 10px;
+    line-height: 1.65;
+}
+
+#theory-content li > p { /* Paragraphs inside list items */
+    margin-bottom: 8px;
+}
+
+#theory-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 25px;
+    font-size: 0.9em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+#theory-content th,
+#theory-content td {
+    border: 1px solid var(--border-color, #dee2e6);
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+}
+
+#theory-content th {
+    background-color: var(--background-color, #f8f9fa);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom-width: 2px;
+}
+
+#theory-content tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
+}
+
+#theory-content table code {
+    font-family: var(--font-family-monospace);
+    background-color: #e9f2f9; /* Light blueish tint - fallback */
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: var(--primary-color);
+}
+
+#theory-content p > code,
+#theory-content li > code,
+#theory-content strong > code { /* Code in paragraphs/lists */
+    font-family: var(--font-family-monospace);
+    background-color: rgba(0,0,0,0.05);
+    padding: 3px 6px;
+    border-radius: var(--border-radius, 4px);
+    font-size: 0.875em;
+    color: var(--text-color);
+}
+
+#theory-content hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--border-color, #dee2e6);
+    margin: 40px 0;
+}
+
+#theory-content .MathJax_Display { /* For MathJax v2 if applicable */
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 5px 0;
+}
+#theory-content mjx-container[display="true"] > svg { /* For MathJax v3 SVG output */
+    max-width: 100%;
+    display: block;
+    margin: auto;
+}
+#theory-content mjx-container[display="true"] { /* Container for MathJax v3 */
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 5px 0;
+    margin: 1em 0;
+}
