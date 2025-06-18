@@ -11,7 +11,7 @@
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$'], ['\\$', '\\$'], ['`','`']], // Added backticks for inline math
+                inlineMath: [['$', '$'], ['\\$', '\\$'], ['`','`']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']]
             }
         };
@@ -61,6 +61,12 @@
                     </div>
                     <div class="visualization-panel">
                         <h3>McCabe-Thiele Diagram</h3>
+                        <div class="diagram-controls" style="margin-bottom: 10px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <label for="showGridCheckbox" style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9em; font-weight: normal;">
+                                <input type="checkbox" id="showGridCheckbox" style="margin-right: 5px;">Show Grid
+                            </label>
+                            <button id="resetViewButton" class="button" style="margin-left: 15px;">Reset View</button>
+                        </div>
                         <div id="mccabe-thiele-diagram"></div>
                         <div class="results-grid">
                             <!-- Results will be displayed here -->
@@ -74,7 +80,7 @@
                             <button id="exportCSVButton" class="button">Export CSV</button>
                         </div>
                     </div>
-                </div> {/* Closes simulator-layout */}
+                </div>
 
                 <div style="margin-top: 20px; padding-top:15px; border-top: 1px solid var(--border-color);">
                     <button id="toggleStageDataButton" class="button">Show Stage-by-Stage Data</button>
@@ -96,7 +102,7 @@
                     </div>
                 </div>
 
-            </div> {/* Closes app-container */}
+            </div>
         </section>
 
         <section id="theory-content" class="tab-content">
@@ -115,7 +121,7 @@
             </ol>
             <hr>
             <h4>3. Equilibrium Relation</h4>
-            <p>For Raoult-law mixtures with constant relative volatility α:</p>
+            <p>For Raoult-law mixtures with constant relative volatility <code>α</code>:</p>
             <p>$$ y = \frac{\alpha x}{1 + (\alpha - 1)x} $$</p>
             <p><code>x</code>, <code>y</code> are mole fractions of the more-volatile component in liquid and vapour.</p>
             <hr>
@@ -131,13 +137,13 @@
                 <tbody>
                     <tr>
                         <td><strong>Rectifying</strong></td>
-                        <td><code>y = (R / (R + 1)) x + xᴰ / (R + 1)</code></td>
-                        <td>R = reflux ratio (L/D), <code>xᴰ</code> = distillate composition</td>
+                        <td><code>y = (R / (R + 1)) x + x<sub>D</sub> / (R + 1)</code></td>
+                        <td>R = reflux ratio (L/D), <code>x<sub>D</sub></code> = distillate composition</td>
                     </tr>
                     <tr>
                         <td><strong>Stripping</strong></td>
-                        <td><code>y = (L̄ / V̄) x – (B xᴮ) / V̄</code></td>
-                        <td><code>xᴮ</code> = bottoms composition; L̄, V̄ = liquid/vapour rates</td>
+                        <td><code>y = (L&#772; / V&#772;) x – (B x<sub>B</sub>) / V&#772;</code></td>
+                        <td><code>x<sub>B</sub></code> = bottoms composition; <code>L&#772;</code>, <code>V&#772;</code> = liquid/vapour rates</td>
                     </tr>
                 </tbody>
             </table>
@@ -161,7 +167,7 @@
                     <tr>
                         <td>q = 1</td>
                         <td>Saturated liquid</td>
-                        <td>Vertical at <code>x = z_F</code></td>
+                        <td>Vertical at <code>x = z<sub>F</sub></code></td>
                     </tr>
                     <tr>
                         <td>0 &lt; q &lt; 1</td>
@@ -171,7 +177,7 @@
                     <tr>
                         <td>q = 0</td>
                         <td>Saturated vapour</td>
-                        <td>Horizontal at <code>y = z_F</code></td>
+                        <td>Horizontal at <code>y = z<sub>F</sub></code></td>
                     </tr>
                     <tr>
                         <td>q &lt; 0</td>
@@ -192,9 +198,9 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>α</strong></td>
+                        <td><strong><code>α</code></strong></td>
                         <td>Relative volatility</td>
-                        <td>α &gt; 1.4 is usually economical</td>
+                        <td><code>α</code> &gt; 1.4 is usually economical</td>
                     </tr>
                     <tr>
                         <td><strong>R</strong></td>
@@ -202,26 +208,26 @@
                         <td>↑R → ↓stage count but ↑condenser/reboiler duty</td>
                     </tr>
                     <tr>
-                        <td><strong>R_min</strong></td>
+                        <td><strong><code>R<sub>min</sub></code></strong></td>
                         <td>Minimum reflux</td>
-                        <td>Operate at ≈1.1–1.5 × R_min for good cost balance</td>
+                        <td>Operate at ≈1.1–1.5 × <code>R<sub>min</sub></code> for good cost balance</td>
                     </tr>
                 </tbody>
             </table>
             <hr>
             <h4>7. From Theory to Hardware</h4>
-            <p>Overall efficiency <strong>Eₒ</strong>:</p>
+            <p>Overall efficiency <strong><code>E<sub>o</sub></code></strong>:</p>
             <p>$$ N_{actual} = \frac{N_{theoretical}}{E_o} $$</p>
-            <p>Typical <strong>Eₒ</strong> values: 0.3 – 0.9 (system-dependent).</p>
-            <p>Murphree vapour-phase efficiency <strong>E_M,V</strong>:</p>
+            <p>Typical <strong><code>E<sub>o</sub></code></strong> values: 0.3 – 0.9 (system-dependent).</p>
+            <p>Murphree vapour-phase efficiency <strong><code>E<sub>M,V</sub></code></strong>:</p>
             <p>$$ E_{MV} = \frac{y_n − y_{n+1}}{y_n^* − y_{n+1}} $$</p>
-            <p>Use plate-by-plate efficiencies when hydraulic or pilot-plant data are available.</p>
+            <p>Use plate-by-plate efficiencies when hydraulic or pilot-plant data are available. (Note: in the equation above, <code>y<sub>n</sub></code>, <code>y<sub>n+1</sub></code>, and <code>y<sub>n</sub>*</code> are implied from context).</p>
             <hr>
             <h4>8. Using This Simulator</h4>
             <ol>
-                <li><strong>Select components</strong> and supply either α or full VLE data.</li>
-                <li><strong>Specify compositions:</strong> feed (<code>z_F</code>), distillate (<code>xᴰ</code>), bottoms (<code>xᴮ</code>) and <strong>feed quality</strong> (q).</li>
-                <li><strong>Choose a reflux ratio</strong> or let the tool compute R_min and suggest R ≈ 1.2 R_min.</li>
+                <li><strong>Select components</strong> and supply either <code>α</code> or full VLE data.</li>
+                <li><strong>Specify compositions:</strong> feed (<code>z<sub>F</sub></code>), distillate (<code>x<sub>D</sub></code>), bottoms (<code>x<sub>B</sub></code>) and <strong>feed quality</strong> (q).</li>
+                <li><strong>Choose a reflux ratio</strong> or let the tool compute <code>R<sub>min</sub></code> and suggest R ≈ 1.2 <code>R<sub>min</sub></code>.</li>
                 <li><strong>Read the stepped stage count</strong> on the M-T plot; apply efficiency to find the real plate count.</li>
                 <li><strong>Iterate</strong> to evaluate energy vs. capital trade-offs or check sensitivity to feed condition.</li>
             </ol>
