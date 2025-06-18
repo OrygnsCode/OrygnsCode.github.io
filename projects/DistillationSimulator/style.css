@@ -39,15 +39,24 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-    padding-top: 60px; /* Adjust if header is fixed */
+    
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure body takes at least full viewport height */
+    padding-top: 60px; /* Create space for the fixed header */
+    margin: 0; /* Override default browser margin on body */
 }
 
 /* Header */
 body > header { /* Target only the main page header, not potential article headers */
     background-color: var(--secondary-color);
     color: var(--text-light-color);
-    padding: calc(var(--spacing-unit) * 2) var(--spacing-unit);
-    text-align: center;
+    height: 60px; /* Explicit height for the fixed header */
+    padding: 0 var(--spacing-unit); /* Adjust padding if explicit height is set, to center content */
+    display: flex; /* To help center content within fixed height */
+    align-items: center; /* Vertically center header content */
+    justify-content: center; /* Horizontally center header content (if h1 is not full width) */
+    text-align: center; /* Keep text centered if it wraps */
     position: fixed; /* Or sticky */
     top: 0;
     left: 0;
@@ -57,11 +66,11 @@ body > header { /* Target only the main page header, not potential article heade
 }
 
 body > header h1 {
-    margin: 0;
-    font-size: 1.8em;
+    margin: 0; /* Reset margin if flex is used on parent */
+    font-size: 1.8em; /* Existing */
 }
-body > header p {
-    margin: var(--spacing-unit) 0 0;
+body > header p { /* Subtitle in header */
+    margin: 0 0 0 calc(var(--spacing-unit) * 2); /* Adjust margin to be next to H1 if flex direction is row */
     font-size: 0.9em;
     opacity: 0.9;
 }
@@ -75,7 +84,7 @@ nav#tabs {
     border-bottom: 1px solid var(--border-color);
     margin-bottom: calc(var(--spacing-unit) * 3);
     position: sticky;
-    top: 60px; /* Height of the fixed header */
+    top: 0; /* Stick to the top of its containing block (body, after body's padding-top) */
     z-index: 999; /* Below header, above content */
 }
 
@@ -103,8 +112,10 @@ nav#tabs {
 /* Main Content Area */
 main {
     max-width: var(--max-width-container);
-    margin: 0 auto;
-    padding: calc(var(--spacing-unit) * 2);
+    margin: 0 auto; /* Horizontal centering */
+    padding: calc(var(--spacing-unit) * 2) var(--spacing-unit); /* Adjust padding as needed */
+    width: 100%; /* Ensure it takes up available width within its centering margins */
+    flex-grow: 1; /* This is key for pushing the footer down */
 }
 
 .tab-content {
@@ -287,7 +298,8 @@ body > footer { /* Target only the main page footer */
     color: var(--background-color);
     text-align: center;
     padding: calc(var(--spacing-unit) * 3) var(--spacing-unit);
-    margin-top: calc(var(--spacing-unit) * 4);
+    margin-top: auto; /* Pushes footer to bottom if content is short, but flex-grow on main is primary */
+    flex-shrink: 0; /* Ensures footer doesn't shrink if content is short */
 }
 
 body > footer a {
@@ -406,13 +418,13 @@ body > footer a:hover {
 }
 
 .tooltip-popup {
-    position: absolute;
+    position: absolute; 
     background-color: #333; /* Dark background for contrast */
     color: white;
     padding: 8px 12px;
     border-radius: var(--border-radius, 4px);
-    font-size: 0.875em;
-    font-weight: normal;
+    font-size: 0.875em; 
+    font-weight: normal; 
     line-height: 1.4;
     z-index: 1010; /* Ensure it's above most other elements */
     max-width: 280px; /* Prevent very wide tooltips */
@@ -428,4 +440,25 @@ body > footer a:hover {
     visibility: visible;
     opacity: 1;
     transition: opacity 0.2s ease-in-out; /* Only transition opacity when becoming visible */
+}
+
+/* Stage Data Table Styles */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+.data-table th, .data-table td {
+    border: 1px solid var(--border-color, #ccc);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+.data-table th {
+    background-color: var(--background-color, #f0f0f0);
+    font-weight: bold;
+}
+#stageDataTableContainer h4 { /* Ensure heading has some margin */
+    margin-bottom: 10px;
 }
