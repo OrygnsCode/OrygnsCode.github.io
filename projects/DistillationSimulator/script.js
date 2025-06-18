@@ -349,7 +349,7 @@ class ProfessionalDistillationSimulator {
         } else { // Subcooled liquid or superheated vapor
             const qLineSlope = qValue / (qValue - 1);
             const qLineIntercept = -feedComposition / (qValue - 1);
-
+            
             let x = feedComposition; // Initial guess
             for (let i = 0; i < 20; i++) { // Newton-Raphson or other solver
                 const yEq = this.calculateEquilibrium(x, relativeVolatility);
@@ -365,7 +365,7 @@ class ProfessionalDistillationSimulator {
             xIntersect = x;
             yIntersect = this.calculateEquilibrium(x, relativeVolatility);
         }
-
+        
         if (Math.abs(yIntersect - xIntersect) < 1e-6) return 1E6; // Avoid division by zero
         const minReflux = (distillateComposition - yIntersect) / (yIntersect - xIntersect);
         return Math.max(minReflux, 0.1);
@@ -397,7 +397,7 @@ class ProfessionalDistillationSimulator {
                 yIntersect = rectifyingSlope * xIntersect + rectifyingIntercept;
             }
         }
-
+        
         // Clamp intersection to be physically meaningful (between bottoms and distillate)
         xIntersect = Math.max(bottomsComposition, Math.min(distillateComposition, xIntersect));
         yIntersect = Math.max(bottomsComposition, Math.min(distillateComposition, yIntersect));
@@ -447,7 +447,7 @@ class ProfessionalDistillationSimulator {
                 xNext = (y - opLines.stripping.intercept) / opLines.stripping.slope;
             }
             steps.push({ x1: x, y1: y, x2: xNext, y2: y, type: 'horizontal', plate: plates + 1 });
-
+            
             if (xNext >= x && x < distillateComposition) { plates = 150; break; } // Prevent infinite loop if stepping backward or stalling not at xD
 
             x = xNext;
@@ -472,7 +472,7 @@ class ProfessionalDistillationSimulator {
         if (distillateFlowRate < 0 || bottomsFlowRate < 0) { // Indicates infeasible separation based on mass balance
             return { condenserDuty: NaN, reboilerDuty: NaN, distillateFlowRate: distillateFlowRate, bottomsFlowRate: bottomsFlowRate };
         }
-
+        
         const selectedComponentKey = document.getElementById('componentPair').value;
         let heatOfVap = 35.0; // Default kJ/mol
         if (this.componentData[selectedComponentKey] && this.componentData[selectedComponentKey].heatOfVaporization) {
@@ -607,7 +607,7 @@ class ProfessionalDistillationSimulator {
             .style('stroke', 'var(--secondary-green)')
             .style('stroke-width', 2)
             .style('opacity', 0).transition().duration(this.animationEnabled ? 800:0).delay(this.animationEnabled ? 400:0).style('opacity', 1);
-
+        
         // Q-line
         let qLineP1 = {x: feedComposition, y: feedComposition};
         let qLineP2 = {x: opLines.intersection.x, y: opLines.intersection.y};
@@ -697,7 +697,7 @@ class ProfessionalDistillationSimulator {
                 .style('opacity', 1);
         });
     }
-
+    
     resetParameters() {
         this.parameters = {
             feedComposition: 0.5, qValue: 1.0, distillateComposition: 0.9,
@@ -724,7 +724,7 @@ class ProfessionalDistillationSimulator {
         }
         const optimalReflux = Math.min(minReflux * 1.35, 12); // Typical 1.2-1.5 Rmin, cap at 12
         this.parameters.refluxRatio = parseFloat(optimalReflux.toFixed(2));
-
+        
         ['refluxRatio'].forEach(param => { // Update only refluxRatio
             const slider = document.getElementById(param);
             const input = document.getElementById(`${param}Input`);
@@ -778,7 +778,7 @@ class ProfessionalDistillationSimulator {
                 if(lightCompEl) lightCompEl.textContent = data.light;
                 if(heavyCompEl) heavyCompEl.textContent = data.heavy;
                 if(alphaEl) alphaEl.textContent = data.alpha.toFixed(1);
-
+                
                 this.parameters.relativeVolatility = data.alpha;
                 ['relativeVolatility'].forEach(param => {
                      const slider = document.getElementById(param);
@@ -797,7 +797,7 @@ class ProfessionalDistillationSimulator {
         if (!this.svg) { this.showNotification('Diagram not available for export.', 'error'); return; }
         const svgNode = this.svg.node().cloneNode(true); // Clone node to preserve original
         d3.select(svgNode).selectAll('.axis, .grid, .axis-label, .point-label').remove(); // Remove elements for cleaner export if needed, or style them
-
+        
         // Embed styles directly for better portability
         const styles = document.getElementById('professional-theme-styles'); // Assume you add an ID to your <style> tag
         if (styles) {
@@ -810,7 +810,7 @@ class ProfessionalDistillationSimulator {
         const serializer = new XMLSerializer();
         let svgString = serializer.serializeToString(svgNode);
         // Basic CSS inlining for critical parts if external sheet or complex vars are an issue
-         svgString = svgString.replace(/var\(--primary-blue\)/g, '#1e3a8a');
+         svgString = svgString.replace(/var\(--primary-blue\)/g, '#1e3a8a'); 
          svgString = svgString.replace(/var\(--secondary-orange\)/g, '#ea580c');
          svgString = svgString.replace(/var\(--secondary-green\)/g, '#059669');
          svgString = svgString.replace(/var\(--warning\)/g, '#f59e0b');
@@ -841,7 +841,7 @@ class ProfessionalDistillationSimulator {
 
         context.fillStyle = 'white'; // Background for PNG
         context.fillRect(0, 0, canvas.width, canvas.height);
-
+        
         const img = new Image();
         img.onload = () => {
             context.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -864,7 +864,7 @@ class ProfessionalDistillationSimulator {
 
         // Create a string from the SVG, replacing CSS variables with their actual values for better rendering in canvas
         let svgString = new XMLSerializer().serializeToString(svgNode);
-        svgString = svgString.replace(/var\(--primary-blue\)/g, '#1e3a8a');
+        svgString = svgString.replace(/var\(--primary-blue\)/g, '#1e3a8a'); 
         svgString = svgString.replace(/var\(--secondary-orange\)/g, '#ea580c');
         svgString = svgString.replace(/var\(--secondary-green\)/g, '#059669');
         svgString = svgString.replace(/var\(--warning\)/g, '#f59e0b');
@@ -911,7 +911,7 @@ class ProfessionalDistillationSimulator {
         URL.revokeObjectURL(link.href);
         this.showNotification('Summary data exported as CSV.', 'success');
     }
-
+    
     exportResults() { this.exportCSV(); } // Alias
 
     handleResize() {
@@ -932,7 +932,7 @@ class ProfessionalDistillationSimulator {
         const notification = document.createElement('div');
         notification.className = `notification-toast ${type}`; // Use a distinct class
         notification.textContent = message;
-
+        
         // Basic styling for the toast
         notification.style.cssText = `
             position: fixed;
