@@ -386,3 +386,46 @@ body > footer a:hover {
         page-break-inside: avoid;
     }
 }
+
+/* Tooltip Styles */
+.info-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #6c757d; /* Neutral grey, consider var(--secondary-color) for theme consistency */
+    color: white;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 16px;
+    cursor: help;
+    margin-left: 4px;
+    user-select: none; /* Prevent text selection of '?' */
+    position: relative; /* For potential pseudo-element tooltips if not using JS one */
+}
+
+.tooltip-popup {
+    position: absolute;
+    background-color: #333; /* Dark background for contrast */
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--border-radius, 4px);
+    font-size: 0.875em;
+    font-weight: normal;
+    line-height: 1.4;
+    z-index: 1010; /* Ensure it's above most other elements */
+    max-width: 280px; /* Prevent very wide tooltips */
+    text-align: left; /* Default, but good to be explicit */
+    visibility: hidden; /* Hidden by default, controlled by JS */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; /* Delay visibility to allow opacity transition */
+    pointer-events: none; /* Tooltip itself shouldn't be interactive for mouse events */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.tooltip-popup.visible { /* Class added by JS to show */
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out; /* Only transition opacity when becoming visible */
+}

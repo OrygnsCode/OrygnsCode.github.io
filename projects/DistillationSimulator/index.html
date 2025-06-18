@@ -36,13 +36,28 @@
                 <div class="simulator-layout">
                     <div class="control-panel">
                         <h3>Input Parameters</h3>
-                        <!-- Input controls and sliders will go here -->
-                        <label for="feedRate">Feed Rate (F):</label>
+                        <label for="feedRate">Feed Rate (F) <span class="info-icon" data-tooltip="Total molar flow rate of the feed into the column (e.g., mol/hr). Typical values: 10-1000.">?</span></label>
                         <input type="number" id="feedRate" value="100">
-                        <label for="feedComposition">Feed Composition (zF):</label>
+                        <label for="feedComposition">Feed Composition (z<sub>F</sub>) <span class="info-icon" data-tooltip="Mole fraction of the more volatile component in the feed. Range: 0.01 to 0.99.">?</span></label>
                         <input type="range" id="feedComposition" min="0.01" max="0.99" step="0.01" value="0.5">
                         <span id="feedCompositionValue">0.50</span>
-                        <!-- More controls -->
+
+                        <label for="qValue">Feed Condition (q) <span class="info-icon" data-tooltip="Thermal condition of the feed. Examples: q=1 (sat. liquid), q=0 (sat. vapor), 0<q<1 (liquid-vapor mix), q>1 (subcooled liquid), q<0 (superheated vapor).">?</span></label>
+                        <input type="number" id="qValue" step="0.1" value="1.0">
+
+                        <label for="distillateComposition">Distillate Composition (x<sub>D</sub>) <span class="info-icon" data-tooltip="Desired mole fraction of the more volatile component in the distillate product. Range: 0.01 to 0.99. Must be > xB and > zF (typically).">?</span></label>
+                        <input type="range" id="distillateComposition" min="0.01" max="0.99" step="0.01" value="0.95">
+                        <span id="distillateCompositionValue">0.95</span>
+
+                        <label for="bottomsComposition">Bottoms Composition (x<sub>B</sub>) <span class="info-icon" data-tooltip="Desired mole fraction of the more volatile component in the bottoms product. Range: 0.01 to 0.99. Must be < xD and < zF (typically).">?</span></label>
+                        <input type="range" id="bottomsComposition" min="0.01" max="0.99" step="0.01" value="0.05">
+                        <span id="bottomsCompositionValue">0.05</span>
+
+                        <label for="refluxRatio">Reflux Ratio (R) <span class="info-icon" data-tooltip="Ratio of liquid returned as reflux to the distillate product withdrawn (L/D). Must be > Rmin for separation. Typical: 1.1*Rmin to 1.5*Rmin or higher.">?</span></label>
+                        <input type="number" id="refluxRatio" step="0.1" value="1.5" min="0">
+
+                        <label for="relativeVolatility">Relative Volatility (α) <span class="info-icon" data-tooltip="Measure of separability. Ratio of K-values (K_A/K_B). Must be > 1 for separation. Higher alpha means easier separation.">?</span></label>
+                        <input type="number" id="relativeVolatility" step="0.01" value="2.5" min="0.01">
                     </div>
                     <div class="visualization-panel">
                         <h3>McCabe-Thiele Diagram</h3>
@@ -53,26 +68,80 @@
                         <div class="legend">
                             <!-- Diagram legend -->
                         </div>
+                        <div class="export-buttons" style="margin-top: 20px; padding-top:15px; border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 10px;">
+                            <button id="exportSVGButton" class="button">Export SVG</button>
+                            <button id="exportPNGButton" class="button">Export PNG</button>
+                            <button id="exportCSVButton" class="button">Export CSV</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="theory-content" class="tab-content">
-            <h2>Theory</h2>
-            <p>The McCabe-Thiele method is a graphical method for determining the number of theoretical plates required for a binary distillation.</p>
-            <p>Key equations:</p>
-            <p>Rectifying section operating line: \( y_{n+1} = \frac{R}{R+1}x_n + \frac{x_D}{R+1} \)</p>
-            <p>Stripping section operating line: \( y_{m+1} = \frac{L'}{V'}x_m - \frac{B x_B}{V'} \)</p>
-            <p>Feed line (q-line): \( y = \frac{q}{q-1}x - \frac{x_F}{q-1} \)</p>
+            <h2>Theory of McCabe-Thiele Method</h2>
+
+            <h3>Overview</h3>
+            <p>The McCabe-Thiele method is a graphical procedure used for determining the number of theoretical equilibrium stages required for the separation of a binary mixture by distillation. It relies on several simplifying assumptions.</p>
+
+            <h3>Key Equations</h3>
+            <p><strong>1. Equilibrium Curve:</strong> Describes the relationship between the mole fraction of the more volatile component in the liquid phase (x) and the vapor phase (y) at equilibrium.</p>
+            <p>For systems obeying Raoult's Law with constant relative volatility (α):</p>
+            <p>$$ y = \frac{\alpha x}{1 + (\alpha - 1)x} $$</p>
+            <p>Where α is the relative volatility of the more volatile component with respect to the less volatile component.</p>
+
+            <p><strong>2. Operating Lines:</strong></p>
+            <ul>
+                <li>
+                    <p><strong>Rectifying Section Operating Line (ROL):</strong> Mass balance above the feed plate.</p>
+                    <p>$$ y_{n+1} = \frac{R}{R+1}x_n + \frac{x_D}{R+1} $$</p>
+                    <p>Where R is the reflux ratio (L/D), x<sub>D</sub> is the distillate composition.</p>
+                </li>
+                <li>
+                    <p><strong>Stripping Section Operating Line (SOL):</strong> Mass balance below the feed plate.</p>
+                    <p>The SOL connects the point (x<sub>B</sub>, x<sub>B</sub>) on the y=x line to the intersection of the q-line and the ROL. Its equation can be written as:</p>
+                    <p>$$ y_{m+1} = \frac{\bar{L}}{\bar{V}}x_m - \frac{B x_B}{\bar{V}} $$</p>
+                    <p>Where x<sub>B</sub> is the bottoms composition, B is the bottoms flow rate, and L&#772;, V&#772; are liquid and vapor flow rates in the stripping section.</p>
+                </li>
+            </ul>
+
+            <p><strong>3. Feed Line (q-Line):</strong> Represents the locus of points where the ROL and SOL intersect, determined by the thermal condition of the feed.</p>
+            <p>Equation: $$ y = \frac{q}{q-1}x - \frac{z_F}{q-1} $$</p>
+            <p>For specific q values:</p>
+            <ul>
+                <li>q = 1 (Saturated Liquid): Vertical line,  `x = z_F`</li>
+                <li>q = 0 (Saturated Vapor): Horizontal line, `y = z_F`</li>
+            </ul>
+            <p>Where z<sub>F</sub> is the feed composition and q is the feed condition parameter.</p>
+
+            <h3>Key Parameters</h3>
+            <p><strong>Relative Volatility (α):</strong> A measure of the separability of the two components. `α = (y_A/x_A) / (y_B/x_B) = K_A / K_B`.</p>
+            <p><strong>Reflux Ratio (R):</strong> Ratio of liquid returned to the column (reflux) to the liquid withdrawn as distillate product. `R = L/D`.</p>
+            <p><strong>Minimum Reflux Ratio (R<sub>min</sub>):</strong> The reflux ratio at which an infinite number of theoretical plates would be required for the desired separation. Operating slightly above R<sub>min</sub> is typical.</p>
+            <p><strong>Feed Condition (q-value):</strong> Represents the thermal state of the feed.</p>
+            <ul>
+                <li>q > 1: Subcooled liquid feed.</li>
+                <li>q = 1: Saturated liquid feed.</li>
+                <li>0 < q < 1: Partially vaporized feed.</li>
+                <li>q = 0: Saturated vapor feed.</li>
+                <li>q < 0: Superheated vapor feed.</li>
+            </ul>
+
+            <h3>Assumptions of the McCabe-Thiele Method</h3>
+            <ul>
+                <li><strong>Constant Molar Overflow (CMO):</strong> Molar flow rates of liquid and vapor are constant in each section (rectifying and stripping) of the column. This implies equimolar counterdiffusion and negligible heat effects (heat of mixing, heat losses).</li>
+                <li><strong>Binary System:</strong> The mixture consists of only two components.</li>
+                <li><strong>Equilibrium Stages:</strong> Each theoretical plate is an equilibrium stage where the vapor leaving the plate is in equilibrium with the liquid leaving the same plate.</li>
+                <li><strong>Adiabatic Column:</strong> No heat is lost to or gained from the surroundings.</li>
+                <li>Pressure is constant throughout the column.</li>
+            </ul>
         </section>
 
         <section id="component-data-content" class="tab-content">
             <h2>Component Data</h2>
             <label for="component-select">Select Component System:</label>
             <select id="component-select">
-                <option value="benzene-toluene">Benzene-Toluene</option>
-                <option value="ethanol-water">Ethanol-Water</option>
+                <!-- Options will be populated by script.js, including "Custom Alpha" -->
             </select>
             <div id="system-properties">
                 <!-- Properties for the selected system will be displayed here -->
