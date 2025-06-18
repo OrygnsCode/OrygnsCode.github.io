@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Distillation Column Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\$', '\\$']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Distillation Simulator</h1>
+        <p>Version 1.0 - Advanced Chemical Engineering Tool</p>
+    </header>
+
+    <nav id="tabs">
+        <button class="tab-button active" data-tab="simulator">Simulator</button>
+        <button class="tab-button" data-tab="theory">Theory</button>
+        <button class="tab-button" data-tab="component-data">Component Data</button>
+    </nav>
+
+    <main>
+        <section id="simulator-content" class="tab-content active">
+            <h2>Simulator</h2>
+            <div class="app-container">
+                <div class="simulator-layout">
+                    <div class="control-panel">
+                        <h3>Input Parameters</h3>
+                        <!-- Input controls and sliders will go here -->
+                        <label for="feedRate">Feed Rate (F):</label>
+                        <input type="number" id="feedRate" value="100">
+                        <label for="feedComposition">Feed Composition (zF):</label>
+                        <input type="range" id="feedComposition" min="0.01" max="0.99" step="0.01" value="0.5">
+                        <span id="feedCompositionValue">0.50</span>
+                        <!-- More controls -->
+                    </div>
+                    <div class="visualization-panel">
+                        <h3>McCabe-Thiele Diagram</h3>
+                        <div id="mccabe-thiele-diagram"></div>
+                        <div class="results-grid">
+                            <!-- Results will be displayed here -->
+                        </div>
+                        <div class="legend">
+                            <!-- Diagram legend -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="theory-content" class="tab-content">
+            <h2>Theory</h2>
+            <p>The McCabe-Thiele method is a graphical method for determining the number of theoretical plates required for a binary distillation.</p>
+            <p>Key equations:</p>
+            <p>Rectifying section operating line: \( y_{n+1} = \frac{R}{R+1}x_n + \frac{x_D}{R+1} \)</p>
+            <p>Stripping section operating line: \( y_{m+1} = \frac{L'}{V'}x_m - \frac{B x_B}{V'} \)</p>
+            <p>Feed line (q-line): \( y = \frac{q}{q-1}x - \frac{x_F}{q-1} \)</p>
+        </section>
+
+        <section id="component-data-content" class="tab-content">
+            <h2>Component Data</h2>
+            <label for="component-select">Select Component System:</label>
+            <select id="component-select">
+                <option value="benzene-toluene">Benzene-Toluene</option>
+                <option value="ethanol-water">Ethanol-Water</option>
+            </select>
+            <div id="system-properties">
+                <!-- Properties for the selected system will be displayed here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="#">About</a> | <a href="#">Contact</a> | <a href="#">Help</a></p>
+        <p>&copy; 2024 Your Name/Company</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
