@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@
+3/es5/tex-mml-chtml.js"></script>
     <script>
         window.MathJax = {
             tex: {
@@ -203,7 +204,7 @@ in="1.1" max="15" step="0.01" value="2.0" class="numeric-input">
                             <div class="parameter-header">
                                 <label class="parameter-label">Relative Volatili
 ty</label>
-                                <div class="math-notation">$\alpha_{AB} = \frac{
+                                <div class="math-notation">$lpha_{AB} = rac{
 K_A}{K_B}$ (dimensionless)</div>
                             </div>
                             <div class="dual-input">
@@ -424,15 +425,15 @@ v>
                     <h3>Fundamental Equations</h3>
                     <div class="equation-block">
                         <h4>Equilibrium Relationship</h4>
-                        <div class="equation">$$y^* = \frac{\alpha x}{1 + (lph
+                        <div class="equation">$$y^* = rac{lpha x}{1 + (lph
 a - 1)x}$$</div>
-                        <p>Where $\alpha$ is the relative volatility of the ligh
+                        <p>Where $lpha$ is the relative volatility of the ligh
 t component.</p>
                     </div>
 
                     <div class="equation-block">
                         <h4>Rectifying Operating Line</h4>
-                        <div class="equation">$$y = \frac{R}{R+1}x + \frac{x_D}{
+                        <div class="equation">$$y = rac{R}{R+1}x + rac{x_D}{
 R+1}$$</div>
                         <p>Operating line equation for the rectifying section.</
 p>
@@ -440,7 +441,7 @@ p>
 
                     <div class="equation-block">
                         <h4>Stripping Operating Line</h4>
-                        <div class="equation">$$y = \frac{L'}{V'}x - \frac{L'x_B
+                        <div class="equation">$$y = rac{L'}{V'}x - rac{L'x_B
 }{V'}$$</div>
                         <p>Operating line equation for the stripping section.</p
 >
