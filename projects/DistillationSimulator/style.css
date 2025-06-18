@@ -1,0 +1,464 @@
+/* projects/DistillationSimulator/style.css */
+
+:root {
+    /* Color Palette */
+    --primary-color: #005A9C; /* Professional Blue */
+    --secondary-color: #003366; /* Darker Blue */
+    --accent-color: #E67E22; /* Contrasting Orange for highlights/buttons */
+    --background-color: #F4F7F6; /* Light neutral background */
+    --surface-color: #FFFFFF; /* For cards, modals, etc. */
+    --text-color: #333333; /* Standard text */
+    --text-light-color: #FFFFFF;
+    --border-color: #D1D5DB; /* Light grey for borders */
+
+    /* Semantic Colors */
+    --success-color: #28A745;
+    --warning-color: #FFC107;
+    --error-color: #DC3545;
+
+    /* Typography */
+    --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family-monospace: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-family-math: 'STIX Two Math', 'Times New Roman', serif; /* For MathJax if needed */
+
+    /* Spacing & Sizing */
+    --spacing-unit: 8px;
+    --border-radius: 4px;
+    --max-width-container: 1200px;
+}
+
+/* Base Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure body takes at least full viewport height */
+    padding-top: 60px; /* Create space for the fixed header */
+    margin: 0; /* Override default browser margin on body */
+}
+
+/* Header */
+body > header { /* Target only the main page header, not potential article headers */
+    background-color: var(--secondary-color);
+    color: var(--text-light-color);
+    height: 60px; /* Explicit height for the fixed header */
+    padding: 0 var(--spacing-unit); /* Adjust padding if explicit height is set, to center content */
+    display: flex; /* To help center content within fixed height */
+    align-items: center; /* Vertically center header content */
+    justify-content: center; /* Horizontally center header content (if h1 is not full width) */
+    text-align: center; /* Keep text centered if it wraps */
+    position: fixed; /* Or sticky */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body > header h1 {
+    margin: 0; /* Reset margin if flex is used on parent */
+    font-size: 1.8em; /* Existing */
+}
+body > header p { /* Subtitle in header */
+    margin: 0 0 0 calc(var(--spacing-unit) * 2); /* Adjust margin to be next to H1 if flex direction is row */
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+
+/* Navigation Tabs */
+nav#tabs {
+    display: flex;
+    justify-content: center;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    position: sticky;
+    top: 0; /* Stick to the top of its containing block (body, after body's padding-top) */
+    z-index: 999; /* Below header, above content */
+}
+
+.tab-button {
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1em;
+    color: var(--secondary-color);
+    border-bottom: 3px solid transparent;
+    transition: color 0.3s ease, border-bottom-color 0.3s ease;
+}
+
+.tab-button:hover {
+    color: var(--primary-color);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Main Content Area */
+main {
+    max-width: var(--max-width-container);
+    margin: 0 auto; /* Horizontal centering */
+    padding: calc(var(--spacing-unit) * 2) var(--spacing-unit); /* Adjust padding as needed */
+    width: 100%; /* Ensure it takes up available width within its centering margins */
+    flex-grow: 1; /* This is key for pushing the footer down */
+}
+
+.tab-content {
+    display: none; /* Hidden by default */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.tab-content.active {
+    display: block; /* Show active tab */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* App Container & Layout */
+.app-container {
+    background-color: var(--surface-color);
+    padding: calc(var(--spacing-unit) * 3);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.simulator-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Control panel and visualization */
+    gap: calc(var(--spacing-unit) * 3);
+}
+
+.control-panel, .visualization-panel {
+    padding: calc(var(--spacing-unit) * 2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+h2, h3 {
+    color: var(--primary-color);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+section > h2 { /* For tab titles */
+    margin-top: 0;
+    padding-bottom: var(--spacing-unit);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Form Controls */
+label {
+    display: block;
+    margin-bottom: var(--spacing-unit);
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+input[type="number"],
+input[type="text"],
+select {
+    width: 100%;
+    padding: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1em;
+    font-family: var(--font-family-sans-serif);
+}
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 90, 156, 0.2);
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-bottom: var(--spacing-unit);
+}
+
+/* Buttons */
+button, .button { /* General button styling */
+    background-color: var(--accent-color);
+    color: var(--text-light-color);
+    border: none;
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 2.5);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    text-decoration: none; /* For <a> styled as buttons */
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+button:hover, .button:hover {
+    background-color: #D35400; /* Darker orange */
+    transform: translateY(-1px);
+}
+button:active, .button:active {
+    transform: translateY(0px);
+}
+
+/* Visualization Panel Specifics */
+#mccabe-thiele-diagram {
+    width: 100%;
+    height: 400px; /* Adjust as needed */
+    border: 1px solid var(--border-color);
+    background-color: #FCFCFC; /* Slightly off-white for diagram bg */
+    border-radius: var(--border-radius);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    overflow: hidden; /* To contain SVG */
+}
+#mccabe-thiele-diagram svg { /* Ensure SVG scales */
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+.results-grid div {
+    background-color: var(--background-color);
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+.results-grid strong {
+    color: var(--primary-color);
+}
+
+.legend {
+    font-size: 0.9em;
+    padding: var(--spacing-unit);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+.legend span {
+    display: inline-block;
+    margin-right: var(--spacing-unit);
+    padding-left: calc(var(--spacing-unit) * 2.5); /* Space for color swatch */
+    position: relative;
+}
+.legend span::before { /* Color swatch */
+    content: '';
+    width: calc(var(--spacing-unit) * 1.5);
+    height: calc(var(--spacing-unit) * 1.5);
+    background-color: var(--text-color); /* Default, override in JS */
+    border: 1px solid var(--border-color);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 2px;
+}
+
+
+/* Theory Section */
+#theory-content p {
+    margin-bottom: var(--spacing-unit);
+}
+#theory-content .MathJax { /* Ensure MathJax is styled correctly */
+    font-family: var(--font-family-math) !important;
+}
+
+/* Component Data Section */
+#system-properties {
+    margin-top: calc(var(--spacing-unit) * 2);
+    padding: calc(var(--spacing-unit) * 2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+}
+
+/* Footer */
+body > footer { /* Target only the main page footer */
+    background-color: var(--text-color);
+    color: var(--background-color);
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 3) var(--spacing-unit);
+    margin-top: auto; /* Pushes footer to bottom if content is short, but flex-grow on main is primary */
+    flex-shrink: 0; /* Ensures footer doesn't shrink if content is short */
+}
+
+body > footer a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+body > footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .simulator-layout {
+        grid-template-columns: 1fr; /* Stack control and viz panels */
+    }
+    #mccabe-thiele-diagram {
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 50px; /* Adjust for smaller header */
+    }
+    body > header h1 {
+        font-size: 1.5em;
+    }
+     body > header p {
+        font-size: 0.8em;
+    }
+    nav#tabs {
+        top: 50px; /* Match new header height */
+        font-size: 0.9em;
+    }
+    .tab-button {
+        padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+    }
+    main {
+        padding: var(--spacing-unit);
+    }
+    .app-container {
+        padding: calc(var(--spacing-unit) * 2);
+    }
+    #mccabe-thiele-diagram {
+        height: 300px;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 14px; /* Slightly smaller base font for small devices */
+    }
+    .control-panel, .visualization-panel {
+        padding: var(--spacing-unit);
+    }
+    .results-grid {
+        grid-template-columns: 1fr; /* Single column results on very small screens */
+    }
+    button, .button {
+        font-size: 0.9em;
+        padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    }
+    nav#tabs {
+        /* Allow tabs to wrap if they don't fit */
+        flex-wrap: wrap;
+    }
+    .tab-button {
+        flex-grow: 1; /* Allow buttons to take up space */
+        text-align: center;
+    }
+}
+
+/* Print-specific styles (optional but good practice) */
+@media print {
+    body > header, nav#tabs, body > footer, .control-panel button {
+        display: none !important; /* Hide non-essential elements for print */
+    }
+    main, .app-container, .visualization-panel {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+    .simulator-layout {
+        grid-template-columns: 1fr; /* Ensure single column for print */
+    }
+    body {
+        padding-top: 0;
+        background-color: #FFF; /* White background for print */
+        color: #000; /* Black text for print */
+    }
+    #mccabe-thiele-diagram {
+        height: auto;
+        page-break-inside: avoid;
+    }
+}
+
+/* Tooltip Styles */
+.info-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #6c757d; /* Neutral grey, consider var(--secondary-color) for theme consistency */
+    color: white;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 16px;
+    cursor: help;
+    margin-left: 4px;
+    user-select: none; /* Prevent text selection of '?' */
+    position: relative; /* For potential pseudo-element tooltips if not using JS one */
+}
+
+.tooltip-popup {
+    position: absolute;
+    background-color: #333; /* Dark background for contrast */
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--border-radius, 4px);
+    font-size: 0.875em;
+    font-weight: normal;
+    line-height: 1.4;
+    z-index: 1010; /* Ensure it's above most other elements */
+    max-width: 280px; /* Prevent very wide tooltips */
+    text-align: left; /* Default, but good to be explicit */
+    visibility: hidden; /* Hidden by default, controlled by JS */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; /* Delay visibility to allow opacity transition */
+    pointer-events: none; /* Tooltip itself shouldn't be interactive for mouse events */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.tooltip-popup.visible { /* Class added by JS to show */
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out; /* Only transition opacity when becoming visible */
+}
+
+/* Stage Data Table Styles */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+.data-table th, .data-table td {
+    border: 1px solid var(--border-color, #ccc);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+.data-table th {
+    background-color: var(--background-color, #f0f0f0);
+    font-weight: bold;
+}
+#stageDataTableContainer h4 { /* Ensure heading has some margin */
+    margin-bottom: 10px;
+}
