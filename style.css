@@ -114,6 +114,7 @@ header h1 {
     padding-left: 70px; /* Approx width of switch + its offset */
     padding-right: 70px; /* Approx width of switch + its offset */
     box-sizing: border-box; /* Include padding in width calculation */
+    position: relative; /* Ensures xPercent/yPercent transforms behave predictably */
 }
 
 /* Nav is now absolutely positioned */
