@@ -174,7 +174,7 @@
         </section>
 
         <section id="projects-showcase">
-            <h2 data-aos="fade-up">My Games</h2>
+            <h2 data-aos="fade-up">My Games</h2> 
             <div class="project-list">
                 <article class="project-item" data-aos="fade-up">
                     <h3>AstroDuel</h3>
@@ -242,11 +242,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure GSAP is loaded
             if (typeof gsap !== 'undefined') {
-                gsap.from(".hero h1", {
-                    duration: 1,
-                    y: 50,
-                    opacity: 0,
-                    ease: "power1.out",
+                gsap.from(".hero h1", { 
+                    duration: 1, 
+                    y: 50, 
+                    opacity: 0, 
+                    ease: "power1.out", 
                     delay: 0.5 // Delay to allow hero section fadeIn to occur
                 });
                 // Optional: Animate the hero paragraph as well with a slight delay
@@ -287,7 +287,7 @@
             function showNewMessage() {
                 if (messageElement) {
                     // Optional: fade out
-                    // messageElement.style.opacity = 0;
+                    // messageElement.style.opacity = 0; 
                     // setTimeout(() => {
                         currentMessageIndex = (currentMessageIndex + 1) % messages.length;
                         messageElement.textContent = messages[currentMessageIndex];
@@ -310,7 +310,7 @@
             if (titleElement) {
                 // Set initial position explicitly to avoid jump if script runs late
                 gsap.set(titleElement, {xPercent: 0, yPercent: 0});
-
+                
                 const weaveDuration = 4; // Total duration of one weave
 
                 const snakeTl = gsap.timeline({
