@@ -7,7 +7,8 @@
     --light-bg: #ffffff; /* White for elements like cards/sections */
     --header-bg: #ffffff; /* Header background */
     --footer-bg: #343a40; /* Darker grey for footer */
-    --font-family-base: 'Poppins', sans-serif;
+    --font-family-base: 'Rubik', sans-serif;
+    --primary-color-rgb: 0, 123, 255; /* RGB for #007bff */
 
     /* Dark Theme Palette */
     --dark-primary-color: #007bff; /* Keeping primary blue, or choose a lighter shade if needed e.g., #409eff */
@@ -28,20 +29,51 @@ body.dark-mode {
     --header-bg: var(--dark-header-bg);
     --footer-bg: var(--dark-footer-bg);
     /* Note: --font-family-base generally remains the same for both themes */
+    /* Assuming dark theme also uses the same primary color #007bff for the glow
+       If --dark-primary-color were different, we'd define --dark-primary-color-rgb
+       and potentially use a different variable in the animation or update --primary-color-rgb
+       via JavaScript when the theme changes if the animation directly uses --primary-color-rgb.
+       For now, --primary-color-rgb will be inherited by dark-mode. */
+
+    /* New gradient properties for dark mode */
+    --gradient-color-1-dark: #1a1a2e; /* Dark desaturated blue */
+    --gradient-color-2-dark: #16213e; /* Darker blue/purple */
+    --gradient-color-3-dark: #0f3460; /* Dark navy */
+    --gradient-color-4-dark: #121212; /* Very dark grey (original dark body bg) */
+
+    background: linear-gradient(45deg, var(--gradient-color-1-dark), var(--gradient-color-2-dark), var(--gradient-color-3-dark), var(--gradient-color-4-dark));
+    background-size: 400% 400%; /* Ensure this is consistent */
+    animation: animatedGradient 30s ease infinite; /* Ensure this is consistent */
 }
 
 body {
     font-family: var(--font-family-base);
     margin: 0;
     padding: 0;
-    background-color: var(--body-bg);
+    /* background-color: var(--body-bg); /* Replaced by gradient */
     color: var(--text-color);
     font-size: 16px; /* Base font size */
     line-height: 1.7; /* Improved line height */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
+    /* New background properties */
+    --gradient-color-1: #e0e7ff; /* Light blue/lavender */
+    --gradient-color-2: #f0f3ff; /* Very light blue */
+    --gradient-color-3: #e6f0ff; /* Light sky blue */
+    --gradient-color-4: #f5f7fa; /* Off-white / very light grey */
+
+    background: linear-gradient(45deg, var(--gradient-color-1), var(--gradient-color-2), var(--gradient-color-3), var(--gradient-color-4));
+    background-size: 400% 400%; /* Make gradient large for smooth animation */
+    animation: animatedGradient 30s ease infinite; /* Slow and subtle animation */
+
+    transition: color 0.3s ease; /* Keep color transition, background transition might be less effective */
 }
 
 /* Animations */
+@keyframes animatedGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -82,6 +114,7 @@ header h1 {
     padding-left: 70px; /* Approx width of switch + its offset */
     padding-right: 70px; /* Approx width of switch + its offset */
     box-sizing: border-box; /* Include padding in width calculation */
+    position: relative; /* Ensures xPercent/yPercent transforms behave predictably */
 }
 
 /* Nav is now absolutely positioned */
@@ -148,7 +181,16 @@ main {
     text-align: center;
     margin-bottom: 40px;
     border-radius: 8px;
-    animation: fadeIn 0.8s ease-out forwards;
+    animation: fadeIn 0.8s ease-out forwards, heroGlow 3s infinite alternate ease-in-out;
+}
+
+@keyframes heroGlow {
+    0% {
+        box-shadow: 0 0 15px 5px rgba(var(--primary-color-rgb), 0.3);
+    }
+    100% {
+        box-shadow: 0 0 25px 10px rgba(var(--primary-color-rgb), 0.5);
+    }
 }
 
 .hero h1 {
@@ -189,16 +231,25 @@ h2 {
 }
 
 .project-item {
-    background-color: var(--light-bg);
+    background-color: rgba(255, 255, 255, 0.65); /* Light mode glass */
     padding: 25px;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease-out, transform 0.3s ease-out; /* Added background-color to transition */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border-bottom: none;
-    margin-bottom: 0;
+    border-radius: 12px; /* Increased border-radius */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Adjusted shadow */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle light border */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Safari */
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Changed to 0.3s and ease-out */
+    /* Combined transitions from original and new requirements */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease-out, transform 0.3s ease-out, border-color 0.3s ease;
+    border-bottom: none; /* This was in the original, keeping it if it served a purpose, though border is now all around */
+    margin-bottom: 0; /* This was in the original */
+}
+
+body.dark-mode .project-item {
+    background-color: rgba(40, 40, 40, 0.65); /* Dark mode glass */
+    border: 1px solid rgba(255, 255, 255, 0.12); /* Slightly more subtle border for dark */
+    /* Text color should be handled by --dark-text-color inherited from body.dark-mode */
 }
 
 .project-item:hover {
@@ -240,6 +291,10 @@ h2 {
     transform: translateY(-2px) scale(1.05); /* Updated transform with scale */
 }
 
+.project-item a i {
+    margin-right: 8px; /* Adjust as needed */
+}
+
 footer {
     text-align: center;
     padding: 30px 20px;
@@ -262,6 +317,17 @@ footer a:focus { /* Added focus state */
     color: #0056b3; /* This is a hardcoded color, consider var(--secondary-color) or a new var if it needs to change with theme */
     /* If #0056b3 is a darker version of primary, it might need adjustment for dark mode */
     /* For now, leaving as is, but it's a potential refinement point. */
+}
+
+#rotating-message {
+    font-style: italic;
+    font-size: 0.9em;
+    color: var(--secondary-color); /* Or a slightly lighter/dimmer version of text color */
+    /* transition: opacity 0.3s ease-in-out; /* If using opacity fade in JS */
+}
+
+body.dark-mode #rotating-message {
+    color: var(--dark-secondary-color); /* Ensure good contrast in dark mode */
 }
 
 /* --- Media Queries for Responsiveness --- */
