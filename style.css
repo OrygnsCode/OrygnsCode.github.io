@@ -55,11 +55,15 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    min-width: 100vw; /* Reinforce */
+    min-height: 100vh; /* Reinforce */
     z-index: -1; /* Behind all content */
     overflow: hidden; /* Prevent scrollbars if SVG slightly overflows */
+    box-sizing: border-box; /* Add for explicitness */
 }
 
 #hex-background svg {
+    display: block; /* Add to remove potential extra space */
     width: 100%;
     height: 100%;
     stroke-linecap: round; /* Optional: for nicer line ends if dashed later */
@@ -68,7 +72,7 @@ body {
 
 .hexagon-path {
     stroke: var(--hexagon-line-color);
-    stroke-width: 1px;
+    stroke-width: 2px; /* Changed from 1px */
     fill: none;
 }
 
