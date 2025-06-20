@@ -9,6 +9,7 @@
     --footer-bg: #343a40; /* Darker grey for footer */
     --font-family-base: 'Rubik', sans-serif;
     --primary-color-rgb: 0, 123, 255; /* RGB for #007bff */
+    --hexagon-line-color: rgba(0, 0, 0, 0.15); /* For light theme */
 
     /* Dark Theme Palette */
     --dark-primary-color: #007bff; /* Keeping primary blue, or choose a lighter shade if needed e.g., #409eff */
@@ -34,46 +35,44 @@ body.dark-mode {
        and potentially use a different variable in the animation or update --primary-color-rgb
        via JavaScript when the theme changes if the animation directly uses --primary-color-rgb.
        For now, --primary-color-rgb will be inherited by dark-mode. */
-
-    /* New gradient properties for dark mode */
-    --gradient-color-1-dark: #1a1a2e; /* Dark desaturated blue */
-    --gradient-color-2-dark: #16213e; /* Darker blue/purple */
-    --gradient-color-3-dark: #0f3460; /* Dark navy */
-    --gradient-color-4-dark: #121212; /* Very dark grey (original dark body bg) */
-
-    background: linear-gradient(45deg, var(--gradient-color-1-dark), var(--gradient-color-2-dark), var(--gradient-color-3-dark), var(--gradient-color-4-dark));
-    background-size: 400% 400%; /* Ensure this is consistent */
-    animation: animatedGradient 30s ease infinite; /* Ensure this is consistent */
+    --hexagon-line-color: rgba(255, 255, 255, 0.1); /* For dark theme */
 }
 
 body {
     font-family: var(--font-family-base);
     margin: 0;
     padding: 0;
-    /* background-color: var(--body-bg); /* Replaced by gradient */
+    background-color: var(--body-bg); /* Restored */
     color: var(--text-color);
     font-size: 16px; /* Base font size */
     line-height: 1.7; /* Improved line height */
-    /* New background properties */
-    --gradient-color-1: #e0e7ff; /* Light blue/lavender */
-    --gradient-color-2: #f0f3ff; /* Very light blue */
-    --gradient-color-3: #e6f0ff; /* Light sky blue */
-    --gradient-color-4: #f5f7fa; /* Off-white / very light grey */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Restored */
+}
 
-    background: linear-gradient(45deg, var(--gradient-color-1), var(--gradient-color-2), var(--gradient-color-3), var(--gradient-color-4));
-    background-size: 400% 400%; /* Make gradient large for smooth animation */
-    animation: animatedGradient 30s ease infinite; /* Slow and subtle animation */
+#hex-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* Behind all content */
+    overflow: hidden; /* Prevent scrollbars if SVG slightly overflows */
+}
 
-    transition: color 0.3s ease; /* Keep color transition, background transition might be less effective */
+#hex-background svg {
+    width: 100%;
+    height: 100%;
+    stroke-linecap: round; /* Optional: for nicer line ends if dashed later */
+    stroke-linejoin: round; /* Optional: for nicer line joins */
+}
+
+.hexagon-path {
+    stroke: var(--hexagon-line-color);
+    stroke-width: 1px;
+    fill: none;
 }
 
 /* Animations */
-@keyframes animatedGradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
 @keyframes fadeIn {
     from {
         opacity: 0;
