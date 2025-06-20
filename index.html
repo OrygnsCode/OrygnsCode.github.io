@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 </head>
 <body>
+    <div id="hex-background"></div>
     <header>
         <h1><span class="title-letter">O</span><span class="title-letter">r</span><span class="title-letter">y</span><span class="title-letter">g</span><span class="title-letter">n</span><span class="title-letter">s</span><span class="title-letter">C</span><span class="title-letter">o</span><span class="title-letter">d</span><span class="title-letter">e</span></h1>
         <nav>
@@ -355,5 +356,99 @@
         }
     });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+       const hexBackground = document.getElementById('hex-background');
+       if (!hexBackground) return;
+
+       const svgNS = "http://www.w3.org/2000/svg";
+       const svg = document.createElementNS(svgNS, "svg");
+
+       const hexRadius = 50; // Adjust for desired hex size
+       const hexWidth = Math.sqrt(3) * hexRadius;
+       const hexHeight = 2 * hexRadius;
+       const vertSpacing = hexHeight * 3/4; // Vertical distance between rows
+       const horizSpacing = hexWidth;       // Horizontal distance between centers in the same row
+
+       const hexPathData = `M 0 ${-hexRadius}
+                            L ${hexWidth/2} ${-hexRadius/2}
+                            L ${hexWidth/2} ${hexRadius/2}
+                            L 0 ${hexRadius}
+                            L ${-hexWidth/2} ${hexRadius/2}
+                            L ${-hexWidth/2} ${-hexRadius/2}
+                            Z`;
+
+       const screenWidth = window.innerWidth + hexWidth;
+       const screenHeight = window.innerHeight + hexHeight;
+
+       const numRows = Math.ceil(screenHeight / vertSpacing) +1;
+       const numCols = Math.ceil(screenWidth / horizSpacing) +1;
+
+       for (let r = 0; r < numRows; r++) {
+           for (let c = 0; c < numCols; c++) {
+               const xOffset = (r % 2 === 0) ? 0 : horizSpacing / 2;
+               const cx = (c * horizSpacing) + xOffset - (hexWidth/2) ;
+               const cy = (r * vertSpacing) - (hexHeight/2);
+
+               const hexPath = document.createElementNS(svgNS, "path");
+               hexPath.setAttribute("d", hexPathData);
+               hexPath.setAttribute("transform", `translate(${cx}, ${cy})`);
+               hexPath.classList.add('hexagon-path');
+               hexPath.setAttribute('data-row', r);
+               hexPath.setAttribute('data-col', c);
+               svg.appendChild(hexPath);
+           }
+       }
+       hexBackground.appendChild(svg);
+
+       // PULSE ANIMATION CODE (new)
+       if (typeof gsap !== 'undefined') {
+           const allHexPaths = Array.from(svg.querySelectorAll('.hexagon-path'));
+           if (allHexPaths.length === 0) return;
+
+           function pulseHexagon(hexElement) {
+               if (!hexElement) return;
+               // Dynamically get current theme's base opacity for robustness
+               const currentStyle = getComputedStyle(hexElement);
+               const currentStroke = currentStyle.stroke; // Gets var(--hexagon-line-color) in rgba form
+               const parts = currentStroke.match(/[\d.]+/g); // Extract r,g,b,a
+               let dynamicBaseOpacity = 0.1; // Default fallback if parsing fails
+               if (parts && parts.length === 4) {
+                   dynamicBaseOpacity = parseFloat(parts[3]);
+               }
+
+               gsap.timeline()
+                   .to(hexElement, {
+                       strokeOpacity: dynamicBaseOpacity + 0.5 > 1 ? 1 : dynamicBaseOpacity + 0.5, // Increase opacity, cap at 1
+                       strokeWidth: 1.5, // Slightly thicker pulse
+                       duration: 0.4,
+                       ease: "power1.out"
+                   })
+                   .to(hexElement, {
+                       strokeOpacity: dynamicBaseOpacity, // Return to its original opacity
+                       strokeWidth: 1, // Return to base width
+                       duration: 0.6,
+                       ease: "power1.in"
+                   });
+           }
+
+           // Continuously trigger pulses on random hexagons
+           gsap.to({}, { // Dummy object for ticker
+               duration: 0.1, // How often to try and pick a new hex to pulse (more frequent for more pulses)
+               repeat: -1,
+               ease: "linear", // Important for consistent ticker
+               onRepeat: () => {
+                   const randomIndex = Math.floor(Math.random() * allHexPaths.length);
+                   const randomHex = allHexPaths[randomIndex];
+                   if (randomHex && !gsap.isTweening(randomHex)) { // Pulse only if not already tweening
+                       pulseHexagon(randomHex);
+                   }
+               }
+           });
+       } else {
+           console.warn("GSAP not loaded, skipping hex pulse animation.");
+       }
+   });
+   </script>
 </body>
 </html>
