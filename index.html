@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OrygnsCode Projects</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 </head>
 <body>
+    <div id="hex-background"></div>
     <header>
-        <h1>OrygnsCode</h1>
+        <h1><span class="title-letter">O</span><span class="title-letter">r</span><span class="title-letter">y</span><span class="title-letter">g</span><span class="title-letter">n</span><span class="title-letter">s</span><span class="title-letter">C</span><span class="title-letter">o</span><span class="title-letter">d</span><span class="title-letter">e</span></h1>
         <nav>
             <div id="day"></div>
             <div id="night"></div>
@@ -171,79 +174,188 @@
             <p>Practicing building and deploying code using 100% AI assistance—powered by Jules and streamlined through GitHub</p>
         </section>
 
-<section id="apps-showcase">
-            <h2>My Apps</h2>
-            <div class="project-list">
-                <article class="project-item">
-                    <h3>Distillation Simulator</h3>
-                    <p>An advanced McCabe-Thiele analysis tool for binary distillation systems. (Chemical Engineering App)</p>
-                    <a href="projects/DistillationSimulator/index.html">Run Simulator</a>
-                </article>
-            </div>
-        </section>
         <section id="projects-showcase">
-            <h2>My Games</h2> 
+            <h2 data-aos="fade-up">My Games</h2>
             <div class="project-list">
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>AstroDuel</h3>
                     <p>A space combat game. TURN MOBILE DEVICE HORIZONTAL TO PLAY (Works best on Computer)</p>
-                    <a href="projects/game-AstroDuel/index.html">Play AstroDuel</a>
+                    <a href="projects/game-AstroDuel/index.html"><i class="fas fa-rocket"></i> Play AstroDuel</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>2048 Game</h3>
                     <p>A classic tile-merging puzzle game. Swipe or use arrow keys!</p>
-                    <a href="projects/game-2048/index.html">Play 2048</a>
+                    <a href="projects/game-2048/index.html"><i class="fas fa-border-all"></i> Play 2048</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Simon Game</h3>
                     <p>Test your memory with this classic color and sound sequence game!</p>
-                    <a href="projects/game-simon/index.html">Play Simon</a>
+                    <a href="projects/game-simon/index.html"><i class="fas fa-brain"></i> Play Simon</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Stick Hero Game</h3>
                     <p>Stretch the stick to reach the next platform. How far can you go?</p>
-                    <a href="projects/game-stickhero/index.html">Play Stick Hero</a>
+                    <a href="projects/game-stickhero/index.html"><i class="fas fa-ruler-horizontal"></i> Play Stick Hero</a>
                 </article>
                 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Interactive Piano</h3>
                     <p>Play tunes on this virtual piano using your mouse or keyboard!</p>
-                    <a href="projects/game-InteractivePiano/index.html">Play Piano</a>
+                    <a href="projects/game-InteractivePiano/index.html"><i class="fas fa-music"></i> Play Piano</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Snake Game</h3>
                     <p>A classic arcade game where you control a growing snake to eat food and avoid collisions.</p>
-                    <a href="projects/game-snake/index.html">Play Snake</a>
+                    <a href="projects/game-snake/index.html"><i class="fas fa-staff-snake"></i> Play Snake</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Connect 4 Game</h3>
                     <p>Try to outsmart the AI in this classic strategy game of Connect 4. Five different difficulty levels.</p>
-                    <a href="projects/game-Align/index.html">Play Connect 4</a>
+                    <a href="projects/game-Align/index.html"><i class="fas fa-braille"></i> Play Connect 4</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Endless Boxy Run</h3>
                     <p>Jump and shuffle to avoid the trees in this Temple Run inspired game.</p>
-                    <a href="projects/game-EndlessBoxyRun/index.html">Play Endless Boxy Run</a>
+                    <a href="projects/game-EndlessBoxyRun/index.html"><i class="fas fa-person-running"></i> Play Endless Boxy Run</a>
                 </article>
 
-                <article class="project-item">
+                <article class="project-item" data-aos="fade-up">
                     <h3>Tetris</h3>
                     <p>A classic falling block puzzle game. Use arrow keys to move and rotate the blocks. (COMPUTER ONLY, Mobile support coming soon!)</p>
-                    <a href="projects/game-Tetris/index.html">Play Tetris</a>
+                    <a href="projects/game-Tetris/index.html"><i class="fas fa-cubes"></i> Play Tetris</a>
                 </article>
             </div> 
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 OrygnsCode - <a href="https://github.com/OrygnsCode" target="_blank">My GitHub</a></p>
+    <footer data-aos="fade-up">
+        <p>&copy; 2025 OrygnsCode - <a href="https://github.com/OrygnsCode" target="_blank"><i class="fab fa-github"></i> My GitHub</a></p>
+        <p id="rotating-message" style="margin-top: 10px; min-height: 1.2em;"></p>
     </footer>
     <script src="theme.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure GSAP is loaded
+            if (typeof gsap !== 'undefined') {
+                gsap.from(".hero h1", {
+                    duration: 1,
+                    y: 50,
+                    opacity: 0,
+                    ease: "power1.out",
+                    delay: 0.5 // Delay to allow hero section fadeIn to occur
+                });
+                // Optional: Animate the hero paragraph as well with a slight delay
+                gsap.from(".hero p", {
+                    duration: 1,
+                    y: 30, // Slightly less movement
+                    opacity: 0,
+                    ease: "power1.out",
+                    delay: 0.8 // Start after h1 animation begins
+                });
+            } else {
+                console.warn("GSAP not loaded, skipping hero text animation.");
+            }
+        });
+    </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800, // values from 0 to 3000, with step 50ms
+        easing: 'ease-in-out', // default easing for AOS animations
+        once: true, // whether animation should happen only once - while scrolling down
+        mirror: false, // whether elements should animate out while scrolling past them
+      });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = [
+                "Powered by pixels and passion.",
+                "Turning coffee into code since 2023.",
+                "Currently exploring new digital frontiers.",
+                "Building the future, one line at a time.",
+                "Keep scrolling, there's more to see (maybe)!",
+                "Fun fact: This message changes!"
+            ];
+            let currentMessageIndex = Math.floor(Math.random() * messages.length);
+            const messageElement = document.getElementById('rotating-message');
+
+            function showNewMessage() {
+                if (messageElement) {
+                    // Optional: fade out
+                    // messageElement.style.opacity = 0;
+                    // setTimeout(() => {
+                        currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+                        messageElement.textContent = messages[currentMessageIndex];
+                    //     messageElement.style.opacity = 1;
+                    // }, 300); // match this delay with CSS transition if used
+                }
+            }
+
+            if (messageElement) {
+                 messageElement.textContent = messages[currentMessageIndex]; // Show initial message
+                 setInterval(showNewMessage, 5000); // Change message every 5 seconds
+            }
+        });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof gsap !== 'undefined') {
+            const letters = document.querySelectorAll('header h1 .title-letter');
+
+            if (letters.length > 0) {
+                // Calculate approximate animation duration
+                // Number of letters: letters.length
+                // Stagger time for last letter to start: (letters.length - 1) * 0.15
+                // Pulse duration for one letter: 0.3 (up) + 0.3 (down) = 0.6
+                const staggerPerLetter = 0.15;
+                const pulseEffectDuration = 0.6; // 0.3s up + 0.3s down
+                const animationDuration = (letters.length > 0 ? ((letters.length - 1) * staggerPerLetter) + pulseEffectDuration : 0);
+
+                const desiredCycleTime = 5; // 5 seconds
+                const repeatDelayTime = desiredCycleTime - animationDuration;
+
+                const letterPulseTimeline = gsap.timeline({
+                    repeat: -1, // Loop indefinitely
+                    repeatDelay: repeatDelayTime > 0 ? repeatDelayTime : 0 // Ensure delay is not negative
+                });
+
+                // Define the animation for a single letter pulse
+                // It will scale up and slightly lift, then return.
+                // Applied with a stagger to all letters.
+                letterPulseTimeline.to(letters, {
+                    scale: 1.3,
+                    yPercent: -20,
+                    opacity: 0.8,
+                    duration: 0.3,
+                    ease: "power1.out",
+                    stagger: {
+                        each: staggerPerLetter,
+                        from: "start"
+                    }
+                })
+                .to(letters, {
+                    scale: 1,
+                    yPercent: 0,
+                    opacity: 1,
+                    duration: 0.3,
+                    ease: "power1.in",
+                    stagger: {
+                        each: staggerPerLetter,
+                        from: "start"
+                    }
+                }, "-=0.15"); // Overlap for smoother word effect
+            }
+        } else {
+            console.warn("GSAP not loaded, skipping header title letter animation.");
+        }
+    });
+    </script>
+    <script src="js/hex-background.js" defer></script>
 </body>
 </html>
