@@ -14,6 +14,8 @@ body {
     overflow: hidden;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
 }
 
 .game-container {
@@ -407,6 +409,32 @@ body {
     transform: translateX(0);
 }
 
+@media (max-width: 768px) {
+    .toast {
+        top: 80px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        transform: translateY(-100px);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .toast.hide {
+        transform: translateY(-100px) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
 .toast-content h3 {
     color: #FFD700;
     margin-bottom: 10px;
@@ -448,6 +476,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: -webkit-fill-available;
     background: rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
@@ -515,71 +544,284 @@ body {
 }
 
 @media (max-width: 768px) {
+    .game-header {
+        padding: 4px 10px;
+        position: fixed;
+        z-index: 100;
+        min-height: 40px;
+    }
+    
+    .header-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    
     .title-main {
-        font-size: 24px;
+        font-size: 16px;
+        line-height: 1;
     }
 
     .title-sub {
-        font-size: 14px;
+        font-size: 10px;
+        margin-top: -2px;
+    }
+    
+    .title-author {
+        font-size: 8px;
+        margin-top: 1px;
+    }
+
+    .mobile-safari-notice {
+        display: none;
+        font-family: 'Roboto', sans-serif;
+        font-size: 8px;
+        font-weight: 400;
+        color: #FFD700;
+        margin-top: 2px;
+        opacity: 0.8;
+    }
+
+    .game-stats {
+        gap: 15px;
     }
 
     .stat-value {
-        font-size: 18px;
+        font-size: 14px;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-size: 8px;
+        margin-bottom: 1px;
     }
 
-    .control-panel {
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
+    .game-container {
+        padding-top: 45px;
+        padding-bottom: 50px;
+        height: 100vh;
+        overflow: hidden;
     }
 
-    .controls-left,
-    .controls-center,
-    .controls-right {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .power-meter-container {
-        position: static;
-        transform: none;
-        flex-direction: row;
-        margin: 10px 0;
-    }
-
-    .power-meter {
-        width: 200px;
-        height: 20px;
-    }
-
-    .power-fill {
-        border-radius: 8px 0 0 8px;
-    }
-
-    .toast {
-        right: 10px;
-        left: 10px;
-        max-width: none;
-    }
-
-    /* Better mobile canvas sizing */
     .canvas-container {
-        margin: 80px 5px 5px 5px;
+        margin: 2px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
     }
 
     #gameCanvas {
-        max-width: 100%;
-        height: auto;
+        width: calc(100vw - 80px);
+        height: calc(100vh - 100px);
+        max-width: calc(100vw - 80px);
+        max-height: calc(100vh - 100px);
+        object-fit: contain;
+    }
+
+    .control-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        min-height: 45px;
+        max-height: 45px;
+        overflow: visible;
+        z-index: 100;
+    }
+
+    .controls-left {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        flex: 0 0 auto;
+        align-items: center;
+    }
+    
+    .controls-center {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        gap: 10px;
+        min-width: 0;
+    }
+    
+    .controls-right {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+        flex: 0 0 auto;
+    }
+    
+    /* Move spin controls to left section on mobile */
+    .controls-left .cue-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+    
+    .controls-left .control-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 0;
+    }
+    
+    .controls-left .slider {
+        width: 60px;
+        height: 4px;
+    }
+    
+    .controls-left .control-group label {
+        font-size: 7px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    .controls-left .spin-indicator {
+        font-size: 9px;
+        min-width: 20px;
+    }
+
+    .power-meter-container {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-direction: column;
+        margin: 0;
+        z-index: 50;
+    }
+
+    .power-meter {
+        width: 12px;
+        height: 100px;
+        border: 1px solid #FFD700;
+    }
+
+    .power-fill {
+        border-radius: 0 0 4px 4px;
+    }
+
+    .power-label {
+        font-size: 8px;
+        margin-top: 2px;
+    }
+
+    .power-indicator {
+        right: 15px;
+        border-left: 6px solid #FFD700;
+        border-top: 3px solid transparent;
+        border-bottom: 3px solid transparent;
     }
 
     /* Improve mobile controls */
     .control-btn {
-        padding: 15px 20px;
-        font-size: 16px;
-        min-width: 120px;
+        padding: 6px 10px;
+        font-size: 11px;
+        min-width: 70px;
+        white-space: nowrap;
+        border: 1px solid #FFD700;
+    }
+
+    .cue-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 0;
     }
 
     .slider {
-        width: 150px;
+        width: 80px;
+        height: 4px;
+        touch-action: manipulation;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .control-group label {
+        font-size: 8px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    .spin-indicator {
+        font-size: 10px;
+        min-width: 25px;
+    }
+
+    /* Improve touch targets */
+    .control-btn,
+    .slider,
+    .toast-close {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Make sure canvas doesn't interfere with touch */
+    #gameCanvas {
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    /* Show mobile Safari notice only on mobile */
+    .mobile-safari-notice {
+        display: block !important;
+    }
+    
+    /* Hide desktop controls on mobile */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    /* Show mobile controls on mobile */
+    .mobile-only {
+        display: flex !important;
+    }
+}
+
+/* Desktop visibility - hide mobile controls */
+@media (min-width: 769px) {
+    .mobile-only {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: flex !important;
+    }
+    
+    .mobile-safari-notice {
+        display: none !important;
     }
 }
