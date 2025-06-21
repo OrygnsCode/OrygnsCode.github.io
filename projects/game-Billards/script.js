@@ -172,10 +172,11 @@ class BilliardsGame {
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
         this.canvas.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
 
-        // Touch events
-        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+        // Touch events with passive: false for better control
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        this.canvas.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
 
         // Button events
         const newGameBtn = document.getElementById('newGameBtn');
@@ -185,12 +186,32 @@ class BilliardsGame {
         if (newGameBtn) newGameBtn.addEventListener('click', () => this.newGame());
         if (settingsBtn) settingsBtn.addEventListener('click', () => this.showSettings());
 
-        // Spin control
+        // Spin control - mobile version
         if (spinControl) {
             spinControl.addEventListener('input', (e) => {
                 this.gameState.spin = parseFloat(e.target.value);
                 const indicator = document.getElementById('spinIndicator');
+                const desktopControl = document.getElementById('spinControlDesktop');
+                const desktopIndicator = document.getElementById('spinIndicatorDesktop');
+                
                 if (indicator) indicator.textContent = this.gameState.spin.toFixed(1);
+                if (desktopControl) desktopControl.value = e.target.value;
+                if (desktopIndicator) desktopIndicator.textContent = this.gameState.spin.toFixed(1);
+            });
+        }
+        
+        // Spin control - desktop version
+        const spinControlDesktop = document.getElementById('spinControlDesktop');
+        if (spinControlDesktop) {
+            spinControlDesktop.addEventListener('input', (e) => {
+                this.gameState.spin = parseFloat(e.target.value);
+                const indicator = document.getElementById('spinIndicatorDesktop');
+                const mobileControl = document.getElementById('spinControl');
+                const mobileIndicator = document.getElementById('spinIndicator');
+                
+                if (indicator) indicator.textContent = this.gameState.spin.toFixed(1);
+                if (mobileControl) mobileControl.value = e.target.value;
+                if (mobileIndicator) mobileIndicator.textContent = this.gameState.spin.toFixed(1);
             });
         }
 
@@ -282,18 +303,37 @@ class BilliardsGame {
 
     handleTouchStart(e) {
         e.preventDefault();
+        e.stopPropagation();
         const touch = e.touches[0];
-        this.handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+        
+        // Get more precise touch coordinates
+        const rect = this.canvas.getBoundingClientRect();
+        const touchEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            preventDefault: () => {}
+        };
+        
+        this.handleMouseDown(touchEvent);
     }
 
     handleTouchMove(e) {
         e.preventDefault();
+        e.stopPropagation();
         const touch = e.touches[0];
-        this.handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+        
+        const touchEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            preventDefault: () => {}
+        };
+        
+        this.handleMouseMove(touchEvent);
     }
 
     handleTouchEnd(e) {
         e.preventDefault();
+        e.stopPropagation();
         this.handleMouseUp(e);
     }
 
@@ -304,7 +344,9 @@ class BilliardsGame {
         const dy = this.mouse.y - this.cueBall.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        return distance < this.ballRadius * 6;
+        // Larger touch area for mobile devices
+        const touchRadius = this.isMobile ? this.ballRadius * 8 : this.ballRadius * 6;
+        return distance < touchRadius;
     }
 
     updateAimAngle() {
@@ -563,16 +605,22 @@ function closeToast() {
     if (toast) {
         toast.classList.remove('show');
         toast.classList.remove('auto-show');
+        toast.classList.add('hide');
+        
+        // Ensure toast is completely hidden on mobile
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 300);
     }
 }
 
 // Global function to close toast
 window.closeToast = closeToast;
 
-// Auto-hide toast after 5 seconds
+// Auto-hide toast after 8 seconds (longer for mobile users)
 setTimeout(() => {
     closeToast();
-}, 5000);
+}, 8000);
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
