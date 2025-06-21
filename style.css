@@ -242,111 +242,35 @@ body {
 }
 
 .logo-o {
-    color: var(--color-primary);
     font-size: 2.5rem;
     font-weight: 900;
     font-family: var(--font-mono);
-    text-shadow: 0 0 20px var(--color-primary);
-    animation: logo-orbit 4s ease-in-out infinite;
     position: relative;
     margin-right: 2px;
-    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    background: linear-gradient(90deg, #00f5ff, #0099ff, #6644ff, #9933ff, #cc22ff, #ff006e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-.logo-o::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    background: var(--color-secondary);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: inner-pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 10px var(--color-secondary);
+    vertical-align: baseline;
 }
 
 .logo-text {
-    color: var(--color-text-primary);
     font-family: var(--font-mono);
     font-weight: 700;
     letter-spacing: 1px;
     position: relative;
     z-index: 2;
-    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    background: linear-gradient(90deg, #00f5ff, #0099ff, #6644ff, #9933ff, #cc22ff, #ff006e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: text-glow 3s ease-in-out infinite;
 }
 
 .logo-pulse {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.1;
-    animation: pulse-expand 2s ease-in-out infinite;
-    z-index: 1;
+    display: none;
 }
 
-@keyframes logo-orbit {
-    0%, 100% { 
-        transform: rotate(0deg) scale(1);
-        text-shadow: 0 0 20px var(--color-primary);
-    }
-    25% { 
-        transform: rotate(90deg) scale(1.05);
-        text-shadow: 0 0 25px var(--color-primary), 0 0 35px var(--color-secondary);
-    }
-    50% { 
-        transform: rotate(180deg) scale(1.1);
-        text-shadow: 0 0 30px var(--color-secondary), 0 0 40px var(--color-primary);
-    }
-    75% { 
-        transform: rotate(270deg) scale(1.05);
-        text-shadow: 0 0 25px var(--color-primary), 0 0 35px var(--color-secondary);
-    }
-}
 
-@keyframes inner-pulse {
-    0%, 100% { 
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0.7;
-    }
-    50% { 
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 1;
-    }
-}
-
-@keyframes text-glow {
-    0%, 100% { 
-        filter: brightness(1);
-    }
-    50% { 
-        filter: brightness(1.2);
-    }
-}
-
-@keyframes pulse-expand {
-    0%, 100% { 
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0.05;
-    }
-    50% { 
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0.15;
-    }
-}
 
 .nav-toggle {
     display: none;
