@@ -372,9 +372,8 @@ class BilliardsGame {
         // Update power charging
         if (this.gameState.isPowerCharging) {
             const elapsed = (Date.now() - this.powerChargeStart) / 1000;
-            // More realistic power curve - faster at start, slower at end
-            const rawPower = elapsed * 50;
-            this.gameState.power = Math.min(rawPower - (rawPower * rawPower * 0.005), 100);
+            // Smooth power curve that only increases to 100%
+            this.gameState.power = Math.min(elapsed * 40, 100);
             this.updatePowerMeter();
         }
 
