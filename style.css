@@ -1,534 +1,1232 @@
-/* CSS Custom Properties (Color Palette) */
-:root {
-    --primary-color: #007bff; /* Modern Blue */
-    --secondary-color: #6c757d; /* Cool Grey */
-    --text-color: #212529; /* Soft Dark Grey */
-    --body-bg: #f8f9fa; /* Very Light Grey */
-    --light-bg: #ffffff; /* White for elements like cards/sections */
-    --header-bg: #ffffff; /* Header background */
-    --footer-bg: #343a40; /* Darker grey for footer */
-    --font-family-base: 'Rubik', sans-serif;
-    --primary-color-rgb: 0, 123, 255; /* RGB for #007bff */
-    --hexagon-line-color: rgba(0, 0, 0, 0.15); /* For light theme */
 
-    /* Dark Theme Palette */
-    --dark-primary-color: #007bff; /* Keeping primary blue, or choose a lighter shade if needed e.g., #409eff */
-    --dark-secondary-color: #8a929a; /* Lighter Grey for dark mode */
-    --dark-text-color: #e9ecef; /* Light Grey for text */
-    --dark-body-bg: #121212; /* Very Dark Grey/Black */
-    --dark-light-bg: #1e1e1e; /* Dark Grey for elements */
-    --dark-header-bg: #1c1c1c; /* Slightly lighter than body for header */
-    --dark-footer-bg: #232323; /* Slightly lighter than body for footer */
+/* Modern CSS Reset & Variables */
+:root {
+    /* Color Palette */
+    --color-primary: #00f5ff;
+    --color-secondary: #ff006e;
+    --color-accent: #8338ec;
+    --color-bg-primary: #0a0a0f;
+    --color-bg-secondary: #1a1a2e;
+    --color-bg-tertiary: #16213e;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b8bcc8;
+    --color-text-muted: #6b7280;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-glass: rgba(255, 255, 255, 0.05);
+    
+    /* Typography */
+    --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* Spacing */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+    --space-2xl: 4rem;
+    --space-3xl: 6rem;
+    
+    /* Borders */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    --shadow-glow: 0 0 20px rgba(0, 245, 255, 0.3);
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
 }
 
-body.dark-mode {
-    --primary-color: var(--dark-primary-color);
-    --secondary-color: var(--dark-secondary-color);
-    --text-color: var(--dark-text-color);
-    --body-bg: var(--dark-body-bg);
-    --light-bg: var(--dark-light-bg);
-    --header-bg: var(--dark-header-bg);
-    --footer-bg: var(--dark-footer-bg);
-    /* Note: --font-family-base generally remains the same for both themes */
-    /* Assuming dark theme also uses the same primary color #007bff for the glow
-       If --dark-primary-color were different, we'd define --dark-primary-color-rgb
-       and potentially use a different variable in the animation or update --primary-color-rgb
-       via JavaScript when the theme changes if the animation directly uses --primary-color-rgb.
-       For now, --primary-color-rgb will be inherited by dark-mode. */
-    --hexagon-line-color: rgba(255, 255, 255, 0.1); /* For dark theme */
+/* Light Theme */
+.light-theme {
+    --color-primary: #2563eb;
+    --color-secondary: #dc2626;
+    --color-accent: #7c3aed;
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f1f5f9;
+    --color-bg-tertiary: #e2e8f0;
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #334155;
+    --color-text-muted: #64748b;
+    --color-border: rgba(15, 23, 42, 0.15);
+    --color-glass: rgba(15, 23, 42, 0.05);
+    --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
 }
 
 body {
-    font-family: var(--font-family-base);
-    margin: 0;
-    padding: 0;
-    background-color: var(--body-bg); /* Restored */
-    color: var(--text-color);
-    font-size: 16px; /* Base font size */
-    line-height: 1.7; /* Improved line height */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Restored */
+    font-family: var(--font-primary);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: all var(--transition-normal);
 }
 
-#hex-background {
+/* Loading Screen */
+#loading-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    min-width: 100vw; /* Reinforce */
-    min-height: 100vh; /* Reinforce */
-    z-index: -1; /* Behind all content */
-    overflow: hidden; /* Prevent scrollbars if SVG slightly overflows */
-    box-sizing: border-box; /* Add for explicitness */
+    background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
 }
 
-#hex-background svg {
-    display: block; /* Add to remove potential extra space */
+#loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loading-container {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.loading-logo {
+    margin-bottom: var(--space-lg);
+}
+
+.logo-text {
+    font-family: var(--font-mono);
+    font-size: 3rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: var(--space-md);
+}
+
+.loading-bar {
+    width: 300px;
+    height: 4px;
+    background: var(--color-bg-tertiary);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loading-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    width: 0%;
+    transition: width var(--transition-fast);
+    border-radius: 2px;
+}
+
+.loading-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-md);
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#loading-percentage {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.loading-subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.loading-particles {
+    position: absolute;
     width: 100%;
     height: 100%;
-    stroke-linecap: round; /* Optional: for nicer line ends if dashed later */
-    stroke-linejoin: round; /* Optional: for nicer line joins */
+    pointer-events: none;
+    overflow: hidden;
 }
 
-.hexagon-path {
-    stroke: var(--hexagon-line-color);
-    stroke-width: 2px; /* Changed from 1px */
-    fill: none;
+/* Main Content */
+#main-content {
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+    position: relative;
+    z-index: 1;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+#main-content.loaded {
+    opacity: 1;
 }
 
-header {
-    background-color: var(--header-bg);
-    color: var(--text-color);
-    padding: 15px 20px; /* Padding will define space for absolute positioned nav */
-    transition: background-color 0.3s ease, color 0.3s ease;
-    /* display: flex; removed */
-    /* justify-content: space-between; removed */
-    /* align-items: center; removed */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    position: relative; /* Changed from sticky to relative for absolute positioning context of nav */
-                       /* If sticky is desired, nav needs to be relative to a child of header or adjust top value */
-    top: 0; /* If header is sticky, this is fine */
+/* 3D Background */
+#three-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Navigation */
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    /* Re-adding sticky behavior if it was intended, but position:relative is key for nav */
-    /* For now, let's assume sticky is still desired. If not, remove position: sticky */
-     position: sticky;
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--color-border);
+    transition: all var(--transition-normal);
 }
 
-header h1 {
-    margin: 0 auto; /* Center the h1 */
-    font-size: 2.2em;
-    font-weight: 700;
-    color: var(--primary-color);
-    text-align: center; /* Ensure text is centered */
-    /* flex-grow: 1; removed */
-    /* Add padding to prevent overlap with absolutely positioned nav */
-    padding-left: 70px; /* Approx width of switch + its offset */
-    padding-right: 70px; /* Approx width of switch + its offset */
-    box-sizing: border-box; /* Include padding in width calculation */
+.light-theme .main-nav {
+    background: rgba(255, 255, 255, 0.9);
 }
 
-header h1 .title-letter {
-    display: inline-block; /* Important for transforms to work as expected */
-    /* transform-origin: center center; /* GSAP usually handles this well, but can be explicit */
-    /* No extra margin/padding to avoid disrupting original letter spacing */
-}
-
-/* Nav is now absolutely positioned */
-header nav {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 70px; /* Width to contain the scaled switch + some padding */
-    height: 40px; /* Height to contain the scaled switch + some padding */
-    /* display: flex; align-items: center; justify-content: center; /* Optional: to help center if needed */
-}
-
-/* Basic Navigation Styling (Future Proofing) */
-header nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap; /* Allow nav items to wrap on smaller screens */
-}
-
-header nav li {
-    margin: 5px 10px; /* Add vertical margin for wrapping */
-}
-
-header nav a {
-    text-decoration: none;
-    color: var(--text-color);
-    padding: 8px 15px; /* Increased padding for better click area */
-    border-bottom: 2px solid transparent;
-    transition: color 0.3s ease, border-bottom-color 0.3s ease, background-color 0.3s ease;
-    font-weight: 500; /* Medium weight for nav links */
-    border-radius: 4px; /* Slight radius for hover effect */
-}
-
-header nav a:hover,
-header nav a:focus { /* Added focus state for accessibility */
-    color: var(--primary-color);
-    background-color: rgba(0, 123, 255, 0.1); /* Subtle background on hover/focus */
-}
-
-/* Ensure nav elements (if any besides switch) are spaced out */
-/* This might not be needed if nav is only holding the switch and is absolutely positioned */
-/* header nav > * {
-    margin-left: 15px;
-}
-header nav > *:first-child {
-    margin-left: 0;
-} */
-
-
-main {
-    max-width: 960px;
+.nav-container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-}
-
-.hero {
-    background-color: var(--primary-color);
-    color: var(--light-bg); /* This will be light text on dark primary in dark mode if primary isn't changed much */
-    padding: 4rem 2rem;
-    text-align: center;
-    margin-bottom: 40px;
-    border-radius: 8px;
-    animation: fadeIn 0.8s ease-out forwards, heroGlow 3s infinite alternate ease-in-out;
-}
-
-@keyframes heroGlow {
-    0% {
-        box-shadow: 0 0 15px 5px rgba(var(--primary-color-rgb), 0.3);
-    }
-    100% {
-        box-shadow: 0 0 25px 10px rgba(var(--primary-color-rgb), 0.5);
-    }
-}
-
-.hero h1 {
-    font-size: 2.8em;
-    font-weight: 700;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-}
-
-.hero p {
-    font-size: 1.2em;
-    margin-bottom: 0;
-}
-
-#projects-showcase {
-    background-color: transparent;
-    padding: 0;
-    margin-bottom: 30px;
-    border-radius: 0;
-    box-shadow: none;
-}
-
-h2 {
-    color: var(--primary-color);
-    padding-bottom: 10px;
-    margin-top: 0;
-    font-size: 2em;
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.project-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    animation: fadeIn 0.8s ease-out 0.2s forwards; /* Added delay to project-list animation */
-    opacity: 0; /* Start with opacity 0 before animation */
-}
-
-.project-item {
-    background-color: rgba(255, 255, 255, 0.65); /* Light mode glass */
-    padding: 25px;
-    border-radius: 12px; /* Increased border-radius */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Adjusted shadow */
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle light border */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); /* Safari */
+    padding: var(--space-sm) var(--space-lg);
     display: flex;
-    flex-direction: column;
-    /* Combined transitions from original and new requirements */
-    transition: background-color 0.3s ease, box-shadow 0.3s ease-out, transform 0.3s ease-out, border-color 0.3s ease;
-    border-bottom: none; /* This was in the original, keeping it if it served a purpose, though border is now all around */
-    margin-bottom: 0; /* This was in the original */
+    align-items: center;
+    justify-content: space-between;
 }
 
-body.dark-mode .project-item {
-    background-color: rgba(40, 40, 40, 0.65); /* Dark mode glass */
-    border: 1px solid rgba(255, 255, 255, 0.12); /* Slightly more subtle border for dark */
-    /* Text color should be handled by --dark-text-color inherited from body.dark-mode */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.2rem;
 }
 
-.project-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12); /* Slightly increased shadow on hover */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    position: relative;
 }
 
-.project-item h3 {
-    margin-top: 0;
-    color: var(--text-color);
-    font-size: 1.4em;
-    margin-bottom: 0.75rem;
-    transition: color 0.3s ease; /* Smooth transition for theme change */
+.logo-brand {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
-.project-item p {
-    font-size: 1em;
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
-    /* color will inherit from body or .project-item if set directly */
+.logo-o {
+    color: var(--color-primary);
+    font-size: 2.5rem;
+    font-weight: 900;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 20px var(--color-primary);
+    animation: logo-orbit 4s ease-in-out infinite;
+    position: relative;
+    margin-right: 2px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.project-item a {
-    display: inline-block;
-    background-color: var(--primary-color);
-    color: #ffffff; /* This should be a light color, works for dark primary too */
-    padding: 12px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Kept as is from previous step */
-    align-self: flex-start;
-    margin-top: auto;
-}
-
-.project-item a:hover,
-.project-item a:focus { /* Added focus state */
-    background-color: #0056b3;
-    transform: translateY(-2px) scale(1.05); /* Updated transform with scale */
-}
-
-.project-item a i {
-    margin-right: 8px; /* Adjust as needed */
-}
-
-footer {
-    text-align: center;
-    padding: 30px 20px;
-    background-color: var(--footer-bg);
-    color: #e9ecef; /* Light grey text, good for dark footer backgrounds in both themes */
-    margin-top: 40px;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
-}
-
-footer a {
-    color: var(--primary-color); /* Will adapt with theme */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-footer a:hover,
-footer a:focus { /* Added focus state */
-    text-decoration: underline;
-    color: #0056b3; /* This is a hardcoded color, consider var(--secondary-color) or a new var if it needs to change with theme */
-    /* If #0056b3 is a darker version of primary, it might need adjustment for dark mode */
-    /* For now, leaving as is, but it's a potential refinement point. */
-}
-
-#rotating-message {
-    font-style: italic;
-    font-size: 0.9em;
-    color: var(--secondary-color); /* Or a slightly lighter/dimmer version of text color */
-    /* transition: opacity 0.3s ease-in-out; /* If using opacity fade in JS */
-}
-
-body.dark-mode #rotating-message {
-    color: var(--dark-secondary-color); /* Ensure good contrast in dark mode */
-}
-
-/* --- Media Queries for Responsiveness --- */
-
-@media (max-width: 992px) {
-    main {
-        padding: 20px 15px;
-    }
-    .project-list {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-    }
-    .hero {
-        padding: 3rem 1.5rem;
-    }
-    .hero h1 {
-        font-size: 2.5em;
-    }
-    h2 {
-        font-size: 1.8em;
-        margin-bottom: 25px;
-    }
-}
-/* Adjustments for smaller screens if needed */
-@media (max-width: 768px) {
-    header {
-        padding: 10px 15px; /* Reduce header padding */
-    }
-    header h1 {
-        font-size: 1.8em; /* Reduce h1 size */
-        padding-left: 60px; /* Adjust padding for smaller screens */
-        padding-right: 60px;
-    }
-    header nav { /* Adjust nav position for new header padding */
-        right: 15px;
-    }
-    #theme-switch-container { /* Make switch slightly smaller */
-        width: 45px;
-        height: 24px;
-        border-radius: 12px;
-        padding: 2px;
-    }
-    #switch-knob { /* Adjust knob for smaller switch */
-        /* width and height are fixed at 20px from base style, which is correct (24px height - 2*2px padding) */
-        top: 2px; /* Align with new padding */
-        left: 2px; /* Align with new padding */
-    }
-/* body.dark-mode #switch-knob removed */
-/* #sun-icon, #moon-icon removed */
-    header nav ul {
-        justify-content: space-around; /* Better for limited space */
-    }
-    header nav a {
-        padding: 6px 10px; /* Smaller padding for nav links */
-    }
-    .hero {
-        padding: 2.5rem 1rem;
-        margin-bottom: 30px;
-    }
-    .hero h1 {
-        font-size: 2.2em;
-    }
-    .hero p {
-        font-size: 1.1em;
-    }
-    h2 {
-        font-size: 1.6em;
-        margin-bottom: 20px;
-    }
-    .project-list {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    .project-item {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 576px) {
-    body {
-        font-size: 15px;
-    }
-    header {
-        /* Header padding is 10px 15px here */
-    }
-    header h1 {
-        font-size: 1.6em; /* Further reduce h1 size */
-        /* Padding already adjusted in the 768px media query, should inherit */
-        /* If further adjustment needed:
-        padding-left: 55px;
-        padding-right: 55px;
-        */
-    }
-    /* header nav { right: 15px; } already set */
-    header nav li {
-        margin: 3px 5px; /* Tighter spacing for nav items */
-    }
-    header nav a {
-        padding: 5px 8px; /* Further reduce nav link padding */
-        font-size: 0.95em;
-    }
-    main {
-        padding: 15px 10px;
-    }
-    .hero {
-        padding: 2rem 1rem;
-        margin-bottom: 25px;
-    }
-    .hero h1 {
-        font-size: 1.9em;
-    }
-    .hero p {
-        font-size: 1em;
-    }
-    h2 {
-        font-size: 1.5em;
-        margin-bottom: 20px;
-    }
-    .project-list {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    .project-item {
-        padding: 15px;
-    }
-    .project-item h3 {
-        font-size: 1.3em;
-    }
-    .project-item p {
-        font-size: 0.95em;
-        margin-bottom: 1rem;
-    }
-    .project-item a {
-        padding: 10px 15px;
-    }
-    footer {
-        padding: 20px 15px;
-    }
-}
-
-svg {
-  transform: scale(.7);
-  z-index: 2;
-  pointer-events: none;
-}
-
-#day, #night {
-  width: 240px;
-  height: 110px;
-  /* background: white; remove this line, it's overridden by specific background below */
-  position: absolute;
-  z-index: 1;
-  cursor: pointer;
-  border-radius: 100px;
-  background: #9cd6ef; /* Default for #day */
-  border: 6px solid #65c0e7; /* Default for #day */
-  /* Attempt to center them within the nav area */
-  /* The nav is approx 50px wide and 26px tall based on old switch. */
-  /* New switch is 240px wide. This will be too big for current nav. */
-  /* For now, let's position them at top-left of nav and scale them down significantly. */
-  /* This will require further refinement in the testing phase. */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.25); /* Center and significantly scale down */
-
-}
-
-#night {
-  pointer-events: none;
-  /* background: #9cd6ef; border: 6px solid #65c0e7; These are set by JS, but initial state might be needed if not day */
-}
-
-#darkmode {
-    position: absolute; /* Position it like #day and #night */
+.logo-o::before {
+    content: '';
+    position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.15); /* Even smaller scale for the large SVG */
-    /* The media query has svg { transform: scale(.95); } which will apply to this too. */
-    /* This might need to be #darkmode specific: @media (max-width: 720px) { #darkmode { transform: scale(.2); } } */
+    width: 10px;
+    height: 10px;
+    background: var(--color-secondary);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: inner-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 10px var(--color-secondary);
 }
 
-@media (max-width: 720px) {
-  #day, #night {
-    /* Original new CSS had width: 320px, height: 150px */
-    /* With the new scaling, these might not be hit effectively. */
-    /* Keeping original transform scale, adjust base size if needed later */
-    width: 320px; /* Base size before scaling */
-    height: 150px; /* Base size before scaling */
-  }
-  svg {
-    /* Original new CSS had transform: scale(.95) */
-    /* This will be relative to its container. */
-    /* The main #day, #night also has a transform. Let's adjust svg's scale within its parent. */
-    transform: scale(.95); /* This should be fine if SVG is child of #day/#night or similar */
-  }
+.logo-text {
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: text-glow 3s ease-in-out infinite;
+}
+
+.logo-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.1;
+    animation: pulse-expand 2s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes logo-orbit {
+    0%, 100% { 
+        transform: rotate(0deg) scale(1);
+        text-shadow: 0 0 20px var(--color-primary);
+    }
+    25% { 
+        transform: rotate(90deg) scale(1.05);
+        text-shadow: 0 0 25px var(--color-primary), 0 0 35px var(--color-secondary);
+    }
+    50% { 
+        transform: rotate(180deg) scale(1.1);
+        text-shadow: 0 0 30px var(--color-secondary), 0 0 40px var(--color-primary);
+    }
+    75% { 
+        transform: rotate(270deg) scale(1.05);
+        text-shadow: 0 0 25px var(--color-primary), 0 0 35px var(--color-secondary);
+    }
+}
+
+@keyframes inner-pulse {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.7;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+}
+
+@keyframes text-glow {
+    0%, 100% { 
+        filter: brightness(1);
+    }
+    50% { 
+        filter: brightness(1.2);
+    }
+}
+
+@keyframes pulse-expand {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.05;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.15;
+    }
+}
+
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 4px;
+}
+
+.nav-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--color-text-primary);
+    transition: all var(--transition-fast);
+    border-radius: 2px;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.nav-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+    position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--color-primary);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-primary);
+    transition: width var(--transition-fast);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: relative;
+    width: 50px;
+    height: 25px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    outline: none;
+}
+
+.theme-toggle:hover {
+    background: var(--color-bg-secondary);
+}
+
+.theme-toggle i {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+    z-index: 2;
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    width: 21px;
+    height: 21px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    transition: transform var(--transition-fast);
+    z-index: 1;
+}
+
+.light-theme .theme-toggle::before {
+    transform: translateX(25px);
+}
+
+.light-theme .theme-toggle .fa-sun {
+    color: var(--color-primary);
+}
+
+.theme-toggle .fa-moon {
+    color: var(--color-primary);
+}
+
+.light-theme .theme-toggle .fa-moon {
+    color: var(--color-text-muted);
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: calc(80px + var(--space-xl)) 0 var(--space-3xl) 0;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: var(--color-glass);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-xl);
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    backdrop-filter: blur(10px);
+}
+
+.badge-icon {
+    color: var(--color-primary);
+}
+
+.hero-title {
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: var(--space-lg);
+}
+
+.title-line {
+    display: block;
+}
+
+.highlight {
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-description {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xl);
+    max-width: 500px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+}
+
+.btn-secondary {
+    background: var(--color-glass);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-tertiary);
+    transform: translateY(-2px);
+}
+
+/* Hero Visual */
+.hero-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.floating-cards {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.game-card.mini {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: var(--color-glass);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    animation: float 6s ease-in-out infinite;
+}
+
+.game-card.mini:nth-child(1) {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 0s;
+}
+
+.game-card.mini:nth-child(2) {
+    bottom: 0;
+    left: 0;
+    animation-delay: 2s;
+}
+
+.game-card.mini:nth-child(3) {
+    bottom: 0;
+    right: 0;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: var(--space-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.scroll-indicator {
+    width: 2px;
+    height: 30px;
+    background: var(--color-primary);
+    animation: scroll 2s ease-in-out infinite;
+}
+
+@keyframes scroll {
+    0%, 100% { opacity: 0; transform: translateY(-10px); }
+    50% { opacity: 1; transform: translateY(10px); }
+}
+
+/* Section Styles */
+.section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-lg);
+    position: relative;
+    z-index: 10;
+}
+
+section {
+    position: relative;
+    z-index: 10;
+    min-height: fit-content;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.section-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Games Grid */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-3xl);
+}
+
+.game-card {
+    background: var(--color-glass);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+    transition: left var(--transition-slow);
+}
+
+.game-card:hover::before {
+    left: 100%;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-glow);
+    border-color: var(--color-primary);
+}
+
+.featured {
+    background: linear-gradient(135deg, var(--color-glass), rgba(131, 56, 236, 0.1));
+    border-color: var(--color-accent);
+}
+
+.featured-badge {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: var(--color-accent);
+    color: white;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.card-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-icon {
+    font-size: 2rem;
+    color: white;
+    z-index: 2;
+}
+
+.card-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.game-card:hover .card-glow {
+    opacity: 0.2;
+}
+
+.card-content {
+    margin-bottom: var(--space-lg);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+}
+
+.card-description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+    line-height: 1.6;
+}
+
+.card-tags {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.card-link:hover {
+    gap: var(--space-sm);
+    color: var(--color-secondary);
+}
+
+/* About Section */
+.about-section {
+    background: rgba(26, 26, 46, 0.3);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+}
+
+.about-text p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.tech-stack {
+    margin-top: var(--space-xl);
+}
+
+.stack-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    padding-bottom: var(--space-sm);
+    text-align: center;
+}
+
+.stack-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    border-radius: 2px;
+}
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+.tech-card {
+    background: var(--color-glass);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.tech-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.05), transparent);
+    transition: left var(--transition-slow);
+}
+
+.tech-card:hover::before {
+    left: 100%;
+}
+
+.tech-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
+}
+
+.tech-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    position: relative;
+    z-index: 2;
+}
+
+.tech-icon i {
+    font-size: 1.2rem;
+    color: white;
+}
+
+.tech-name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+    font-size: 0.9rem;
+}
+
+
+
+/* Tech card color variations */
+.tech-card[data-tech="html"] .tech-icon { background: linear-gradient(45deg, #e34f26, #f06529); }
+.tech-card[data-tech="css"] .tech-icon { background: linear-gradient(45deg, #1572b6, #33a9dc); }
+.tech-card[data-tech="js"] .tech-icon { background: linear-gradient(45deg, #f7df1e, #f0db4f); }
+.tech-card[data-tech="sass"] .tech-icon { background: linear-gradient(45deg, #cc6699, #bf4080); }
+.tech-card[data-tech="threejs"] .tech-icon { background: linear-gradient(45deg, #000000, #333333); }
+.tech-card[data-tech="gsap"] .tech-icon { background: linear-gradient(45deg, #88ce02, #8cc800); }
+.tech-card[data-tech="nodejs"] .tech-icon { background: linear-gradient(45deg, #339933, #68cc68); }
+.tech-card[data-tech="express"] .tech-icon { background: linear-gradient(45deg, #000000, #404040); }
+.tech-card[data-tech="git"] .tech-icon { background: linear-gradient(45deg, #f05032, #f14e32); }
+.tech-card[data-tech="ai"] .tech-icon { background: linear-gradient(45deg, var(--color-primary), var(--color-accent)); }
+
+.about-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--space-lg);
+    background: var(--color-glass);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+}
+
+.stat-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--space-xs);
+}
+
+.stat-label {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+/* Footer */
+.main-footer {
+    background: rgba(10, 10, 15, 0.3);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-xl) 0 var(--space-3xl) 0;
+    margin-top: var(--space-3xl);
+    position: relative;
+    z-index: 100;
+    width: 100%;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+.footer-link:hover {
+    color: var(--color-primary);
+    background: var(--color-glass);
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.dynamic-message {
+    margin-top: var(--space-sm);
+    font-style: italic;
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+    padding-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: var(--space-xl);
+    }
+    
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-toggle {
+        display: flex;
+        z-index: 1001;
+    }
+    
+    .nav-menu {
+        position: fixed;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-bg-primary);
+        border-top: 1px solid var(--color-border);
+        flex-direction: column;
+        padding: var(--space-lg);
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+        backdrop-filter: blur(15px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .light-theme .nav-menu {
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .nav-link {
+        padding: var(--space-md) 0;
+        font-size: 1.1rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    .nav-link:last-of-type {
+        border-bottom: none;
+        margin-bottom: var(--space-md);
+    }
+    
+    .theme-toggle {
+        align-self: center;
+    }
+    
+    .section-container {
+        padding: var(--space-xl) var(--space-md);
+    }
+    
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-md);
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+        max-width: 280px;
+        padding: var(--space-md) var(--space-lg);
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: var(--space-lg);
+        text-align: center;
+    }
+    
+    .floating-cards {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .game-card.mini {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8rem;
+    }
+    
+    .hero-container {
+        padding-top: var(--space-xl);
+    }
+    
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+        text-align: center;
+    }
+    
+    .about-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+        justify-content: center;
+    }
+    
+    .stat-item {
+        margin: 0;
+        padding: var(--space-md);
+    }
+    
+    .tech-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .game-card {
+        padding: var(--space-lg);
+    }
+    
+    .nav-container {
+        padding: var(--space-sm) var(--space-md);
+    }
+}
+
+/* Performance optimizations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+img, video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .scroll-indicator {
+        animation: none;
+    }
+    
+    .game-card.mini {
+        animation: none;
+    }
+}
+
+/* Focus styles */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    #three-bg, .loading-screen, .main-nav {
+        display: none;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
 }
