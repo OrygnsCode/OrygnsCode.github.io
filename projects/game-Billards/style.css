@@ -1,0 +1,585 @@
+
+/* Professional Billiards Game Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Header Styles */
+.game-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px solid #FFD700;
+    padding: 12px 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.game-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.title-main {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 
+        0 0 3px #FFD700,
+        0 0 6px #FFD700,
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+}
+
+.title-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: #FFFFFF;
+    margin-top: -5px;
+    letter-spacing: 1px;
+    text-shadow: 
+        0 0 2px #FFFFFF,
+        0 0 4px #FFFFFF;
+}
+
+.title-author {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    color: #CCCCCC;
+    margin-top: 2px;
+}
+
+.game-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #CCCCCC;
+    font-weight: 300;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 24px;
+    color: #FFD700;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+}
+
+/* Canvas Container */
+.canvas-container {
+    position: relative;
+    margin: 90px 20px 20px 20px;
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    background: #1a3009;
+}
+
+#gameCanvas {
+    display: block;
+    border-radius: 7px;
+    background: #228B22;
+}
+
+/* Power Meter */
+.power-meter-container {
+    position: absolute;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.power-meter {
+    width: 20px;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.power-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, #FF4444, #FFAA44, #44FF44);
+    transition: height 0.1s ease;
+    border-radius: 0 0 8px 8px;
+}
+
+.power-indicator {
+    position: absolute;
+    right: 25px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid #FFD700;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: bottom 0.1s ease;
+}
+
+.power-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFD700;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 2px;
+}
+
+/* Control Panel */
+.control-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    border-top: 2px solid #FFD700;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls-left,
+.controls-center,
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(145deg, #2c5364, #1a252f);
+    color: white;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background: linear-gradient(145deg, #FFD700, #FFA500);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+/* Cue Controls */
+.cue-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.control-group label {
+    font-size: 12px;
+    color: #CCCCCC;
+    font-weight: 300;
+}
+
+.slider {
+    width: 120px;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #FFD700;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #FFD700;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.spin-indicator {
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #2c5364, #1a252f);
+    border: 2px solid #FFD700;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    color: white;
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    color: #FFD700;
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.settings-group:last-child {
+    border-bottom: none;
+}
+
+.settings-group label {
+    font-weight: 500;
+    color: #CCCCCC;
+}
+
+.settings-group input,
+.settings-group select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    color: white;
+    padding: 5px 10px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal-btn.primary {
+    background: #FFD700;
+    color: #000;
+}
+
+.modal-btn.secondary {
+    background: transparent;
+    color: #FFD700;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+/* Toast Styles */
+.toast {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 350px;
+    color: white;
+    z-index: 1001;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-content h3 {
+    color: #FFD700;
+    margin-bottom: 10px;
+    font-family: 'Orbitron', monospace;
+}
+
+.toast-content ul {
+    list-style: none;
+    margin: 15px 0;
+    padding: 0;
+}
+
+.toast-content li {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: #FFD700;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.toast-close:hover {
+    background: #FFA500;
+}
+
+/* Mobile Orientation Notice */
+.orientation-notice {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    color: white;
+    text-align: center;
+}
+
+.orientation-content {
+    padding: 40px;
+    max-width: 400px;
+}
+
+.orientation-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: rotate 2s ease-in-out infinite;
+}
+
+.orientation-content h2 {
+    font-family: 'Orbitron', monospace;
+    color: #FFD700;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.orientation-content p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #CCCCCC;
+}
+
+@keyframes rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}
+
+/* Remove button icon spacing */
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 12px 20px;
+    background: linear-gradient(145deg, #2c5364, #1a252f);
+    color: white;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .canvas-container {
+        margin: 90px 10px 20px 10px;
+    }
+
+    .power-meter-container {
+        right: -50px;
+    }
+}
+
+@media (max-width: 768px) {
+    .title-main {
+        font-size: 24px;
+    }
+
+    .title-sub {
+        font-size: 14px;
+    }
+
+    .stat-value {
+        font-size: 18px;
+    }
+
+    .control-panel {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .controls-left,
+    .controls-center,
+    .controls-right {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .power-meter-container {
+        position: static;
+        transform: none;
+        flex-direction: row;
+        margin: 10px 0;
+    }
+
+    .power-meter {
+        width: 200px;
+        height: 20px;
+    }
+
+    .power-fill {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .toast {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+
+    /* Better mobile canvas sizing */
+    .canvas-container {
+        margin: 80px 5px 5px 5px;
+    }
+
+    #gameCanvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Improve mobile controls */
+    .control-btn {
+        padding: 15px 20px;
+        font-size: 16px;
+        min-width: 120px;
+    }
+
+    .slider {
+        width: 150px;
+    }
+}
