@@ -18,6 +18,7 @@
                     <span class="title-main">RACK 'EM</span>
                     <span class="title-sub">BILLIARDS</span>
                     <span class="title-author">by OrygnsCode</span>
+                    <span class="mobile-safari-notice" id="safariNotice">📱 Can't see bottom holes? Tap sidebar icon in address bar to hide toolbar</span>
                 </h1>
                 <div class="game-stats">
                     <div class="stat-item">
@@ -56,14 +57,21 @@
                 <button class="control-btn" id="newGameBtn">
                     New Game
                 </button>
+                <div class="cue-controls mobile-only">
+                    <div class="control-group">
+                        <label for="spinControl">Spin</label>
+                        <input type="range" id="spinControl" min="-5" max="5" step="0.5" value="0" class="slider">
+                        <span class="spin-indicator" id="spinIndicator">0</span>
+                    </div>
+                </div>
             </div>
 
             <div class="controls-center">
-                <div class="cue-controls">
+                <div class="cue-controls desktop-only">
                     <div class="control-group">
                         <label for="spinControl">English (Spin)</label>
-                        <input type="range" id="spinControl" min="-5" max="5" step="0.5" value="0" class="slider">
-                        <span class="spin-indicator" id="spinIndicator">0</span>
+                        <input type="range" id="spinControlDesktop" min="-5" max="5" step="0.5" value="0" class="slider">
+                        <span class="spin-indicator" id="spinIndicatorDesktop">0</span>
                     </div>
                 </div>
             </div>
@@ -112,14 +120,14 @@
     <!-- Instructions Toast -->
     <div class="toast show auto-show" id="instructionsToast">
         <div class="toast-content">
-            <h3>Professional Billiards</h3>
+            <h3>Rack 'Em Billiards</h3>
             <ul>
                 <li><strong>Aim:</strong> Move mouse around cue ball</li>
                 <li><strong>Shoot:</strong> Hold mouse button to charge power</li>
                 <li><strong>English:</strong> Use spin slider for advanced shots</li>
                 <li><strong>Goal:</strong> Sink all balls with perfect technique</li>
             </ul>
-            <button class="toast-close" onclick="closeToast()">Got it!</button>
+            <button class="toast-close" onclick="closeToast()" ontouchend="closeToast()">Got it!</button>
         </div>
     </div>
 
