@@ -1,1 +1,161 @@
 .
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AI Drum Machine | OrygnsCode</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Audio libraries -->
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+    
+    <!-- Magenta.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.23.1"></script>
+    
+    <!-- Utilities -->
+    <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
+    
+    <!-- WebMIDI -->
+    <script src="https://cdn.jsdelivr.net/npm/webmidi@2.5.3/webmidi.min.js"></script>
+    
+    <!-- 
+    SOUND FILES DIRECTORY STRUCTURE FOR GITHUB:
+    When uploading to GitHub, create a 'sounds' folder in this directory with these files:
+    
+    sounds/
+    ├── 808-kick-vh.mp3
+    ├── 808-kick-vm.mp3
+    ├── 808-kick-vl.mp3
+    ├── flares-snare-vh.mp3
+    ├── flares-snare-vm.mp3
+    ├── flares-snare-vl.mp3
+    ├── 808-hihat-vh.mp3
+    ├── 808-hihat-vm.mp3
+    ├── 808-hihat-vl.mp3
+    ├── 808-hihat-open-vh.mp3
+    ├── 808-hihat-open-vm.mp3
+    ├── 808-hihat-open-vl.mp3
+    ├── slamdam-tom-low-vh.mp3
+    ├── slamdam-tom-low-vm.mp3
+    ├── slamdam-tom-low-vl.mp3
+    ├── slamdam-tom-mid-vh.mp3
+    ├── slamdam-tom-mid-vm.mp3
+    ├── slamdam-tom-mid-vl.mp3
+    ├── slamdam-tom-high-vh.mp3
+    ├── slamdam-tom-high-vm.mp3
+    ├── slamdam-tom-high-vl.mp3
+    ├── 909-clap-vh.mp3
+    ├── 909-clap-vm.mp3
+    ├── 909-clap-vl.mp3
+    ├── 909-rim-vh.wav
+    ├── 909-rim-vm.wav
+    └── 909-rim-vl.wav
+    
+    The app will work with synthetic drum sounds until you add the actual samples.
+    -->
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading AI Drum Machine...</div>
+            <div class="loading-status">Initializing neural networks...</div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" style="display: none;">
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1>AI Drum Machine</h1>
+            <p>Create and generate drum patterns with AI assistance using neural networks</p>
+        </div>
+
+        <!-- Main Sequencer -->
+        <div class="sequencer">
+            <div class="legend">
+                <div class="drum-class">Kick</div>
+                <div class="drum-class">Snare</div>
+                <div class="drum-class">Hi-hat Closed</div>
+                <div class="drum-class">Hi-hat Open</div>
+                <div class="drum-class">Tom Low</div>
+                <div class="drum-class">Tom Mid</div>
+                <div class="drum-class">Tom High</div>
+                <div class="drum-class">Clap</div>
+                <div class="drum-class">Rim</div>
+            </div>
+            <div class="steps"></div>
+        </div>
+
+        <!-- Generate Button -->
+        <a class="regenerate btn-floating btn-large waves-effect waves-light pulse">
+            <i class="material-icons">refresh</i>
+        </a>
+
+        <!-- Controls Section -->
+        <div class="controls">
+            <div class="control">
+                <a class="playpause btn-floating btn-large waves-effect waves-light pulse">
+                    <i class="material-icons play-icon">play_arrow</i>
+                    <i class="material-icons pause-icon" style="display: none">pause</i>
+                </a>
+                <div class="control-label">Play/Pause</div>
+            </div>
+            
+            <div class="control">
+                <div class="input-field">
+                    <select id="pattern-length">
+                        <option>4</option>
+                        <option>8</option>
+                        <option selected>16</option>
+                        <option>32</option>
+                    </select>
+                    <div class="control-label">Pattern Length</div>
+                </div>
+            </div>
+            
+            <div class="control">
+                <div class="range-field">
+                    <input type="range" id="tempo" min="60" max="180" value="120" step="1">
+                    <div class="control-label">Tempo: <span id="tempo-value">120</span> BPM</div>
+                </div>
+            </div>
+            
+            <div class="control">
+                <div class="range-field">
+                    <input type="range" id="swing" min="0.5" max="0.7" value="0.55" step="0.05">
+                    <div class="control-label">Swing</div>
+                </div>
+            </div>
+            
+            <div class="control">
+                <div class="range-field">
+                    <input type="range" id="temperature" min="0.5" max="2" value="1.1" step="0.1">
+                    <div class="control-label">Temperature</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <p><strong>How it works:</strong> Create a seed pattern on the left side (pink area), then click generate to let AI continue your pattern.</p>
+            <p>Click drum cells to toggle beats. The AI will learn from your pattern and generate creative continuations.</p>
+            <p>Using neural networks for intelligent drum pattern generation with real-time audio synthesis.</p>
+        </div>
+    </div>
+
+    <!-- Back to Home Button -->
+    <a href="../../index.html" class="back-home-button">Back to OrygnsCode Home</a>
+
+    <!-- Status Indicator -->
+    <div class="status-indicator" id="status">Loading...</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
