@@ -494,9 +494,10 @@ async function attemptToLoadSamples(sampleBaseUrl) {
       snareLFO.start();
       logDebug('Snare panning recreated for samples');
 
-      // Replace synthetic drums with actual samples
-      logDebug('Creating Tone.Players for each drum kit piece');
-      drumKit = [
+      // Replace synthetic drums with actual samples, maintaining the same interface
+      logDebug('Creating sample-based drum kit with consistent interface');
+      
+      const samplePlayers = [
         // Kick
         new Tone.Players({
           high: `${sampleBaseUrl}/${samplePaths[0][0]}`,
@@ -552,6 +553,23 @@ async function attemptToLoadSamples(sampleBaseUrl) {
           low: `${sampleBaseUrl}/${samplePaths[8][2]}`
         }).connect(new Tone.Panner(0.5).connect(reverb))
       ];
+      
+      // Wrap each player with consistent interface
+      drumKit = samplePlayers.map((player, index) => ({
+        get: function(velocity) {
+          logDebug(`Getting sample player ${index} with velocity: ${velocity}`);
+          return {
+            start: (time) => {
+              try {
+                logDebug(`Starting sample player ${index} at time: ${time}`);
+                player.player(velocity).start(time);
+              } catch (error) {
+                logError(`Failed to start sample player ${index}`, error);
+              }
+            }
+          };
+        }
+      }));
       
       logInfo('✅ Actual drum samples loaded successfully');
       logDebug('Drum kit replaced with sample-based players');
