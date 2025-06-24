@@ -59,37 +59,63 @@ class OrygnsCodeApp {
         const navMenu = document.getElementById('nav-menu');
         const navLinks = document.querySelectorAll('.nav-link');
 
-        // Mobile menu toggle
+        // Mobile menu toggle with improved handling
         if (navToggle && navMenu) {
-            navToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navMenu.classList.toggle('active');
-                navToggle.classList.toggle('active');
+            const toggleMenu = (forceClose = false) => {
+                const isActive = navToggle.classList.contains('active');
+                
+                if (forceClose || isActive) {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                    document.body.style.overflow = '';
+                } else {
+                    navMenu.classList.add('active');
+                    navToggle.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent background scroll
+                }
 
                 // Animate hamburger menu
                 const spans = navToggle.querySelectorAll('span');
                 if (navToggle.classList.contains('active')) {
-                    gsap.to(spans[0], { rotation: 45, y: 6, duration: 0.3 });
+                    gsap.to(spans[0], { rotation: 45, y: 7, duration: 0.3, ease: 'power2.inOut' });
                     gsap.to(spans[1], { opacity: 0, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: -45, y: -6, duration: 0.3 });
+                    gsap.to(spans[2], { rotation: -45, y: -7, duration: 0.3, ease: 'power2.inOut' });
                 } else {
-                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
+                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
                     gsap.to(spans[1], { opacity: 1, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
+                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
+                }
+            };
+
+            navToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Close menu when clicking outside or on overlay
+            document.addEventListener('click', (e) => {
+                if (navMenu.classList.contains('active') && 
+                    !navMenu.contains(e.target) && 
+                    !navToggle.contains(e.target)) {
+                    toggleMenu(true);
                 }
             });
 
-            // Close menu when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
-                    navMenu.classList.remove('active');
-                    navToggle.classList.remove('active');
-                    const spans = navToggle.querySelectorAll('span');
-                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
-                    gsap.to(spans[1], { opacity: 1, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
+            // Close menu on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                    toggleMenu(true);
                 }
+            });
+
+            // Close menu when nav link is clicked
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        setTimeout(() => toggleMenu(true), 300);
+                    }
+                });
             });
         }
 
@@ -187,7 +213,7 @@ class OrygnsCodeApp {
             window.addEventListener('scroll', this.throttle(() => {
                 const scrolled = window.pageYOffset;
                 parallaxElements.forEach(element => {
-                    const speed = 0.1; // Reduced speed to prevent disappearing
+                    const speed = 0.05; // Further reduced for stability
                     if (element && scrolled < window.innerHeight) {
                         gsap.set(element, {
                             y: scrolled * speed
@@ -197,17 +223,68 @@ class OrygnsCodeApp {
             }, 16));
         }
 
-        // Navigation background on scroll
+        // Enhanced navigation scroll behavior
         const nav = document.querySelector('.main-nav');
+        let lastScrollY = 0;
+        let ticking = false;
+
         if (nav) {
-            window.addEventListener('scroll', this.throttle(() => {
-                if (window.scrollY > 100) {
+            const updateNav = () => {
+                const scrollY = window.pageYOffset;
+                const scrollDirection = scrollY > lastScrollY ? 'down' : 'up';
+                
+                if (scrollY > 50) {
                     nav.classList.add('scrolled');
                 } else {
                     nav.classList.remove('scrolled');
                 }
-            }, 16));
+
+                // Always keep nav visible but with different styles when scrolling
+                if (scrollY > 200) {
+                    nav.classList.add('minimized');
+                } else {
+                    nav.classList.remove('minimized');
+                }
+
+                lastScrollY = scrollY;
+                ticking = false;
+            };
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    requestAnimationFrame(updateNav);
+                    ticking = true;
+                }
+            });
         }
+
+        // Smooth scroll behavior improvements
+        this.initSmoothScrolling();
+    }
+
+    initSmoothScrolling() {
+        // Enhanced smooth scrolling for better mobile experience
+        const links = document.querySelectorAll('a[href^="#"]');
+        
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                if (href && href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    
+                    if (target) {
+                        const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                        const targetPosition = target.offsetTop - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
     }
 
     initDynamicMessages() {
@@ -265,7 +342,12 @@ class OrygnsCodeApp {
     }
 
     initParticleEffects() {
-        // Create cursor trail effect
+        // Skip particle effects on mobile for better performance
+        if (this.reducedParticleEffects || window.innerWidth <= 768) {
+            return;
+        }
+
+        // Create cursor trail effect for desktop only
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -293,11 +375,11 @@ class OrygnsCodeApp {
             particles.push({
                 x: x,
                 y: y,
-                size: Math.random() * 3 + 1,
+                size: Math.random() * 2 + 0.5,
                 opacity: 1,
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2,
-                life: 30
+                vx: (Math.random() - 0.5) * 1,
+                vy: (Math.random() - 0.5) * 1,
+                life: 20
             });
         };
 
@@ -308,7 +390,7 @@ class OrygnsCodeApp {
                 particle.x += particle.vx;
                 particle.y += particle.vy;
                 particle.opacity -= 1 / particle.life;
-                particle.size *= 0.98;
+                particle.size *= 0.99;
 
                 if (particle.opacity > 0) {
                     ctx.globalAlpha = particle.opacity;
@@ -328,7 +410,7 @@ class OrygnsCodeApp {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
 
-            if (Math.random() > 0.8) {
+            if (Math.random() > 0.9) { // Reduced frequency
                 createParticle(mouse.x, mouse.y);
             }
         });
@@ -354,21 +436,55 @@ class OrygnsCodeApp {
 
         images.forEach(img => imageObserver.observe(img));
 
-        // Debounce scroll events
-        let scrollTimeout;
-        const originalScrollHandler = window.onscroll;
-
-        window.onscroll = () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (originalScrollHandler) {
-                    originalScrollHandler();
-                }
-            }, 16); // ~60fps
-        };
+        // Mobile-specific optimizations
+        this.initMobileOptimizations();
 
         // Preload critical resources
         this.preloadResources();
+    }
+
+    initMobileOptimizations() {
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.innerWidth <= 768;
+
+        if (isMobile || isSmallScreen) {
+            document.body.classList.add('is-mobile');
+            
+            // Disable parallax on mobile for better performance
+            document.querySelectorAll('.floating-cards').forEach(element => {
+                element.style.transform = 'none';
+            });
+
+            // Reduce particle effects on mobile
+            this.reducedParticleEffects = true;
+
+            // Optimize touch interactions
+            document.addEventListener('touchstart', () => {}, { passive: true });
+            document.addEventListener('touchmove', () => {}, { passive: true });
+        }
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                // Recalculate viewport
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                
+                // Close mobile menu if open
+                const navMenu = document.getElementById('nav-menu');
+                const navToggle = document.getElementById('nav-toggle');
+                if (navMenu && navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }, 100);
+        });
+
+        // Set initial viewport height
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
 
     preloadResources() {
