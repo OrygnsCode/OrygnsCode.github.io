@@ -4,7 +4,12 @@ class OrygnsCodeApp {
         this.isLoaded = false;
         this.currentTheme = localStorage.getItem('theme') || 'dark';
 
-        this.init();
+        // Ensure DOM is ready before initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
 
     init() {
@@ -119,13 +124,15 @@ class OrygnsCodeApp {
             });
         }
 
-        // Smooth scrolling for nav links
+        // Smooth scrolling for nav links with improved reliability
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 const href = link.getAttribute('href');
 
                 if (href && href.startsWith('#')) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    
                     let targetId = href.substring(1);
                     
                     // Map navigation targets to correct section IDs
@@ -136,22 +143,26 @@ class OrygnsCodeApp {
                     const target = document.getElementById(targetId);
 
                     if (target) {
-                        const navHeight = document.querySelector('.main-nav').offsetHeight;
-                        const targetPosition = target.offsetTop - navHeight - 20;
+                        // Wait for any pending renders
+                        setTimeout(() => {
+                            const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                            const targetPosition = target.offsetTop - navHeight - 20;
 
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
+                            window.scrollTo({
+                                top: Math.max(0, targetPosition),
+                                behavior: 'smooth'
+                            });
 
-                        // Update active nav link immediately
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
+                            // Update active nav link immediately
+                            navLinks.forEach(l => l.classList.remove('active'));
+                            link.classList.add('active');
+                        }, 50);
 
                         // Close mobile menu
                         if (navMenu && navMenu.classList.contains('active')) {
                             navMenu.classList.remove('active');
                             navToggle.classList.remove('active');
+                            document.body.style.overflow = '';
                             const spans = navToggle.querySelectorAll('span');
                             gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
                             gsap.to(spans[1], { opacity: 1, duration: 0.2 });
@@ -283,6 +294,8 @@ class OrygnsCodeApp {
                 const href = link.getAttribute('href');
                 if (href && href !== '#') {
                     e.preventDefault();
+                    e.stopPropagation();
+                    
                     let targetId = href.substring(1);
                     
                     // Map targets to correct section IDs
@@ -293,13 +306,16 @@ class OrygnsCodeApp {
                     const target = document.getElementById(targetId);
                     
                     if (target) {
-                        const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                        const targetPosition = target.offsetTop - headerHeight - 20;
-                        
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
+                        // Wait for any pending renders
+                        setTimeout(() => {
+                            const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                            const targetPosition = target.offsetTop - headerHeight - 20;
+                            
+                            window.scrollTo({
+                                top: Math.max(0, targetPosition),
+                                behavior: 'smooth'
+                            });
+                        }, 50);
                     }
                 }
             });
@@ -336,24 +352,32 @@ class OrygnsCodeApp {
             let currentIndex = 0;
 
             const updateMessage = () => {
+                if (!messageElement || !document.body.contains(messageElement)) {
+                    return; // Stop if element is removed
+                }
+
                 gsap.to(messageElement, {
                     opacity: 0,
                     duration: 0.3,
                     onComplete: () => {
-                        messageElement.textContent = messages[currentIndex];
-                        currentIndex = (currentIndex + 1) % messages.length;
+                        if (messageElement && messages[currentIndex]) {
+                            messageElement.textContent = messages[currentIndex];
+                            currentIndex = (currentIndex + 1) % messages.length;
 
-                        gsap.to(messageElement, {
-                            opacity: 1,
-                            duration: 0.3
-                        });
+                            gsap.to(messageElement, {
+                                opacity: 1,
+                                duration: 0.3
+                            });
+                        }
                     }
                 });
             };
 
-            // Initial message
-            messageElement.textContent = messages[0];
-            currentIndex = 1;
+            // Initial message with safety check
+            if (messages[0]) {
+                messageElement.textContent = messages[0];
+                currentIndex = 1;
+            }
 
             // Update every 4 seconds
             setInterval(updateMessage, 4000);
@@ -544,9 +568,20 @@ class OrygnsCodeApp {
     }
 }
 
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    new OrygnsCodeApp();
-});
+// Initialize the application with proper timing
+let app;
+
+function initializeApp() {
+    if (!app) {
+        app = new OrygnsCodeApp();
+    }
+}
+
+// Multiple initialization points for reliability
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
 
 // Service Worker removed to prevent 404 errors
