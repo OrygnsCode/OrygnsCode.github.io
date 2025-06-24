@@ -126,7 +126,13 @@ class OrygnsCodeApp {
 
                 if (href && href.startsWith('#')) {
                     e.preventDefault();
-                    const targetId = href.substring(1);
+                    let targetId = href.substring(1);
+                    
+                    // Map navigation targets to correct section IDs
+                    if (targetId === 'hero') targetId = 'hero';
+                    if (targetId === 'games') targetId = 'games';
+                    if (targetId === 'about') targetId = 'about';
+                    
                     const target = document.getElementById(targetId);
 
                     if (target) {
@@ -183,7 +189,13 @@ class OrygnsCodeApp {
             });
 
             if (activeSection) {
-                const activeLink = document.querySelector(`.nav-link[href="#${activeSection.id}"]`);
+                // Map section IDs to navigation links
+                let linkHref = '#' + activeSection.id;
+                if (activeSection.id === 'games') linkHref = '#games';
+                if (activeSection.id === 'about') linkHref = '#about';
+                if (activeSection.id === 'hero') linkHref = '#hero';
+                
+                const activeLink = document.querySelector(`.nav-link[href="${linkHref}"]`);
                 navLinks.forEach(link => link.classList.remove('active'));
                 if (activeLink) {
                     activeLink.classList.add('active');
@@ -264,14 +276,21 @@ class OrygnsCodeApp {
 
     initSmoothScrolling() {
         // Enhanced smooth scrolling for better mobile experience
-        const links = document.querySelectorAll('a[href^="#"]');
+        const links = document.querySelectorAll('a[href^="#"]:not(.nav-link)');
         
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 const href = link.getAttribute('href');
                 if (href && href !== '#') {
                     e.preventDefault();
-                    const target = document.querySelector(href);
+                    let targetId = href.substring(1);
+                    
+                    // Map targets to correct section IDs
+                    if (targetId === 'hero') targetId = 'hero';
+                    if (targetId === 'games') targetId = 'games';
+                    if (targetId === 'about') targetId = 'about';
+                    
+                    const target = document.getElementById(targetId);
                     
                     if (target) {
                         const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
@@ -530,15 +549,4 @@ document.addEventListener('DOMContentLoaded', () => {
     new OrygnsCodeApp();
 });
 
-// Service Worker registration for PWA capabilities (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-                console.log('SW registration failed: ', registrationError);
-            });
-    });
-}
+// Service Worker removed to prevent 404 errors
