@@ -133,30 +133,23 @@ class OrygnsCodeApp {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    let targetId = href.substring(1);
-                    
-                    // Map navigation targets to correct section IDs
-                    if (targetId === 'hero') targetId = 'hero';
-                    if (targetId === 'games') targetId = 'games';
-                    if (targetId === 'about') targetId = 'about';
-                    
+                    const targetId = href.substring(1);
                     const target = document.getElementById(targetId);
 
                     if (target) {
-                        // Wait for any pending renders
-                        setTimeout(() => {
-                            const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                            const targetPosition = target.offsetTop - navHeight - 20;
+                        // Immediate scroll to target
+                        const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                        const targetPosition = target.offsetTop - navHeight - 20;
 
-                            window.scrollTo({
-                                top: Math.max(0, targetPosition),
-                                behavior: 'smooth'
-                            });
+                        // Force immediate scroll
+                        window.scrollTo({
+                            top: Math.max(0, targetPosition),
+                            behavior: 'smooth'
+                        });
 
-                            // Update active nav link immediately
-                            navLinks.forEach(l => l.classList.remove('active'));
-                            link.classList.add('active');
-                        }, 50);
+                        // Update active nav link immediately
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
 
                         // Close mobile menu
                         if (navMenu && navMenu.classList.contains('active')) {
@@ -168,6 +161,8 @@ class OrygnsCodeApp {
                             gsap.to(spans[1], { opacity: 1, duration: 0.2 });
                             gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
                         }
+                    } else {
+                        console.warn('Target element not found:', targetId);
                     }
                 }
             });
@@ -296,26 +291,27 @@ class OrygnsCodeApp {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    let targetId = href.substring(1);
-                    
-                    // Map targets to correct section IDs
-                    if (targetId === 'hero') targetId = 'hero';
-                    if (targetId === 'games') targetId = 'games';
-                    if (targetId === 'about') targetId = 'about';
-                    
+                    const targetId = href.substring(1);
                     const target = document.getElementById(targetId);
                     
                     if (target) {
-                        // Wait for any pending renders
-                        setTimeout(() => {
-                            const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                            const targetPosition = target.offsetTop - headerHeight - 20;
-                            
-                            window.scrollTo({
-                                top: Math.max(0, targetPosition),
-                                behavior: 'smooth'
-                            });
-                        }, 50);
+                        const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                        const targetPosition = target.offsetTop - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: Math.max(0, targetPosition),
+                            behavior: 'smooth'
+                        });
+                        
+                        // Update nav link active state
+                        const navLinks = document.querySelectorAll('.nav-link');
+                        navLinks.forEach(navLink => navLink.classList.remove('active'));
+                        const correspondingNavLink = document.querySelector(`.nav-link[href="#${targetId}"]`);
+                        if (correspondingNavLink) {
+                            correspondingNavLink.classList.add('active');
+                        }
+                    } else {
+                        console.warn('Target element not found:', targetId);
                     }
                 }
             });
@@ -584,4 +580,4 @@ if (document.readyState === 'loading') {
     initializeApp();
 }
 
-// Service Worker removed to prevent 404 errors
+// Service Worker completely removed - no registration code
