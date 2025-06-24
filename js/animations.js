@@ -129,94 +129,70 @@ class AnimationController {
             const icon = card.querySelector('.card-icon');
             const glow = card.querySelector('.card-glow');
             
-            card.addEventListener('mouseenter', () => {
-                gsap.to(card, {
-                    y: -10,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-                
-                if (icon) {
+            if (icon) {
+                card.addEventListener('mouseenter', () => {
                     gsap.to(icon, {
                         scale: 1.1,
-                        rotation: 10,
+                        rotation: 5,
                         duration: 0.3,
                         ease: 'power2.out'
                     });
-                }
-                
-                if (glow) {
-                    gsap.to(glow, {
-                        opacity: 0.3,
-                        duration: 0.3,
-                        ease: 'power2.out'
-                    });
-                }
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                gsap.to(card, {
-                    y: 0,
-                    duration: 0.3,
-                    ease: 'power2.out'
+                    
+                    if (glow) {
+                        gsap.to(glow, {
+                            opacity: 0.2,
+                            duration: 0.3
+                        });
+                    }
                 });
                 
-                if (icon) {
+                card.addEventListener('mouseleave', () => {
                     gsap.to(icon, {
                         scale: 1,
                         rotation: 0,
                         duration: 0.3,
                         ease: 'power2.out'
                     });
-                }
-                
-                if (glow) {
-                    gsap.to(glow, {
-                        opacity: 0,
+                    
+                    if (glow) {
+                        gsap.to(glow, {
+                            opacity: 0,
+                            duration: 0.3
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Tech cards hover effects
+        document.querySelectorAll('.tech-card').forEach(card => {
+            const icon = card.querySelector('.tech-icon');
+            
+            if (icon) {
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(icon, {
+                        scale: 1.2,
+                        rotationY: 10,
                         duration: 0.3,
                         ease: 'power2.out'
                     });
-                }
-            });
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(icon, {
+                        scale: 1,
+                        rotationY: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            }
         });
-        
-        // Button hover effects
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                gsap.to(btn, {
-                    scale: 1.05,
-                    duration: 0.2,
-                    ease: 'power2.out'
-                });
-            });
-            
-            btn.addEventListener('mouseleave', () => {
-                gsap.to(btn, {
-                    scale: 1,
-                    duration: 0.2,
-                    ease: 'power2.out'
-                });
-            });
-        });
-        
-        // Nav links hover effects
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('mouseenter', () => {
-                gsap.to(link, {
-                    y: -2,
-                    duration: 0.2,
-                    ease: 'power2.out'
-                });
-            });
-            
-            link.addEventListener('mouseleave', () => {
-                gsap.to(link, {
-                    y: 0,
-                    duration: 0.2,
-                    ease: 'power2.out'
-                });
-            });
-        });
+    }
+    
+    initPageTransitions() {
+        // Page transition effects
+        document.body.classList.add('page-loaded');
     }
     
     initPageTransitions() {
