@@ -1,4 +1,3 @@
-
 // GSAP Animations Controller
 class AnimationController {
     constructor() {
@@ -6,13 +5,13 @@ class AnimationController {
         this.initHoverAnimations();
         this.initPageTransitions();
     }
-    
+
     initScrollTriggers() {
         // Register ScrollTrigger plugin if available
         if (typeof ScrollTrigger !== 'undefined') {
             gsap.registerPlugin(ScrollTrigger);
         }
-        
+
         // Hero section animations
         gsap.timeline()
             .from('.hero-title .title-line', {
@@ -42,61 +41,61 @@ class AnimationController {
                 stagger: 0.2,
                 ease: 'back.out(1.7)'
             }, '-=0.8');
-        
+
         // Use fallback animations since ScrollTrigger plugin isn't properly loaded
         this.initFallbackScrollAnimations();
     }
-    
+
     initFallbackScrollAnimations() {
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
         };
-        
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const element = entry.target;
-                    
+
                     if (element.classList.contains('section-title')) {
                         gsap.fromTo(element, 
                             { opacity: 0, y: 50 },
                             { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
                         );
                     }
-                    
+
                     if (element.classList.contains('games-grid')) {
                         gsap.fromTo(Array.from(element.children),
                             { opacity: 0, y: 80 },
                             { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power2.out' }
                         );
                     }
-                    
+
                     if (element.classList.contains('about-stats')) {
                         gsap.fromTo(Array.from(element.children),
                             { opacity: 0, scale: 0.8 },
                             { opacity: 1, scale: 1, duration: 0.8, stagger: 0.2, ease: 'back.out(1.7)' }
                         );
                     }
-                    
+
                     observer.unobserve(element);
                 }
             });
         }, observerOptions);
-        
+
         // Observe elements when they exist
         setTimeout(() => {
             document.querySelectorAll('.section-title, .games-grid, .about-stats, .tech-stack').forEach(el => {
                 if (el) observer.observe(el);
             });
         }, 100);
-        
+
         // Tech stack animations
         const techObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const techCards = entry.target.querySelectorAll('.tech-card');
-                    
+
                     gsap.fromTo(techCards, 
                         { opacity: 0, y: 50, rotationY: -15 },
                         { 
@@ -108,27 +107,27 @@ class AnimationController {
                             ease: 'back.out(1.7)' 
                         }
                     );
-                    
-                    
-                    
+
+
+
                     techObserver.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.2 });
-        
+
         setTimeout(() => {
             document.querySelectorAll('.tech-stack').forEach(el => {
                 if (el) techObserver.observe(el);
             });
         }, 100);
     }
-    
+
     initHoverAnimations() {
         // Game cards hover effects
         document.querySelectorAll('.game-card').forEach(card => {
             const icon = card.querySelector('.card-icon');
             const glow = card.querySelector('.card-glow');
-            
+
             if (icon) {
                 card.addEventListener('mouseenter', () => {
                     gsap.to(icon, {
@@ -137,7 +136,7 @@ class AnimationController {
                         duration: 0.3,
                         ease: 'power2.out'
                     });
-                    
+
                     if (glow) {
                         gsap.to(glow, {
                             opacity: 0.2,
@@ -145,7 +144,7 @@ class AnimationController {
                         });
                     }
                 });
-                
+
                 card.addEventListener('mouseleave', () => {
                     gsap.to(icon, {
                         scale: 1,
@@ -153,7 +152,7 @@ class AnimationController {
                         duration: 0.3,
                         ease: 'power2.out'
                     });
-                    
+
                     if (glow) {
                         gsap.to(glow, {
                             opacity: 0,
@@ -163,11 +162,11 @@ class AnimationController {
                 });
             }
         });
-        
+
         // Tech cards hover effects
         document.querySelectorAll('.tech-card').forEach(card => {
             const icon = card.querySelector('.tech-icon');
-            
+
             if (icon) {
                 card.addEventListener('mouseenter', () => {
                     gsap.to(icon, {
@@ -177,7 +176,7 @@ class AnimationController {
                         ease: 'power2.out'
                     });
                 });
-                
+
                 card.addEventListener('mouseleave', () => {
                     gsap.to(icon, {
                         scale: 1,
@@ -189,30 +188,30 @@ class AnimationController {
             }
         });
     }
-    
+
     initPageTransitions() {
         // Page transition effects
         document.body.classList.add('page-loaded');
     }
-    
+
     initPageTransitions() {
         // Loading screen animation
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
-        
+
         if (loadingScreen && mainContent) {
             // Simulate loading progress
             this.animateLoading();
         }
     }
-    
+
     animateLoading() {
         const progressBar = document.querySelector('.loading-progress');
         const percentage = document.getElementById('loading-percentage');
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
         const loadingStatus = document.querySelector('.loading-status');
-        
+
         // Advanced loading stages with futuristic messages
         const loadingStages = [
             { progress: 12, message: "INITIALIZING QUANTUM CORE..." },
@@ -225,23 +224,23 @@ class AnimationController {
             { progress: 95, message: "ESTABLISHING REALITY ANCHOR..." },
             { progress: 100, message: "WELCOME TO THE NEXUS" }
         ];
-        
+
         let progress = 0;
         let currentStage = 0;
         const duration = 3500; // 3.5 seconds for more dramatic effect
         const interval = 60; // Smoother updates
-        
+
         // Minimal loading without complex effects
-        
+
         const updateProgress = () => {
             // Smooth progress with acceleration towards end
             const targetProgress = loadingStages[currentStage]?.progress || 100;
             const progressDiff = targetProgress - progress;
             const acceleration = Math.min(progressDiff * 0.1, 3);
             progress += acceleration + Math.random() * 0.5;
-            
+
             progress = Math.min(progress, 100);
-            
+
             // Update progress bar with smooth animation
             if (progressBar) {
                 gsap.to(progressBar, {
@@ -250,7 +249,7 @@ class AnimationController {
                     ease: 'power2.out'
                 });
             }
-            
+
             // Update percentage with counting animation
             if (percentage) {
                 gsap.to({ val: parseInt(percentage.textContent) || 0 }, {
@@ -258,11 +257,13 @@ class AnimationController {
                     duration: 0.5,
                     ease: 'power2.out',
                     onUpdate: function() {
-                        percentage.textContent = `${Math.floor(this.targets()[0].val)}%`;
+                        if (percentage && this.targets() && this.targets()[0]) {
+                            percentage.textContent = `${Math.floor(this.targets()[0].val)}%`;
+                        }
                     }
                 });
             }
-            
+
             // Update loading status message
             if (currentStage < loadingStages.length && progress >= loadingStages[currentStage].progress - 5) {
                 if (loadingStatus) {
@@ -281,25 +282,25 @@ class AnimationController {
                 }
                 currentStage++;
             }
-            
+
             if (progress >= 100) {
                 // Spectacular completion sequence
                 setTimeout(() => {
                     // Create completion burst effect
                     this.createCompletionBurst();
-                    
+
                     // Cinematic exit animation sequence
                     const tl = gsap.timeline();
-                    
+
                     // Phase 1: Simple logo scaling
-                    
+
                     // Phase 2: Logo transformation
                     tl.to('.logo-text', {
                         scale: 1.2,
                         duration: 1,
                         ease: 'power2.out'
                     })
-                    
+
                     // Phase 3: Progress bar completion surge
                     .to('.loading-progress', {
                         boxShadow: `
@@ -310,9 +311,9 @@ class AnimationController {
                         duration: 0.5,
                         ease: 'power2.out'
                     }, '-=0.4')
-                    
+
                     // Phase 4: Clean transition
-                    
+
                     // Phase 5: Final implosion and fade
                     .to('.loading-container', {
                         scale: 0.8,
@@ -331,7 +332,7 @@ class AnimationController {
                         onComplete: () => {
                             loadingScreen.style.display = 'none';
                             mainContent.classList.add('loaded');
-                            
+
                             // Dramatic reveal of main content
                             gsap.fromTo(mainContent, 
                                 { 
@@ -347,7 +348,7 @@ class AnimationController {
                                     ease: 'power2.out'
                                 }
                             );
-                            
+
                             // Trigger hero animations with enhanced timing
                             setTimeout(() => {
                                 this.initScrollTriggers();
@@ -359,29 +360,29 @@ class AnimationController {
                 setTimeout(updateProgress, interval);
             }
         };
-        
+
         updateProgress();
     }
-    
+
     createLoadingParticles() {
         const particleContainer = document.querySelector('.loading-particles');
         if (!particleContainer) return;
-        
+
         // Create 80 quantum particles with varying properties
         for (let i = 0; i < 80; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            
+
             // Random positioning across the screen
             particle.style.left = Math.random() * 100 + '%';
             particle.style.animationDelay = Math.random() * 10 + 's';
             particle.style.animationDuration = (6 + Math.random() * 8) + 's';
-            
+
             // Vary particle sizes for depth
             const size = 2 + Math.random() * 4;
             particle.style.width = size + 'px';
             particle.style.height = size + 'px';
-            
+
             // Add particle trail effect
             if (Math.random() > 0.7) {
                 particle.style.boxShadow = `
@@ -390,14 +391,14 @@ class AnimationController {
                     0 ${size * 2}px ${size * 4}px rgba(0,0,0,0.3)
                 `;
             }
-            
+
             particleContainer.appendChild(particle);
         }
-        
+
         // Create constellation connections
         this.createParticleConnections(particleContainer);
     }
-    
+
     createParticleConnections(container) {
         // Create dynamic connection lines between particles
         for (let i = 0; i < 15; i++) {
@@ -418,7 +419,7 @@ class AnimationController {
             `;
             container.appendChild(connection);
         }
-        
+
         // Add CSS for connection animation
         if (!document.getElementById('connection-styles')) {
             const style = document.createElement('style');
@@ -432,20 +433,20 @@ class AnimationController {
             document.head.appendChild(style);
         }
     }
-    
+
     createNeuralNetwork() {
         const networkContainer = document.querySelector('.loading-neural-network');
         if (!networkContainer) return;
-        
+
         // Create advanced neural network visualization
         for (let i = 0; i < 35; i++) {
             const line = document.createElement('div');
             line.className = 'neural-line';
-            
+
             const angle = Math.random() * 360;
             const length = 100 + Math.random() * 300;
             const thickness = 1 + Math.random() * 2;
-            
+
             line.style.cssText = `
                 top: ${Math.random() * 100}%;
                 left: ${Math.random() * 100}%;
@@ -457,10 +458,10 @@ class AnimationController {
                 transform-origin: left center;
                 border-radius: ${thickness}px;
             `;
-            
+
             networkContainer.appendChild(line);
         }
-        
+
         // Create neural nodes
         for (let i = 0; i < 25; i++) {
             const node = document.createElement('div');
@@ -481,7 +482,7 @@ class AnimationController {
             `;
             networkContainer.appendChild(node);
         }
-        
+
         // Add node pulse animation
         if (!document.getElementById('node-styles')) {
             const style = document.createElement('style');
@@ -503,7 +504,7 @@ class AnimationController {
             document.head.appendChild(style);
         }
     }
-    
+
     createCompletionBurst() {
         // Create dramatic completion effect
         const burst = document.createElement('div');
@@ -523,9 +524,9 @@ class AnimationController {
             z-index: 1000;
             pointer-events: none;
         `;
-        
+
         document.querySelector('.loading-container').appendChild(burst);
-        
+
         // Animate the burst
         gsap.to(burst, {
             width: '2000px',
@@ -537,13 +538,13 @@ class AnimationController {
                 burst.remove();
             }
         });
-        
+
         // Create radial particle explosion
         for (let i = 0; i < 30; i++) {
             const burstParticle = document.createElement('div');
             const angle = (i / 30) * Math.PI * 2;
             const distance = 100 + Math.random() * 200;
-            
+
             burstParticle.style.cssText = `
                 position: absolute;
                 top: 50%;
@@ -559,9 +560,9 @@ class AnimationController {
                 z-index: 999;
                 pointer-events: none;
             `;
-            
+
             document.querySelector('.loading-container').appendChild(burstParticle);
-            
+
             gsap.to(burstParticle, {
                 x: Math.cos(angle) * distance,
                 y: Math.sin(angle) * distance,
@@ -575,7 +576,7 @@ class AnimationController {
             });
         }
     }
-    
+
     // Utility method for page transitions
     pageTransition(callback) {
         const overlay = document.createElement('div');
@@ -589,16 +590,16 @@ class AnimationController {
             z-index: 9999;
             opacity: 0;
         `;
-        
+
         document.body.appendChild(overlay);
-        
+
         gsap.to(overlay, {
             opacity: 1,
             duration: 0.3,
             ease: 'power2.inOut',
             onComplete: () => {
                 if (callback) callback();
-                
+
                 gsap.to(overlay, {
                     opacity: 0,
                     duration: 0.3,
