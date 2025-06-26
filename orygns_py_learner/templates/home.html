@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - OrygnsPyLearner{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Welcome to OrygnsPyLearner!</h1>
+    <p>Your interactive journey to mastering Python starts here.</p>
+    <p><i class="fas fa-fire"></i> Current Streak: {{ user_progress.streak }}</p>
+    <a href="{{ url_for('level_selector_page') }}" class="btn btn-primary"><i class="fas fa-graduation-cap"></i> Start Learning</a>
+</div>
+
+<section class="mt-1">
+    <h2>About the Platform</h2>
+    <p>OrygnsPyLearner offers a gamified, hands-on coding experience with 15 progressive levels. Learn Python fundamentals from basic "Hello World" to functions, loops, and data structures. Our platform features:</p>
+    <ul>
+        <li>Interactive dark-themed code editor.</li>
+        <li>Immediate feedback and validation.</li>
+        <li>Detailed explanations and optional hints.</li>
+        <li>Streak tracking and completion badges.</li>
+    </ul>
+</section>
+{% endblock %}

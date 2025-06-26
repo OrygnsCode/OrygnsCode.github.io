@@ -1,0 +1,207 @@
+/* --- Global Resets and Base Styles --- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    background-color: #1a1a2e; /* Dark blue-ish background */
+    color: #e0e0e0; /* Light grey text */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #c0c0e0; /* Lighter text for headings */
+    margin-bottom: 0.75rem;
+}
+
+a {
+    color: #87CEFA; /* LightSkyBlue for links */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #add8e6; /* Lighter blue on hover */
+}
+
+ul {
+    list-style: none;
+}
+
+button, .btn {
+    background-color: #4a4e69; /* Muted purple/blue */
+    color: #f0f0f0;
+    border: 1px solid #6a6e89;
+    padding: 10px 18px;
+    border-radius: 6px; /* Semi-rounded edges */
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #5a5e79;
+    border-color: #7a7e99;
+}
+
+/* --- Header --- */
+header {
+    background-color: #161625; /* Slightly darker than body */
+    padding: 1rem 0;
+    border-bottom: 1px solid #2a2a3f;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e0e0e0;
+}
+
+header .nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+header .nav-links a {
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.progress-bar-container {
+    width: 200px; /* Adjust as needed */
+    height: 12px;
+    background-color: #2a2a3f;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0 20px; /* Spacing around progress bar */
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #87CEFA; /* LightSkyBlue */
+    width: 0%; /* Will be updated by JS */
+    transition: width 0.5s ease-in-out;
+    border-radius: 6px;
+}
+
+
+/* --- Main Content --- */
+main {
+    flex-grow: 1;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* --- Footer --- */
+footer {
+    background-color: #161625;
+    padding: 1.5rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #a0a0c0;
+    border-top: 1px solid #2a2a3f;
+}
+
+/* --- Utility Classes --- */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.p-1 { padding: 1rem; }
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    header .nav-links {
+        margin-top: 0.5rem;
+        gap: 1rem;
+    }
+
+    .progress-bar-container {
+        margin: 10px 0;
+    }
+
+    .container {
+        width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 15px;
+    }
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+
+    button, .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Code Blocks in Feedback --- */
+pre.code-block {
+    background-color: #1e1e30; /* Slightly different dark shade */
+    color: #d4d4d4;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #3a3a4f;
+    overflow-x: auto; /* Allow horizontal scrolling for long lines */
+    white-space: pre-wrap; /* Wrap text but preserve formatting */
+    word-break: break-all; /* Break long words/strings if necessary */
+    font-family: 'Roboto Mono', monospace; /* Monospaced font for code */
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Icon Adjustments --- */
+button i, .btn i, a i {
+    margin-right: 0.4em; /* Space between icon and text */
+}
+
+/* For icons that might appear alone or need specific alignment */
+.icon-only {
+    margin-right: 0;
+}
+
+.status i { /* Icons in level status text */
+    margin-right: 0.3em;
+}
+
+h3 i { /* Icons in headings like Hints */
+    margin-right: 0.3em;
+}

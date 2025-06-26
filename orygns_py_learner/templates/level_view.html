@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Level {{ level.id }}: {{ level.title }} - OrygnsPyLearner{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material-darker.min.css">
+    <style>
+        .level-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .instructions-panel {
+            flex: 1;
+            background-color: #252535; /* Slightly lighter than body for contrast */
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #3a3a4f;
+        }
+        .instructions-panel h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #4a4a5f;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .instructions-panel h3 {
+            margin-top: 1.5rem;
+            color: #b0b0d0;
+        }
+        .editor-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+        .CodeMirror {
+            border: 1px solid #3a3a4f;
+            border-radius: 6px;
+            height: 400px; /* Default height, can be adjusted */
+            font-size: 1rem; /* Ensure editor font size is readable */
+            flex-grow: 1;
+        }
+        .code-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .feedback-area {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #252535;
+            border-radius: 6px;
+            border: 1px solid #3a3a4f;
+            min-height: 100px;
+            white-space: pre-wrap; /* Preserve formatting of output/errors */
+        }
+        .feedback-area.correct {
+            border-left: 5px solid #4CAF50; /* Green for correct */
+            background-color: #2a3b2a;
+        }
+        .feedback-area.incorrect {
+            border-left: 5px solid #F44336; /* Red for incorrect */
+            background-color: #3b2a2a;
+        }
+        .feedback-area h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        .hints-section button {
+            margin-bottom: 0.5rem;
+        }
+        .hint-content {
+            background-color: #2c2c40;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 992px) {
+            .level-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="level-header text-center">
+    <h1>Level {{ level.id }}: {{ level.title }}</h1>
+</div>
+
+<div class="level-container">
+    <div class="instructions-panel">
+        <h2>Task</h2>
+        <p>{{ level.task | safe }}</p>
+
+        <h3>Educational Context</h3>
+        <p>{{ level.educational_context | safe }}</p>
+
+        {% if level.hints %}
+        <div class="hints-section mt-1">
+            <h3><i class="fas fa-lightbulb"></i> Hints</h3>
+            <button id="toggleHintsBtn" class="btn btn-sm"><i class="fas fa-eye"></i> Show Hints</button>
+            <div id="hintsContainer" style="display: none;">
+                {% for hint in level.hints %}
+                <div class="hint-content">{{ hint | safe }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="editor-panel">
+        <form id="codeSubmissionForm">
+            <input type="hidden" name="level_id" value="{{ level.id }}">
+            <textarea id="codeEditor" name="user_code">{{ level.initial_code }}</textarea>
+            <div class="code-actions">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-play"></i> Run Code</button>
+                <button type="button" id="resetCodeBtn" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset Code</button>
+            </div>
+        </form>
+
+        <div id="feedbackArea" class="feedback-area">
+            <h4>Output / Feedback:</h4>
+            <div id="feedbackContent">Run your code to see the output.</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/comment/comment.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+                lineNumbers: true,
+                mode: "python",
+                theme: "material-darker",
+                matchBrackets: true,
+                indentUnit: 4,
+                extraKeys: {
+                    "Ctrl-/": "toggleComment",
+                    "Tab": function(cm) {
+                        var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                        cm.replaceSelection(spaces);
+                    }
+                }
+            });
+
+            const toggleHintsBtn = document.getElementById('toggleHintsBtn');
+            const hintsContainer = document.getElementById('hintsContainer');
+            if (toggleHintsBtn) {
+                toggleHintsBtn.addEventListener('click', () => {
+                    if (hintsContainer.style.display === 'none') {
+                        hintsContainer.style.display = 'block';
+                        toggleHintsBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Hints';
+                    } else {
+                        hintsContainer.style.display = 'none';
+                        toggleHintsBtn.innerHTML = '<i class="fas fa-eye"></i> Show Hints';
+                    }
+                });
+            }
+
+            const resetCodeBtn = document.getElementById('resetCodeBtn');
+            if(resetCodeBtn) {
+                resetCodeBtn.addEventListener('click', () => {
+                    // Confirm before resetting (optional)
+                    // if (confirm("Are you sure you want to reset your code?")) {
+                        editor.setValue("{{ level.initial_code | escapejs }}");
+                    // }
+                });
+            }
+
+            const codeSubmissionForm = document.getElementById('codeSubmissionForm');
+            const feedbackArea = document.getElementById('feedbackArea');
+            const feedbackContent = document.getElementById('feedbackContent');
+
+            if (codeSubmissionForm) {
+                codeSubmissionForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    editor.save(); // Ensure the textarea is updated with CodeMirror content
+
+                    const formData = new FormData(this);
+                    const levelId = formData.get('level_id');
+                    const userCode = formData.get('user_code');
+
+                    feedbackContent.textContent = 'Running your code...';
+                    feedbackArea.className = 'feedback-area'; // Reset classes
+
+                    try {
+                        const response = await fetch("{{ url_for('submit_code_api') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                level_id: levelId,
+                                user_code: userCode
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ message: "Server error: Could not parse JSON response." }));
+                            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        feedbackContent.innerHTML = `<h4>Feedback:</h4><p>${result.message.replace(/\n/g, '<br>').replace(/```<br>/g, '<pre class="code-block">').replace(/<br>```/g, '</pre>')}</p>`;
+
+                        if (result.correct) {
+                            feedbackArea.classList.add('correct');
+                            // Optionally, update overall progress bar or other UI elements based on result.user_progress
+                            const overallProgressBar = document.getElementById('overallProgressBar');
+                            if (overallProgressBar && result.user_progress && result.user_progress.completed_levels) {
+                                const totalLevels = {{ levels_data | length }}; // Get total number of levels
+                                const completedCount = result.user_progress.completed_levels.length;
+                                if (totalLevels > 0) {
+                                    const progressPercentage = (completedCount / totalLevels) * 100;
+                                    overallProgressBar.style.width = progressPercentage + '%';
+                                }
+                            }
+
+                            // Check if there's a next level and add a "Next Level" button
+                            const currentLevelId = parseInt(levelId);
+                            const nextLevelId = currentLevelId + 1;
+                            // We need to know if the next level exists and is unlocked.
+                            // This info isn't directly in the API response for submit_code.
+                            // For simplicity, we'll check against levels_data available to the template.
+                            // A more robust way might be a dedicated API endpoint or enhancing submit_code response.
+
+                            let nextLevelUnlocked = false;
+                            let nextLevelExists = false;
+                            {% for l_data in levels_data %}
+                                if ({{ l_data.id }} === nextLevelId) {
+                                    nextLevelExists = true;
+                                    if ({{ l_data.unlocked | lower }}) { // Ensure JS boolean
+                                        nextLevelUnlocked = true;
+                                    }
+                                }
+                            {% endfor %}
+
+                            if (nextLevelExists && nextLevelUnlocked) {
+                                const nextLevelButton = document.createElement('a');
+                                nextLevelButton.href = "{{ url_for('get_level_page', level_id=0) }}".replace('0', nextLevelId.toString());
+                                nextLevelButton.className = 'btn btn-primary mt-1';
+                                nextLevelButton.innerHTML = '<i class="fas fa-arrow-right"></i> Next Level';
+                                // feedbackContent.appendChild(document.createElement('br'));
+                                feedbackContent.appendChild(nextLevelButton);
+                            } else {
+                                const allLevelsCompleteMsg = document.createElement('p');
+                                if (!nextLevelExists && currentLevelId === {{ levels_data | length }}){
+                                     allLevelsCompleteMsg.innerHTML = "<i class='fas fa-check-circle'></i> Congratulations! You've completed all available levels!";
+                                     feedbackContent.appendChild(allLevelsCompleteMsg);
+                                }
+                            }
+
+                        } else {
+                            feedbackArea.classList.add('incorrect');
+                            if (result.error) {
+                                // Error is already part of the message from backend
+                            } else if (result.output !== null && result.expected_output) {
+                                // The backend now includes this in the message, but we could format it differently if desired.
+                            }
+                        }
+
+                    } catch (error) {
+                        feedbackContent.textContent = `Error submitting code: ${error.message}`;
+                        feedbackArea.classList.add('incorrect');
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

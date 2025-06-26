@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Select Level - OrygnsPyLearner{% endblock %}
+
+{% block head_extra %}
+<style>
+    .level-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .level-card {
+        background-color: #2a2a3f;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #3a3a4f;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .level-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .level-card h3 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        color: #c0c0e0;
+    }
+    .level-card p {
+        font-size: 0.9rem;
+        color: #a0a0c0;
+        margin-bottom: 1rem;
+    }
+    .level-card .status {
+        font-weight: bold;
+    }
+    .level-card.completed {
+        border-left: 5px solid #4CAF50; /* Green for completed */
+    }
+    .level-card.unlocked {
+        border-left: 5px solid #87CEFA; /* LightSkyBlue for unlocked but not completed */
+    }
+    .level-card.locked {
+        border-left: 5px solid #555; /* Grey for locked */
+        opacity: 0.7;
+    }
+    .level-card.locked a {
+        pointer-events: none;
+        color: #777;
+    }
+    .level-card a {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #4a4e69;
+        color: #f0f0f0;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    .level-card a:hover {
+        background-color: #5a5e79;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Choose Your Level</h1>
+    <p>Select a level to start or continue your Python learning journey.</p>
+</div>
+
+<div class="level-grid">
+    {% for level in levels_data %}
+        {% set card_class = 'locked' %}
+        {% if level.completed %}
+            {% set card_class = 'completed' %}
+        {% elif level.unlocked %}
+            {% set card_class = 'unlocked' %}
+        {% endif %}
+
+        <div class="level-card {{ card_class }}">
+            <h3>Level {{ level.id }}: {{ level.title }}</h3>
+            {% if level.completed %}
+                <p class="status" style="color: #4CAF50;"><i class="fas fa-check-circle"></i> Completed</p>
+            {% elif level.unlocked %}
+                <p class="status" style="color: #87CEFA;"><i class="fas fa-play-circle"></i> Unlocked</p>
+            {% else %}
+                <p class="status" style="color: #999;"><i class="fas fa-lock"></i> Locked</p>
+            {% endif %}
+
+            {% if level.unlocked %}
+                <a href="{{ url_for('get_level_page', level_id=level.id) }}" class="btn btn-sm"><i class="fas fa-arrow-right"></i> Go to Level</a>
+            {% else %}
+                <a href="#" class="btn btn-sm" disabled><i class="fas fa-lock"></i> Locked</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>No levels available yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}
