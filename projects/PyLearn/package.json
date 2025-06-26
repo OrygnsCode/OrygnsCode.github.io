@@ -14,10 +14,15 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+<<<<<<< feat/pylearn-initial-setup
     "framer-motion": "^12.19.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
+=======
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+>>>>>>> main
     "react-scripts": "^5.0.1"
   },
   "devDependencies": {
