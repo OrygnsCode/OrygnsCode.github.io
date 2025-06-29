@@ -15,6 +15,7 @@ class OrygnsCodeApp {
     init() {
         this.initTheme();
         this.initNavigation();
+        this.initSmoothScrolling();
         this.initScrollEffects();
         this.initDynamicMessages();
         this.initParticleEffects();
@@ -64,6 +65,78 @@ class OrygnsCodeApp {
     initNavigation() {
         // Handle mobile menu toggle
         this.setupMobileMenu();
+        // Handle navigation link active states
+        this.handleNavActiveStates();
+    }
+
+    initSmoothScrolling() {
+        // Handle smooth scrolling for navigation links
+        const navLinks = document.querySelectorAll('.nav-link[data-section]');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('data-section');
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    // Close mobile menu if open
+                    this.closeMobileMenu();
+                    
+                    // Smooth scroll to target
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    // Update active state
+                    this.updateActiveNavLink(targetId);
+                } else {
+                    console.warn('Target element not found:', targetId);
+                }
+            });
+        });
+    }
+
+    handleNavActiveStates() {
+        // Update active navigation link based on scroll position
+        const sections = document.querySelectorAll('section[id], .hero-section');
+        const navLinks = document.querySelectorAll('.nav-link[data-section]');
+
+        if (sections.length === 0 || navLinks.length === 0) return;
+
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '-80px 0px -50% 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id;
+                    this.updateActiveNavLink(sectionId);
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            if (section.id) {
+                observer.observe(section);
+            }
+        });
+    }
+
+    updateActiveNavLink(activeId) {
+        const navLinks = document.querySelectorAll('.nav-link[data-section]');
+        
+        navLinks.forEach(link => {
+            const targetId = link.getAttribute('data-section');
+            if (targetId === activeId) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
     }
 
     setupMobileMenu() {
@@ -156,12 +229,14 @@ class OrygnsCodeApp {
 
         // Enhanced navigation scroll behavior
         const nav = document.querySelector('.main-nav');
+        const heroSection = document.querySelector('.hero-section');
         let lastScrollY = 0;
         let ticking = false;
 
-        if (nav) {
+        if (nav && heroSection) {
             const updateNav = () => {
                 const scrollY = window.pageYOffset;
+                const heroHeight = heroSection.offsetHeight;
 
                 if (scrollY > 50) {
                     nav.classList.add('scrolled');
@@ -169,7 +244,8 @@ class OrygnsCodeApp {
                     nav.classList.remove('scrolled');
                 }
 
-                if (scrollY > 200) {
+                // Show minimized nav when scrolled past hero section
+                if (scrollY > heroHeight - 100) {
                     nav.classList.add('minimized');
                 } else {
                     nav.classList.remove('minimized');
