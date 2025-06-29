@@ -48,289 +48,103 @@ class OrygnsCodeApp {
                 }));
 
                 // Animate theme toggle
-                gsap.to(themeToggle, {
-                    scale: 0.9,
-                    duration: 0.1,
-                    yoyo: true,
-                    repeat: 1,
-                    ease: 'power2.inOut'
-                });
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(themeToggle, {
+                        scale: 0.9,
+                        duration: 0.1,
+                        yoyo: true,
+                        repeat: 1,
+                        ease: 'power2.inOut'
+                    });
+                }
             });
         }
     }
 
     initNavigation() {
-        const navToggle = document.getElementById('nav-toggle');
-        const navMenu = document.getElementById('nav-menu');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        // Mobile menu toggle with improved handling
-        if (navToggle && navMenu) {
-            const toggleMenu = (forceClose = false) => {
-                const isActive = navToggle.classList.contains('active');
-                
-                if (forceClose || isActive) {
-                    navMenu.classList.remove('active');
-                    navToggle.classList.remove('active');
-                    document.body.style.overflow = '';
-                } else {
-                    navMenu.classList.add('active');
-                    navToggle.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Prevent background scroll
-                }
-
-                // Animate hamburger menu
-                const spans = navToggle.querySelectorAll('span');
-                if (navToggle.classList.contains('active')) {
-                    gsap.to(spans[0], { rotation: 45, y: 7, duration: 0.3, ease: 'power2.inOut' });
-                    gsap.to(spans[1], { opacity: 0, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: -45, y: -7, duration: 0.3, ease: 'power2.inOut' });
-                } else {
-                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
-                    gsap.to(spans[1], { opacity: 1, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
-                }
-            };
-
-            navToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleMenu();
-            });
-
-            // Close menu when clicking outside or on overlay
-            document.addEventListener('click', (e) => {
-                if (navMenu.classList.contains('active') && 
-                    !navMenu.contains(e.target) && 
-                    !navToggle.contains(e.target)) {
-                    toggleMenu(true);
-                }
-            });
-
-            // Close menu on escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-                    toggleMenu(true);
-                }
-            });
-
-            // Close menu when nav link is clicked
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth <= 768) {
-                        setTimeout(() => toggleMenu(true), 300);
-                    }
-                });
-            });
-        }
-
-        // Smooth scrolling for nav links with improved reliability
-        navLinks.forEach(link => {
-            link.addEventListener('click', this.handleNavLinkClick.bind(this));
-        });
-
-        // Update active nav link on scroll
-        this.initScrollSpy();
+        // Handle mobile menu toggle
+        this.setupMobileMenu();
     }
 
-    handleNavLinkClick(e) {
-        const link = e.target.closest('.nav-link');
-        if (!link) return;
+    setupMobileMenu() {
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
 
-        const href = link.getAttribute('href');
-        if (href && href.startsWith('#')) {
+        if (!navToggle || !navMenu) return;
+
+        navToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            const targetId = href.substring(1);
-            const target = document.getElementById(targetId);
+            const isActive = navMenu.classList.contains('active');
 
-            if (target) {
-                const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                // Adjust target position to account for fixed header and add some padding
-                const targetPosition = target.offsetTop - navHeight - 20; // 20px padding
-
-                window.scrollTo({
-                    top: Math.max(0, targetPosition),
-                    behavior: 'smooth'
-                });
-
-                // Update active nav link
-                const navLinks = document.querySelectorAll('.nav-link');
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-
-                // Close mobile menu if open
-                const navMenu = document.getElementById('nav-menu');
-                const navToggle = document.getElementById('nav-toggle');
-                if (navMenu && navMenu.classList.contains('active')) {
-                    navMenu.classList.remove('active');
-                    navToggle.classList.remove('active');
-                    document.body.style.overflow = '';
-                    const spans = navToggle.querySelectorAll('span');
-                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
-                    gsap.to(spans[1], { opacity: 1, duration: 0.2 });
-                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
-                }
+            if (isActive) {
+                navMenu.classList.remove('active');
+                navToggle.classList.remove('active');
+                document.body.style.overflow = '';
             } else {
-                console.warn('Target element not found:', targetId);
+                navMenu.classList.add('active');
+                navToggle.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
+
+            // Animate hamburger menu
+            this.animateHamburger(navToggle, !isActive);
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (navMenu.classList.contains('active') && 
+                !navMenu.contains(e.target) && 
+                !navToggle.contains(e.target)) {
+                this.closeMobileMenu();
+            }
+        });
+
+        // Close menu on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                this.closeMobileMenu();
+            }
+        });
+    }
+
+    closeMobileMenu() {
+        const navMenu = document.getElementById('nav-menu');
+        const navToggle = document.getElementById('nav-toggle');
+
+        if (navMenu && navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            if (navToggle) navToggle.classList.remove('active');
+            document.body.style.overflow = '';
+            if (navToggle) this.animateHamburger(navToggle, false);
         }
     }
 
-    initScrollSpy() {
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-
-        if (sections.length === 0 || navLinks.length === 0) return;
-
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '-80px 0px -80px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            let activeSection = null;
-            let maxRatio = 0;
-
-            entries.forEach(entry => {
-                if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-                    maxRatio = entry.intersectionRatio;
-                    activeSection = entry.target;
-                }
-            });
-
-            if (activeSection) {
-                // Map section IDs to navigation links
-                let linkHref = '#' + activeSection.id;
-                // Explicitly handle common IDs for clarity, though not strictly necessary
-                if (activeSection.id === 'games') linkHref = '#games';
-                if (activeSection.id === 'about') linkHref = '#about';
-                if (activeSection.id === 'hero') linkHref = '#hero';
-
-                const activeLink = document.querySelector(`.nav-link[href="${linkHref}"]`);
-
-                // Only update if the active link is different to avoid unnecessary class toggles
-                if (activeLink && !activeLink.classList.contains('active')) {
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
-                }
+    animateHamburger(navToggle, isActive) {
+        const spans = navToggle.querySelectorAll('span');
+        if (spans.length >= 3 && typeof gsap !== 'undefined') {
+            if (isActive) {
+                gsap.to(spans[0], { rotation: 45, y: 7, duration: 0.3, ease: 'power2.inOut' });
+                gsap.to(spans[1], { opacity: 0, duration: 0.2 });
+                gsap.to(spans[2], { rotation: -45, y: -7, duration: 0.3, ease: 'power2.inOut' });
+            } else {
+                gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
+                gsap.to(spans[1], { opacity: 1, duration: 0.2 });
+                gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3, ease: 'power2.inOut' });
             }
-        }, observerOptions);
-
-        sections.forEach(section => {
-            if (section) observer.observe(section);
-        });
-
-        // Handle scroll to top case
-        // Use Intersection Observer for the hero section instead of scroll listener
-        const heroSection = document.getElementById('hero');
-        if (heroSection) {
-            const heroObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const homeLink = document.querySelector('.nav-link[href="#hero"]');
-                    if (homeLink) {
-                        if (entry.isIntersecting) {
-                            // Only add active class if no other link is active or hero is the most visible
-                             const activeLink = document.querySelector('.nav-link.active');
-                             if (!activeLink || activeLink.getAttribute('href') === '#hero' || entry.intersectionRatio > 0.5) {
-                                 navLinks.forEach(link => link.classList.remove('active'));
-                                 homeLink.classList.add('active');
-                             }
-                        } else {
-                             // Remove active class if hero is no longer visible, unless another link is already active
-                             const activeLink = document.querySelector('.nav-link.active');
-                             if (activeLink && activeLink.getAttribute('href') === '#hero') {
-                                  // Check if any other section is currently intersecting significantly
-                                  let anotherSectionIsVisible = false;
-                                  sections.forEach(section => {
-                                      if (section.id !== 'hero') {
-                                          const sectionEntry = observer.takeRecords().find(record => record.target === section);
-                                          if (sectionEntry && sectionEntry.isIntersecting && sectionEntry.intersectionRatio > 0.1) { // Lower threshold
-                                              anotherSectionIsVisible = true;
-                                          }
-                                      }
-                                  });
-
-                                  if (!anotherSectionIsVisible) {
-                                      // If no other significant section is visible, keep hero active or find the closest one
-                                      // This is a complex edge case, keeping hero active might be the simplest good behavior
-                                      homeLink.classList.add('active'); // Re-add if needed based on scroll position logic
-                                  } else {
-                                      homeLink.classList.remove('active');
-                                  }
-                             }
-                        }
-                    }
-                });
-            }, {
-                threshold: 0.1, // Lower threshold for detecting the hero section start
-                rootMargin: '-10px 0px 0px 0px' // Adjust margin
-            });
-            heroObserver.observe(heroSection);
         }
-    }
-
-    initScrollSpy() {
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-
-        if (sections.length === 0 || navLinks.length === 0) return;
-
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '-80px 0px -80px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            let activeSection = null;
-            let maxRatio = 0;
-
-            entries.forEach(entry => {
-                if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-                    maxRatio = entry.intersectionRatio;
-                    activeSection = entry.target;
-                }
-            });
-
-            if (activeSection) {
-                // Map section IDs to navigation links
-                let linkHref = '#' + activeSection.id;
-                if (activeSection.id === 'games') linkHref = '#games';
-                if (activeSection.id === 'about') linkHref = '#about';
-                if (activeSection.id === 'hero') linkHref = '#hero';
-                
-                const activeLink = document.querySelector(`.nav-link[href="${linkHref}"]`);
-                navLinks.forEach(link => link.classList.remove('active'));
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-            }
-        }, observerOptions);
-
-        sections.forEach(section => {
-            if (section) observer.observe(section);
-        });
-
-        // Handle scroll to top case
-        window.addEventListener('scroll', this.throttle(() => {
-            if (window.scrollY < 100) {
-                navLinks.forEach(link => link.classList.remove('active'));
-                const homeLink = document.querySelector('.nav-link[href="#hero"]');
-                if (homeLink) homeLink.classList.add('active');
-            }
-        }, 100));
     }
 
     initScrollEffects() {
-        // Parallax effect for hero section (reduced to prevent issues)
+        // Parallax effect for hero section
         const parallaxElements = document.querySelectorAll('.floating-cards');
 
-        if (parallaxElements.length > 0) {
+        if (parallaxElements.length > 0 && typeof gsap !== 'undefined') {
             window.addEventListener('scroll', this.throttle(() => {
                 const scrolled = window.pageYOffset;
                 parallaxElements.forEach(element => {
-                    const speed = 0.05; // Further reduced for stability
+                    const speed = 0.05;
                     if (element && scrolled < window.innerHeight) {
                         gsap.set(element, {
                             y: scrolled * speed
@@ -348,15 +162,13 @@ class OrygnsCodeApp {
         if (nav) {
             const updateNav = () => {
                 const scrollY = window.pageYOffset;
-                const scrollDirection = scrollY > lastScrollY ? 'down' : 'up';
-                
+
                 if (scrollY > 50) {
                     nav.classList.add('scrolled');
                 } else {
                     nav.classList.remove('scrolled');
                 }
 
-                // Always keep nav visible but with different styles when scrolling
                 if (scrollY > 200) {
                     nav.classList.add('minimized');
                 } else {
@@ -374,15 +186,6 @@ class OrygnsCodeApp {
                 }
             });
         }
-
-        // Smooth scroll behavior improvements
-        this.initSmoothScrolling();
-
-        // Re-use handleNavLinkClick for any other internal hash links
-        const internalLinks = document.querySelectorAll('a[href^="#"]:not(.nav-link)');
-        internalLinks.forEach(link => {
-            link.addEventListener('click', this.handleNavLinkClick.bind(this));
-        });
     }
 
     initDynamicMessages() {
@@ -416,44 +219,51 @@ class OrygnsCodeApp {
 
             const updateMessage = () => {
                 if (!messageElement || !document.body.contains(messageElement)) {
-                    return; // Stop if element is removed
+                    return;
                 }
 
-                gsap.to(messageElement, {
-                    opacity: 0,
-                    duration: 0.3,
-                    onComplete: () => {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(messageElement, {
+                        opacity: 0,
+                        duration: 0.3,
+                        onComplete: () => {
+                            if (messageElement && messages[currentIndex]) {
+                                messageElement.textContent = messages[currentIndex];
+                                currentIndex = (currentIndex + 1) % messages.length;
+
+                                gsap.to(messageElement, {
+                                    opacity: 1,
+                                    duration: 0.3
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    messageElement.style.opacity = '0';
+                    setTimeout(() => {
                         if (messageElement && messages[currentIndex]) {
                             messageElement.textContent = messages[currentIndex];
                             currentIndex = (currentIndex + 1) % messages.length;
-
-                            gsap.to(messageElement, {
-                                opacity: 1,
-                                duration: 0.3
-                            });
+                            messageElement.style.opacity = '1';
                         }
-                    }
-                });
+                    }, 300);
+                }
             };
 
-            // Initial message with safety check
             if (messages[0]) {
                 messageElement.textContent = messages[0];
                 currentIndex = 1;
             }
 
-            // Update every 4 seconds
             setInterval(updateMessage, 4000);
         }
     }
 
     initParticleEffects() {
-        // Skip particle effects on mobile for better performance
         if (this.reducedParticleEffects || window.innerWidth <= 768) {
             return;
         }
 
-        // Create cursor trail effect for desktop only
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -516,7 +326,7 @@ class OrygnsCodeApp {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
 
-            if (Math.random() > 0.9) { // Reduced frequency
+            if (Math.random() > 0.9) {
                 createParticle(mouse.x, mouse.y);
             }
         });
@@ -527,7 +337,6 @@ class OrygnsCodeApp {
     }
 
     initPerformanceOptimizations() {
-        // Lazy load images
         const images = document.querySelectorAll('img[data-src]');
         const imageObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -542,69 +351,48 @@ class OrygnsCodeApp {
 
         images.forEach(img => imageObserver.observe(img));
 
-        // Mobile-specific optimizations
         this.initMobileOptimizations();
-
-        // Preload critical resources
         this.preloadResources();
     }
 
     initMobileOptimizations() {
-        // Detect mobile device
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const isSmallScreen = window.innerWidth <= 768;
 
         if (isMobile || isSmallScreen) {
             document.body.classList.add('is-mobile');
-            
-            // Disable parallax on mobile for better performance
+
             document.querySelectorAll('.floating-cards').forEach(element => {
                 element.style.transform = 'none';
             });
 
-            // Reduce particle effects on mobile
             this.reducedParticleEffects = true;
 
-            // Optimize touch interactions
             document.addEventListener('touchstart', () => {}, { passive: true });
             document.addEventListener('touchmove', () => {}, { passive: true });
         }
 
-        // Handle orientation changes
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
-                // Recalculate viewport
                 const vh = window.innerHeight * 0.01;
                 document.documentElement.style.setProperty('--vh', `${vh}px`);
-                
-                // Close mobile menu if open
-                const navMenu = document.getElementById('nav-menu');
-                const navToggle = document.getElementById('nav-toggle');
-                if (navMenu && navMenu.classList.contains('active')) {
-                    navMenu.classList.remove('active');
-                    navToggle.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
+
+                this.closeMobileMenu();
             }, 100);
         });
 
-        // Set initial viewport height
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
 
     preloadResources() {
-        const criticalImages = [
-            // Add any critical images here
-        ];
-
+        const criticalImages = [];
         criticalImages.forEach(src => {
             const img = new Image();
             img.src = src;
         });
     }
 
-    // Utility methods
     debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -631,7 +419,7 @@ class OrygnsCodeApp {
     }
 }
 
-// Initialize the application with proper timing
+// Initialize the application
 let app;
 
 function initializeApp() {
@@ -640,11 +428,8 @@ function initializeApp() {
     }
 }
 
-// Multiple initialization points for reliability
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
     initializeApp();
 }
-
-// Service Worker completely removed - no registration code
