@@ -126,50 +126,149 @@ class OrygnsCodeApp {
 
         // Smooth scrolling for nav links with improved reliability
         navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href');
-
-                if (href && href.startsWith('#')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const targetId = href.substring(1);
-                    const target = document.getElementById(targetId);
-
-                    if (target) {
-                        // Immediate scroll to target
-                        const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                        const targetPosition = target.offsetTop - navHeight - 20;
-
-                        // Force immediate scroll
-                        window.scrollTo({
-                            top: Math.max(0, targetPosition),
-                            behavior: 'smooth'
-                        });
-
-                        // Update active nav link immediately
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
-
-                        // Close mobile menu
-                        if (navMenu && navMenu.classList.contains('active')) {
-                            navMenu.classList.remove('active');
-                            navToggle.classList.remove('active');
-                            document.body.style.overflow = '';
-                            const spans = navToggle.querySelectorAll('span');
-                            gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
-                            gsap.to(spans[1], { opacity: 1, duration: 0.2 });
-                            gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
-                        }
-                    } else {
-                        console.warn('Target element not found:', targetId);
-                    }
-                }
-            });
+            link.addEventListener('click', this.handleNavLinkClick.bind(this));
         });
 
         // Update active nav link on scroll
         this.initScrollSpy();
+    }
+
+    handleNavLinkClick(e) {
+        const link = e.target.closest('.nav-link');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const targetId = href.substring(1);
+            const target = document.getElementById(targetId);
+
+            if (target) {
+                const navHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
+                // Adjust target position to account for fixed header and add some padding
+                const targetPosition = target.offsetTop - navHeight - 20; // 20px padding
+
+                window.scrollTo({
+                    top: Math.max(0, targetPosition),
+                    behavior: 'smooth'
+                });
+
+                // Update active nav link
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Close mobile menu if open
+                const navMenu = document.getElementById('nav-menu');
+                const navToggle = document.getElementById('nav-toggle');
+                if (navMenu && navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                    document.body.style.overflow = '';
+                    const spans = navToggle.querySelectorAll('span');
+                    gsap.to(spans[0], { rotation: 0, y: 0, duration: 0.3 });
+                    gsap.to(spans[1], { opacity: 1, duration: 0.2 });
+                    gsap.to(spans[2], { rotation: 0, y: 0, duration: 0.3 });
+                }
+            } else {
+                console.warn('Target element not found:', targetId);
+            }
+        }
+    }
+
+    initScrollSpy() {
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+
+        if (sections.length === 0 || navLinks.length === 0) return;
+
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '-80px 0px -80px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            let activeSection = null;
+            let maxRatio = 0;
+
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                    maxRatio = entry.intersectionRatio;
+                    activeSection = entry.target;
+                }
+            });
+
+            if (activeSection) {
+                // Map section IDs to navigation links
+                let linkHref = '#' + activeSection.id;
+                // Explicitly handle common IDs for clarity, though not strictly necessary
+                if (activeSection.id === 'games') linkHref = '#games';
+                if (activeSection.id === 'about') linkHref = '#about';
+                if (activeSection.id === 'hero') linkHref = '#hero';
+
+                const activeLink = document.querySelector(`.nav-link[href="${linkHref}"]`);
+
+                // Only update if the active link is different to avoid unnecessary class toggles
+                if (activeLink && !activeLink.classList.contains('active')) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                }
+            }
+        }, observerOptions);
+
+        sections.forEach(section => {
+            if (section) observer.observe(section);
+        });
+
+        // Handle scroll to top case
+        // Use Intersection Observer for the hero section instead of scroll listener
+        const heroSection = document.getElementById('hero');
+        if (heroSection) {
+            const heroObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const homeLink = document.querySelector('.nav-link[href="#hero"]');
+                    if (homeLink) {
+                        if (entry.isIntersecting) {
+                            // Only add active class if no other link is active or hero is the most visible
+                             const activeLink = document.querySelector('.nav-link.active');
+                             if (!activeLink || activeLink.getAttribute('href') === '#hero' || entry.intersectionRatio > 0.5) {
+                                 navLinks.forEach(link => link.classList.remove('active'));
+                                 homeLink.classList.add('active');
+                             }
+                        } else {
+                             // Remove active class if hero is no longer visible, unless another link is already active
+                             const activeLink = document.querySelector('.nav-link.active');
+                             if (activeLink && activeLink.getAttribute('href') === '#hero') {
+                                  // Check if any other section is currently intersecting significantly
+                                  let anotherSectionIsVisible = false;
+                                  sections.forEach(section => {
+                                      if (section.id !== 'hero') {
+                                          const sectionEntry = observer.takeRecords().find(record => record.target === section);
+                                          if (sectionEntry && sectionEntry.isIntersecting && sectionEntry.intersectionRatio > 0.1) { // Lower threshold
+                                              anotherSectionIsVisible = true;
+                                          }
+                                      }
+                                  });
+
+                                  if (!anotherSectionIsVisible) {
+                                      // If no other significant section is visible, keep hero active or find the closest one
+                                      // This is a complex edge case, keeping hero active might be the simplest good behavior
+                                      homeLink.classList.add('active'); // Re-add if needed based on scroll position logic
+                                  } else {
+                                      homeLink.classList.remove('active');
+                                  }
+                             }
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.1, // Lower threshold for detecting the hero section start
+                rootMargin: '-10px 0px 0px 0px' // Adjust margin
+            });
+            heroObserver.observe(heroSection);
+        }
     }
 
     initScrollSpy() {
@@ -278,43 +377,11 @@ class OrygnsCodeApp {
 
         // Smooth scroll behavior improvements
         this.initSmoothScrolling();
-    }
 
-    initSmoothScrolling() {
-        // Enhanced smooth scrolling for better mobile experience
-        const links = document.querySelectorAll('a[href^="#"]:not(.nav-link)');
-        
-        links.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href');
-                if (href && href !== '#') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const targetId = href.substring(1);
-                    const target = document.getElementById(targetId);
-                    
-                    if (target) {
-                        const headerHeight = document.querySelector('.main-nav')?.offsetHeight || 60;
-                        const targetPosition = target.offsetTop - headerHeight - 20;
-                        
-                        window.scrollTo({
-                            top: Math.max(0, targetPosition),
-                            behavior: 'smooth'
-                        });
-                        
-                        // Update nav link active state
-                        const navLinks = document.querySelectorAll('.nav-link');
-                        navLinks.forEach(navLink => navLink.classList.remove('active'));
-                        const correspondingNavLink = document.querySelector(`.nav-link[href="#${targetId}"]`);
-                        if (correspondingNavLink) {
-                            correspondingNavLink.classList.add('active');
-                        }
-                    } else {
-                        console.warn('Target element not found:', targetId);
-                    }
-                }
-            });
+        // Re-use handleNavLinkClick for any other internal hash links
+        const internalLinks = document.querySelectorAll('a[href^="#"]:not(.nav-link)');
+        internalLinks.forEach(link => {
+            link.addEventListener('click', this.handleNavLinkClick.bind(this));
         });
     }
 
