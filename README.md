@@ -1,5 +1,5 @@
 OrygnsCode.github.io
 
-Currently practicing building and deploying code using 100% AI assistance, powered by Jules and streamlined through GitHub.
+Currently practicing building and deploying code using 100% AI assistance, powered by Jules/Firebase and streamlined through GitHub.
 
 Visit my project: https://orygnscode.github.io/index.html 😄
