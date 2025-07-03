@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotorBall - A Car Soccer Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+ <div id="mainMenu" class="section-container">
+ <header class="section-header">
+ <h1 class="section-title">MotorBall</h1>
+ <p class="section-subtitle">A Car Soccer Game</p>
+ </header>
+ <button id="startGameButton" class="btn btn-primary">Start Game</button>
+ <a href="../../index.html" class="btn btn-secondary">Back to OrygnsCode Home</a>
+    </div>
+
+    <div id="gameContainer">
+        <div id="canvas-placeholder"></div>
+        <button id="pauseButton" class="pause-button" style="display:none;">Pause</button>
+        <div id="pauseMenu" style="display:none;">
+            <h2>Paused</h2>
+            <button id="resumeGameButton" class="menu-button">Resume Game</button>
+            <button id="restartMatchButton" class="menu-button">Restart Match</button>
+            <button id="returnToMainMenuButton" class="menu-button">Main Menu</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

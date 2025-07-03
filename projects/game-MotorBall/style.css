@@ -1,0 +1,199 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: hidden; /* Prevent scrolling */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a; /* Dark background */
+    color: #ffffff; /* White text */
+    font-family: 'Arial', sans-serif; /* Standard font */
+    text-align: center;
+    position: relative; /* For absolute positioning of children */
+}
+
+/* Containers for main menu and game, filling the screen and centering content */
+#mainMenu,
+#gameContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Stack children vertically */
+}
+
+#mainMenu {
+    z-index: 10; /* Main menu on top */
+}
+
+#gameContainer {
+    position: relative; /* Set position to relative */
+    z-index: 1; /* Lower z-index for game container */
+    display: none; /* Initially hidden */
+}
+
+#canvas-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    /* Removed temporary border */
+}
+
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* Increased gap */
+    padding: 80px 60px; /* Increased padding */
+    background-color: #222; /* Slightly lighter background */
+    border-radius: 15px; /* Slightly more rounded corners */
+    box-shadow: 0 0 40px rgba(0, 255, 0, 0.8); /* More prominent glow */
+    text-align: center;
+    z-index: 20; /* Ensure pause menu is on top */
+}
+
+.menu-container h1,
+.section-title {
+    color: #00ff00; /* Bright green */
+    margin-bottom: 30px; /* More space below title */
+    font-size: 5em; /* Significantly larger title */
+    text-shadow: 0 0 15px rgba(0, 255, 0, 0.9); /* Stronger text glow */
+}
+.menu-container h2 {
+ color: #00ff00; /* Bright green */
+}
+
+.pause-menu h2 {
+ color: #00ff00; /* Bright green */
+}
+
+.menu-button {
+    padding: 25px 50px; /* Even larger buttons */
+    font-size: 2em; /* Even larger button text */
+    color: #ffffff; /* White text */
+    background-color: #008cba; /* Distinct blue */
+    border: 4px solid #005f73; /* Thicker border */
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-block; /* Ensure <a> tags behave like buttons */
+    box-shadow: 0 8px 20px rgba(0, 140, 186, 0.5); /* Button shadow */
+}
+
+.menu-button:hover {
+    background-color: #005f73; /* Darker blue on hover */
+    transform: scale(1.1); /* More pronounced scale on hover */
+    box-shadow: 0 12px 25px rgba(0, 140, 186, 0.8); /* Stronger shadow on hover */
+}
+
+.pause-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 12px 18px;
+    font-size: 1.2em; /* Slightly larger pause button */
+    color: #ffffff;
+    background-color: #ff6f00; /* Orange */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 15; /* Above canvas, below pause menu */
+}
+
+.pause-button:hover {
+    background-color: #e65100;
+}
+
+.section-container {
+    padding: 60px 0;
+}
+
+.section-header {
+    margin-bottom: 40px;
+}
+
+.section-title {
+ font-size: 3em;
+ margin-bottom: 10px;
+}
+
+.section-subtitle {
+ font-size: 1.5em;
+ color: #ffffff;
+}
+
+.btn {
+ display: inline-block;
+ padding: 12px 24px;
+    font-size: 1em;
+    text-align: center;
+    text-decoration: none;
+ border-radius: 5px;
+ cursor: pointer;
+ transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+ color: white;
+ border: 1px solid #007bff;
+}
+
+.pause-menu {
+    display: none;
+    position: absolute;
+ left: 50%;
+    bottom: 20px; /* Position near the bottom */
+    transform: translateX(-50%); /* Center horizontally */
+ background-color: rgba(0, 0, 0, 0.8);
+ padding: 30px;
+ z-index: 1000; /* Ensure it's on top */
+ border-radius: 10px;
+ text-align: center;
+ box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.pause-menu h2 {
+ font-size: 2.5em;
+ margin-bottom: 20px;
+ color: #00ff00; /* Bright green */
+ text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+.pause-menu button { /* Target buttons within pause menu */
+    margin: 10px 0;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+ background-color: #6c757d;
+ color: white;
+ border: 1px solid #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
