@@ -64,6 +64,22 @@ let gameTime = 0;
 let matchDuration = 120;
 let clouds = [];
 
+// Mobile controls
+let isMobile = false;
+let mobileControls = null;
+let joystick = {
+    active: false,
+    centerX: 0,
+    centerY: 0,
+    currentX: 0,
+    currentY: 0,
+    maxRadius: 40,
+    direction: { x: 0, y: 0 },
+    magnitude: 0
+};
+let mobileBoostButton = null;
+let isMobileBoostPressed = false;
+
 // Define all classes first before any other functions
 
 class Wall {
@@ -484,8 +500,318 @@ class AdvancedAI {
     }
 }
 
+// Mobile detection and utilities
+function detectMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+}
+
+function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+}
+
+function showOrientationPrompt() {
+    const overlay = document.createElement('div');
+    overlay.id = 'orientation-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+    `;
+    
+    overlay.innerHTML = `
+        <div style="font-size: 24px; margin-bottom: 20px;">📱 ➡️ 📱</div>
+        <h2 style="margin: 0 0 10px 0;">Please Rotate Your Device</h2>
+        <p style="margin: 0; font-size: 16px;">MotorBall is best played in landscape mode</p>
+    `;
+    
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function createMobileControls() {
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'mobile-controls';
+    controlsContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+    `;
+    
+    // Joystick container
+    const joystickContainer = document.createElement('div');
+    joystickContainer.style.cssText = `
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        width: 120px;
+        height: 120px;
+        pointer-events: auto;
+        touch-action: none;
+    `;
+    
+    // Joystick background
+    const joystickBg = document.createElement('div');
+    joystickBg.style.cssText = `
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        position: relative;
+    `;
+    
+    // Joystick knob
+    const joystickKnob = document.createElement('div');
+    joystickKnob.style.cssText = `
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: none;
+    `;
+    
+    // Boost button
+    const boostButton = document.createElement('div');
+    boostButton.style.cssText = `
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 100, 100, 0.8);
+        border: 3px solid rgba(255, 255, 255, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        pointer-events: auto;
+        touch-action: none;
+        user-select: none;
+    `;
+    boostButton.textContent = 'BOOST';
+    
+    joystickBg.appendChild(joystickKnob);
+    joystickContainer.appendChild(joystickBg);
+    controlsContainer.appendChild(joystickContainer);
+    controlsContainer.appendChild(boostButton);
+    
+    // Store references
+    mobileControls = {
+        container: controlsContainer,
+        joystickContainer: joystickContainer,
+        joystickBg: joystickBg,
+        joystickKnob: joystickKnob,
+        boostButton: boostButton
+    };
+    
+    setupMobileEventListeners();
+    document.body.appendChild(controlsContainer);
+    
+    return controlsContainer;
+}
+
+function setupMobileEventListeners() {
+    if (!mobileControls) return;
+    
+    const { joystickContainer, joystickKnob, boostButton } = mobileControls;
+    
+    // Joystick events
+    joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
+    joystickContainer.addEventListener('touchmove', handleJoystickMove, { passive: false });
+    joystickContainer.addEventListener('touchend', handleJoystickEnd, { passive: false });
+    
+    // Boost button events
+    boostButton.addEventListener('touchstart', handleBoostStart, { passive: false });
+    boostButton.addEventListener('touchend', handleBoostEnd, { passive: false });
+    boostButton.addEventListener('touchcancel', handleBoostEnd, { passive: false });
+}
+
+function handleJoystickStart(e) {
+    e.preventDefault();
+    if (!gameStarted || gamePaused) return;
+    
+    const rect = mobileControls.joystickContainer.getBoundingClientRect();
+    joystick.centerX = rect.left + rect.width / 2;
+    joystick.centerY = rect.top + rect.height / 2;
+    joystick.active = true;
+    
+    updateJoystick(e.touches[0]);
+}
+
+function handleJoystickMove(e) {
+    e.preventDefault();
+    if (!joystick.active || !gameStarted || gamePaused) return;
+    
+    updateJoystick(e.touches[0]);
+}
+
+function handleJoystickEnd(e) {
+    e.preventDefault();
+    joystick.active = false;
+    joystick.direction = { x: 0, y: 0 };
+    joystick.magnitude = 0;
+    
+    // Reset knob position
+    if (mobileControls) {
+        mobileControls.joystickKnob.style.transform = 'translate(-50%, -50%)';
+    }
+    
+    // Stop car movement
+    if (car) {
+        car.accelerating(false);
+        car.rotate(0);
+    }
+}
+
+function updateJoystick(touch) {
+    const deltaX = touch.clientX - joystick.centerX;
+    const deltaY = touch.clientY - joystick.centerY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    if (distance <= joystick.maxRadius) {
+        joystick.currentX = deltaX;
+        joystick.currentY = deltaY;
+    } else {
+        const angle = Math.atan2(deltaY, deltaX);
+        joystick.currentX = Math.cos(angle) * joystick.maxRadius;
+        joystick.currentY = Math.sin(angle) * joystick.maxRadius;
+    }
+    
+    joystick.magnitude = Math.min(distance / joystick.maxRadius, 1);
+    joystick.direction.x = joystick.currentX / joystick.maxRadius;
+    joystick.direction.y = joystick.currentY / joystick.maxRadius;
+    
+    // Update knob visual position
+    if (mobileControls) {
+        mobileControls.joystickKnob.style.transform = 
+            `translate(calc(-50% + ${joystick.currentX}px), calc(-50% + ${joystick.currentY}px))`;
+    }
+}
+
+function handleBoostStart(e) {
+    e.preventDefault();
+    if (!gameStarted || gamePaused) return;
+    
+    isMobileBoostPressed = true;
+    if (mobileControls) {
+        mobileControls.boostButton.style.background = 'rgba(255, 50, 50, 1)';
+    }
+    
+    if (playerBoostMeter >= 100 && !playerIsBoosting) {
+        activatePlayerBoost();
+    }
+}
+
+function handleBoostEnd(e) {
+    e.preventDefault();
+    isMobileBoostPressed = false;
+    if (mobileControls) {
+        mobileControls.boostButton.style.background = 'rgba(255, 100, 100, 0.8)';
+    }
+}
+
+function updateMobileControls() {
+    if (!isMobile || !gameStarted || gamePaused || !car) return;
+    
+    if (joystick.active && joystick.magnitude > 0.1) {
+        // Calculate the angle from joystick direction
+        const joystickAngle = Math.atan2(joystick.direction.y, joystick.direction.x);
+        
+        // Set car angle to match joystick direction
+        Body.setAngle(car.body, joystickAngle);
+        
+        // Accelerate based on joystick magnitude
+        if (joystick.magnitude > 0.2) {
+            const boostMultiplier = (isMobileBoostPressed && playerIsBoosting) ? 1.8 : 1.0;
+            car.accelerate(boostMultiplier);
+            car.accelerating(true);
+        } else {
+            car.accelerating(false);
+        }
+        
+        // Reset rotation since we're using direct angle setting
+        car.rotate(0);
+    } else {
+        // Stop car movement when joystick is not active
+        if (car) {
+            car.accelerating(false);
+            car.rotate(0);
+        }
+    }
+}
+
 function setup() {
     console.log("Setup function started.");
+    
+    // Detect mobile and handle orientation
+    isMobile = detectMobile();
+    
+    if (isMobile) {
+        console.log("Mobile device detected");
+        createMobileControls();
+        
+        // Show mobile instructions instead of desktop ones
+        const desktopControls = document.getElementById('desktop-controls');
+        const mobileInstructions = document.getElementById('mobile-controls-instructions');
+        if (desktopControls) {
+            desktopControls.style.display = 'none';
+        }
+        if (mobileInstructions) {
+            mobileInstructions.style.display = 'flex';
+            mobileInstructions.style.flexDirection = 'column';
+        }
+        
+        // Check orientation on load
+        if (!isLandscape()) {
+            const overlay = showOrientationPrompt();
+            
+            // Listen for orientation changes
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    if (isLandscape()) {
+                        overlay.remove();
+                    } else if (!document.getElementById('orientation-overlay')) {
+                        const newOverlay = showOrientationPrompt();
+                    }
+                }, 100);
+            });
+            
+            window.addEventListener('resize', () => {
+                if (isLandscape() && document.getElementById('orientation-overlay')) {
+                    document.getElementById('orientation-overlay').remove();
+                } else if (!isLandscape() && !document.getElementById('orientation-overlay')) {
+                    showOrientationPrompt();
+                }
+            });
+        }
+    }
+    
     const h = min(window.innerHeight, window.innerWidth * 0.61);
     const w = min(window.innerWidth, h * 1.64);
 
@@ -614,6 +940,11 @@ function startGame() {
     if (p5Canvas) p5Canvas.style('display', 'block');
     if (pauseButton) pauseButton.style.display = 'block';
 
+    // Show mobile controls if on mobile
+    if (isMobile && mobileControls) {
+        mobileControls.container.style.display = 'block';
+    }
+
     gameStarted = true;
     gamePaused = false;
     resetGame();
@@ -653,6 +984,12 @@ function returnToMainMenu() {
     if (pauseMenu) pauseMenu.style.display = 'none';
     if (p5Canvas) p5Canvas.style('opacity', '1');
     if (pauseButton) pauseButton.style.display = 'none';
+    
+    // Hide mobile controls
+    if (isMobile && mobileControls) {
+        mobileControls.container.style.display = 'none';
+    }
+    
     console.log("Returned to main menu. Game started: " + gameStarted + ", Paused: " + gamePaused);
 }
 
@@ -729,6 +1066,9 @@ function draw() {
         car.render();
         car.update();
     }
+    
+    // Update mobile controls
+    updateMobileControls();
 
     if (computerCar) {
         computerCar.render();
