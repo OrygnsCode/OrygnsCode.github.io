@@ -4,6 +4,10 @@ html, body {
     margin: 0;
     overflow: hidden; /* Prevent scrolling */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    touch-action: none; /* Prevent default touch behaviors */
+    -webkit-touch-callout: none; /* Disable callout */
+    -webkit-user-select: none; /* Disable user select */
+    user-select: none;
 }
 
 body {
@@ -245,4 +249,126 @@ canvas {
 .section-container .btn-secondary:hover {
     background-color: #5a6268;
     border-color: #545b62;
+}
+
+/* Mobile Controls Styling */
+#mobile-controls {
+    font-family: Arial, sans-serif;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    #mainMenu {
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    #mainMenu .section-title {
+        font-size: 2.5em;
+    }
+    
+    #mainMenu .section-subtitle {
+        font-size: 1.2em;
+    }
+    
+    .how-to-play {
+        margin-top: 20px;
+    }
+    
+    .how-to-play h2 {
+        font-size: 1.4em;
+    }
+    
+    .how-to-play .controls {
+        font-size: 0.9em;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+    
+    /* Ensure mobile controls don't interfere with game UI */
+    .pause-button {
+        z-index: 1500;
+    }
+    
+    #pauseMenu {
+        z-index: 2000;
+    }
+}
+
+/* Mobile adjustments - hide controls section completely */
+@media (max-width: 768px) {
+    .how-to-play {
+        display: none !important;
+    }
+    
+    #mainMenu {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        gap: 30px;
+        padding: 40px 20px;
+    }
+    
+    #mainMenu .section-header {
+        margin-bottom: 20px;
+    }
+    
+    #mainMenu .section-title {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    
+    #mainMenu .section-subtitle {
+        font-size: 1.2em;
+    }
+    
+    #mainMenu > .btn {
+        margin: 10px 0;
+        padding: 15px 30px;
+        font-size: 1.1em;
+        width: 250px;
+    }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    #mainMenu {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 40px;
+        gap: 50px;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    #mainMenu .section-header {
+        margin-bottom: 0;
+        text-align: left;
+        flex: 1;
+    }
+    
+    #mainMenu .section-title {
+        font-size: 2.2em;
+        margin-bottom: 5px;
+    }
+    
+    #mainMenu .section-subtitle {
+        font-size: 1em;
+    }
+    
+    #mainMenu > .btn {
+        margin: 10px 0;
+        padding: 15px 25px;
+        font-size: 1em;
+        width: auto;
+    }
+    
+    /* Keep controls section hidden on mobile */
+    .how-to-play {
+        display: none !important;
+    }
 }
