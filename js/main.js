@@ -210,45 +210,101 @@ class OrygnsCodeApp {
     }
 
     initScrollEffects() {
-        // Parallax effect for hero section
+        // Enhanced parallax system with multiple layers
         const parallaxElements = document.querySelectorAll('.floating-cards');
+        const heroContent = document.querySelector('.hero-content');
+        const heroTitle = document.querySelector('.hero-title');
 
         if (parallaxElements.length > 0 && typeof gsap !== 'undefined') {
             window.addEventListener('scroll', this.throttle(() => {
-                const scrolled = window.pageYOffset;
-                parallaxElements.forEach(element => {
-                    const speed = 0.05;
-                    if (element && scrolled < window.innerHeight) {
-                        gsap.set(element, {
-                            y: scrolled * speed
+                try {
+                    const scrolled = window.pageYOffset;
+                    const windowHeight = window.innerHeight;
+                    
+                    // Multi-layer parallax effect
+                    parallaxElements.forEach((element, index) => {
+                        const speed = 0.03 + (index * 0.02);
+                        if (element && scrolled < windowHeight) {
+                            gsap.set(element, {
+                                y: scrolled * speed,
+                                rotationY: scrolled * 0.01,
+                                opacity: 1 - (scrolled / windowHeight) * 0.5
+                            });
+                        }
+                    });
+
+                    // Hero content fade effect
+                    if (heroContent && scrolled < windowHeight) {
+                        const fadeAmount = Math.min(scrolled / (windowHeight * 0.6), 1);
+                        gsap.set(heroContent, {
+                            opacity: 1 - fadeAmount,
+                            y: scrolled * 0.3,
+                            scale: 1 - fadeAmount * 0.1
                         });
                     }
-                });
+
+                    // Hero title perspective effect
+                    if (heroTitle && scrolled < windowHeight) {
+                        gsap.set(heroTitle, {
+                            rotationX: scrolled * 0.02,
+                            z: scrolled * 0.1
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Parallax animation error:', error);
+                }
             }, 16));
         }
 
-        // Enhanced navigation scroll behavior
+        // Advanced navigation scroll behavior with sophisticated transitions
         const nav = document.querySelector('.main-nav');
         const heroSection = document.querySelector('.hero-section');
         let lastScrollY = 0;
         let ticking = false;
+        let navState = 'hero'; // 'hero', 'scrolled', 'minimized'
 
         if (nav && heroSection) {
             const updateNav = () => {
                 const scrollY = window.pageYOffset;
                 const heroHeight = heroSection.offsetHeight;
+                const windowHeight = window.innerHeight;
+                
+                // Calculate scroll progress
+                const heroScrollProgress = Math.min(scrollY / (windowHeight * 0.3), 1);
+                const minimizedThreshold = heroHeight - (windowHeight * 0.2);
 
-                if (scrollY > 50) {
-                    nav.classList.add('scrolled');
+                // State transitions with smooth animations
+                if (scrollY < 50) {
+                    if (navState !== 'hero') {
+                        this.transitionNavState('hero', nav);
+                        navState = 'hero';
+                    }
+                } else if (scrollY < minimizedThreshold) {
+                    if (navState !== 'scrolled') {
+                        this.transitionNavState('scrolled', nav);
+                        navState = 'scrolled';
+                    }
                 } else {
-                    nav.classList.remove('scrolled');
+                    if (navState !== 'minimized') {
+                        this.transitionNavState('minimized', nav);
+                        navState = 'minimized';
+                    }
                 }
 
-                // Show minimized nav when scrolled past hero section
-                if (scrollY > heroHeight - 100) {
-                    nav.classList.add('minimized');
-                } else {
-                    nav.classList.remove('minimized');
+                // Dynamic background blur based on scroll speed
+                const scrollSpeed = Math.abs(scrollY - lastScrollY);
+                const blurAmount = Math.min(scrollSpeed * 0.5, 10);
+                
+                if (typeof gsap !== 'undefined' && scrollY > 50) {
+                    gsap.set(nav, {
+                        backdropFilter: `blur(${20 + blurAmount}px) saturate(${150 + scrollSpeed * 2}%)`
+                    });
+                }
+
+                // Parallax effect for navigation background
+                if (scrollY > 0) {
+                    const parallaxOffset = scrollY * 0.1;
+                    nav.style.transform = `translateY(${parallaxOffset * 0.1}px)`;
                 }
 
                 lastScrollY = scrollY;
@@ -261,6 +317,90 @@ class OrygnsCodeApp {
                     ticking = true;
                 }
             });
+
+            // Initialize with hero state
+            this.transitionNavState('hero', nav);
+        }
+    }
+
+    transitionNavState(newState, nav) {
+        // Remove all state classes
+        nav.classList.remove('hero-mode', 'scrolled', 'minimized');
+        
+        // Add new state class
+        nav.classList.add(newState === 'hero' ? 'hero-mode' : newState);
+
+        // Enhanced GSAP animations for state transitions
+        if (typeof gsap !== 'undefined') {
+            const timeline = gsap.timeline();
+            
+            switch (newState) {
+                case 'hero':
+                    timeline
+                        .to(nav, {
+                            background: 'transparent',
+                            borderBottomColor: 'transparent',
+                            backdropFilter: 'none',
+                            boxShadow: 'none',
+                            duration: 0.6,
+                            ease: 'power2.out'
+                        })
+                        .to('.nav-logo', {
+                            opacity: 1,
+                            scale: 1,
+                            x: 0,
+                            duration: 0.4,
+                            ease: 'back.out(1.7)'
+                        }, '-=0.3');
+                    break;
+                    
+                case 'scrolled':
+                    timeline
+                        .to(nav, {
+                            background: 'rgba(10, 10, 15, 0.85)',
+                            borderBottomColor: 'rgba(0, 245, 255, 0.2)',
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05) inset',
+                            duration: 0.5,
+                            ease: 'power2.out'
+                        })
+                        .to('.nav-logo', {
+                            opacity: 1,
+                            scale: 1,
+                            x: 0,
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        }, '-=0.2');
+                    break;
+                    
+                case 'minimized':
+                    timeline
+                        .to(nav, {
+                            background: 'rgba(10, 10, 15, 0.95)',
+                            borderBottomColor: 'rgba(0, 245, 255, 0.3)',
+                            backdropFilter: 'blur(30px) saturate(200%)',
+                            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4), 0 2px 16px rgba(0, 245, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.1) inset',
+                            padding: '6px 0',
+                            duration: 0.4,
+                            ease: 'power2.out'
+                        })
+                        .to('.nav-logo', {
+                            opacity: 0,
+                            scale: 0.8,
+                            x: -20,
+                            duration: 0.3,
+                            ease: 'power2.in'
+                        }, '-=0.3')
+                        .to('.nav-links', {
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '25px',
+                            padding: '8px 16px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            duration: 0.3,
+                            ease: 'power2.out'
+                        }, '-=0.1');
+                    break;
+            }
         }
     }
 
@@ -340,49 +480,91 @@ class OrygnsCodeApp {
             return;
         }
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-        canvas.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        `;
+            if (!ctx) {
+                console.warn('Canvas context not available');
+                return;
+            }
 
-        document.body.appendChild(canvas);
+            canvas.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 999;
+            `;
 
-        let particles = [];
-        let mouse = { x: 0, y: 0 };
+            document.body.appendChild(canvas);
 
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
+            let particles = [];
+            let mouse = { x: 0, y: 0 };
 
-        const createParticle = (x, y) => {
-            particles.push({
-                x: x,
-                y: y,
-                size: Math.random() * 2 + 0.5,
-                opacity: 1,
-                vx: (Math.random() - 0.5) * 1,
-                vy: (Math.random() - 0.5) * 1,
-                life: 20
+            const resizeCanvas = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+
+            const createParticle = (x, y) => {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 2 + 0.5,
+                    opacity: 1,
+                    vx: (Math.random() - 0.5) * 1,
+                    vy: (Math.random() - 0.5) * 1,
+                    life: 20
+                });
+            };
+
+            const updateParticles = () => {
+                try {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    particles = particles.filter(particle => {
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        particle.opacity -= 1 / particle.life;
+                        particle.size *= 0.99;
+
+                        if (particle.opacity <= 0) return false;
+
+                        ctx.save();
+                        ctx.globalAlpha = particle.opacity;
+                        ctx.fillStyle = '#00f5ff';
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+
+                        return true;
+                    });
+
+                    requestAnimationFrame(updateParticles);
+                } catch (error) {
+                    console.warn('Particle update error:', error);
+                }
+            };
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            document.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                if (Math.random() < 0.1) {
+                    createParticle(mouse.x, mouse.y);
+                }
             });
-        };
 
-        const updateParticles = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            particles = particles.filter(particle => {
-                particle.x += particle.vx;
-                particle.y += particle.vy;
-                particle.opacity -= 1 / particle.life;
-                particle.size *= 0.99;
+            updateParticles();
+        } catch (error) {
+            console.warn('Particle effects initialization error:', error);
+        }9;
 
                 if (particle.opacity > 0) {
                     ctx.globalAlpha = particle.opacity;
