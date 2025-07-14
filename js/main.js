@@ -15,7 +15,6 @@ class OrygnsCodeApp {
     init() {
         this.initTheme();
         this.initNavigation();
-        this.initSmoothScrolling();
         this.initScrollEffects();
         this.initDynamicMessages();
         this.initParticleEffects();
@@ -69,35 +68,6 @@ class OrygnsCodeApp {
         this.handleNavActiveStates();
     }
 
-    initSmoothScrolling() {
-        // Handle smooth scrolling for navigation links
-        const navLinks = document.querySelectorAll('.nav-link[data-section]');
-        
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('data-section');
-                const targetElement = document.getElementById(targetId);
-                
-                if (targetElement) {
-                    // Close mobile menu if open
-                    this.closeMobileMenu();
-                    
-                    // Smooth scroll to target
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-
-                    // Update active state
-                    this.updateActiveNavLink(targetId);
-                } else {
-                    console.warn('Target element not found:', targetId);
-                }
-            });
-        });
-    }
-
     handleNavActiveStates() {
         // Update active navigation link based on scroll position
         const sections = document.querySelectorAll('section[id], .hero-section');
@@ -124,6 +94,16 @@ class OrygnsCodeApp {
                 observer.observe(section);
             }
         });
+
+        // Set initial active link
+        const currentScroll = window.pageYOffset;
+        let initialSection = 'hero';
+        sections.forEach(section => {
+            if (section.offsetTop <= currentScroll + 100) {
+                initialSection = section.id;
+            }
+        });
+        this.updateActiveNavLink(initialSection);
     }
 
     updateActiveNavLink(activeId) {
@@ -564,7 +544,7 @@ class OrygnsCodeApp {
             updateParticles();
         } catch (error) {
             console.warn('Particle effects initialization error:', error);
-        }9;
+        }
 
                 if (particle.opacity > 0) {
                     ctx.globalAlpha = particle.opacity;
