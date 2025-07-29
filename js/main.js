@@ -13,6 +13,17 @@ class OrygnsCodeApp {
     }
 
     init() {
+        // Register GSAP plugins if available
+        if (typeof gsap !== 'undefined') {
+            // Try to register ScrollToPlugin if available
+            if (typeof ScrollToPlugin !== 'undefined') {
+                gsap.registerPlugin(ScrollToPlugin);
+                console.log('GSAP ScrollToPlugin registered successfully');
+            } else {
+                console.warn('ScrollToPlugin not available, using fallback scrolling');
+            }
+        }
+        
         this.initTheme();
         this.initNavigation();
         this.initScrollEffects();
@@ -37,7 +48,10 @@ class OrygnsCodeApp {
         }
 
         if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
+            themeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 body.classList.toggle('light-theme');
                 this.currentTheme = body.classList.contains('light-theme') ? 'light' : 'dark';
                 localStorage.setItem('theme', this.currentTheme);
@@ -66,6 +80,8 @@ class OrygnsCodeApp {
         this.setupMobileMenu();
         // Handle navigation link active states
         this.handleNavActiveStates();
+        // Add smooth scrolling to navigation links
+        this.setupSmoothScrolling();
     }
 
     handleNavActiveStates() {
@@ -119,6 +135,107 @@ class OrygnsCodeApp {
         });
     }
 
+    setupSmoothScrolling() {
+        const navLinks = document.querySelectorAll('.nav-link[data-section]');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const targetId = link.getAttribute('data-section');
+                let targetElement;
+                
+                console.log('Scrolling to:', targetId); // Debug log
+                
+                if (targetId === 'hero') {
+                    targetElement = document.querySelector('.hero-section');
+                } else {
+                    targetElement = document.getElementById(targetId);
+                }
+                
+                if (targetElement) {
+                    const navHeight = 80; // Account for fixed navigation
+                    const targetPosition = targetElement.offsetTop - navHeight;
+                    
+                    console.log('Target element found, scrolling to position:', targetPosition);
+                    
+                    // Close mobile menu if open first
+                    this.closeMobileMenu();
+                    
+                    // Update active nav link immediately
+                    this.updateActiveNavLink(targetId);
+                    
+                    // Try GSAP first, then fallback to native smooth scroll
+                    if (typeof gsap !== 'undefined' && typeof ScrollToPlugin !== 'undefined') {
+                        console.log('Using GSAP ScrollToPlugin for smooth scrolling');
+                        gsap.to(window, {
+                            duration: 1.2,
+                            scrollTo: {
+                                y: targetPosition,
+                                autoKill: false
+                            },
+                            ease: 'power2.inOut',
+                            onComplete: () => {
+                                console.log('GSAP scroll animation completed');
+                            }
+                        });
+                    } else {
+                        console.log('Using native smooth scroll fallback');
+                        // Enhanced native smooth scroll with custom easing
+                        this.smoothScrollTo(targetPosition, 1200);
+                    }
+                } else {
+                    console.warn('Target element not found:', targetId);
+                }
+            });
+        });
+        
+        // Also handle hash changes from URL
+        if (window.location.hash) {
+            const targetId = window.location.hash.substring(1);
+            setTimeout(() => {
+                const targetElement = document.getElementById(targetId) || 
+                    (targetId === 'hero' ? document.querySelector('.hero-section') : null);
+                
+                if (targetElement) {
+                    const navHeight = 80;
+                    const targetPosition = targetElement.offsetTop - navHeight;
+                    
+                    this.smoothScrollTo(targetPosition, 800);
+                }
+            }, 100);
+        }
+    }
+
+    // Custom smooth scroll implementation for better control
+    smoothScrollTo(targetPosition, duration = 1000) {
+        const startPosition = window.pageYOffset;
+        const distance = targetPosition - startPosition;
+        let startTime = null;
+
+        const easeInOutCubic = (t) => {
+            return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+        };
+
+        const animation = (currentTime) => {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            const easedProgress = easeInOutCubic(progress);
+            
+            window.scrollTo(0, startPosition + (distance * easedProgress));
+            
+            if (progress < 1) {
+                requestAnimationFrame(animation);
+            } else {
+                console.log('Custom smooth scroll completed');
+            }
+        };
+
+        requestAnimationFrame(animation);
+    }
+
     setupMobileMenu() {
         const navToggle = document.getElementById('nav-toggle');
         const navMenu = document.getElementById('nav-menu');
@@ -132,17 +249,15 @@ class OrygnsCodeApp {
             const isActive = navMenu.classList.contains('active');
 
             if (isActive) {
-                navMenu.classList.remove('active');
-                navToggle.classList.remove('active');
-                document.body.style.overflow = '';
+                this.closeMobileMenu();
             } else {
                 navMenu.classList.add('active');
                 navToggle.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                
+                // Animate hamburger menu
+                this.animateHamburger(navToggle, true);
             }
-
-            // Animate hamburger menu
-            this.animateHamburger(navToggle, !isActive);
         });
 
         // Close menu when clicking outside
@@ -545,33 +660,6 @@ class OrygnsCodeApp {
         } catch (error) {
             console.warn('Particle effects initialization error:', error);
         }
-
-                if (particle.opacity > 0) {
-                    ctx.globalAlpha = particle.opacity;
-                    ctx.fillStyle = this.currentTheme === 'light' ? '#0066ff' : '#00f5ff';
-                    ctx.beginPath();
-                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    return true;
-                }
-                return false;
-            });
-
-            requestAnimationFrame(updateParticles);
-        };
-
-        document.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-
-            if (Math.random() > 0.9) {
-                createParticle(mouse.x, mouse.y);
-            }
-        });
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        updateParticles();
     }
 
     initPerformanceOptimizations() {
