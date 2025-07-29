@@ -2,6 +2,17 @@
 class ThreeBackground {
     constructor() {
         this.container = document.getElementById('three-bg');
+        if (!this.container) {
+            console.warn('Three.js container not found');
+            return;
+        }
+
+        // Check if Three.js is available
+        if (typeof THREE === 'undefined') {
+            console.warn('Three.js not loaded');
+            return;
+        }
+
         this.scene = null;
         this.camera = null;
         this.renderer = null;
@@ -506,5 +517,7 @@ class ThreeBackground {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ThreeBackground();
+    if (typeof THREE !== 'undefined') {
+        new ThreeBackground();
+    }
 });
