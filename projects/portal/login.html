@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Origins Client Portal - Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <style>
+        .auth-container {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .auth-card-enhanced {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-2xl);
+            padding: var(--space-2xl);
+        }
+        
+        .form-auth {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        }
+        
+        .auth-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+            width: 100%;
+        }
+        
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .auth-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .tab-auth {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+        }
+        
+        .tab-auth.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .tab-auth:hover:not(.active) {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .password-indicator {
+            height: 4px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .strength-weak { background: var(--error); }
+        .strength-medium { background: var(--warning); }
+        .strength-strong { background: var(--success); }
+        
+        .floating-auth {
+            position: absolute;
+            animation: float-auth 6s ease-in-out infinite;
+        }
+        
+        @keyframes float-auth {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-15px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+    </style>
+</head>
+<body class="auth-container min-h-screen flex items-center justify-center p-4">
+    <!-- Floating Elements -->
+    <div class="floating-auth" style="top: 10%; left: 10%; width: 20px; height: 20px; background: rgba(0, 212, 255, 0.3); border-radius: 50%; animation-delay: 0s;"></div>
+    <div class="floating-auth" style="top: 20%; right: 15%; width: 15px; height: 15px; background: rgba(0, 212, 255, 0.2); border-radius: 50%; animation-delay: 2s;"></div>
+    <div class="floating-auth" style="bottom: 30%; left: 20%; width: 25px; height: 25px; background: rgba(0, 212, 255, 0.1); border-radius: 50%; animation-delay: 4s;"></div>
+    <div class="floating-auth" style="bottom: 20%; right: 10%; width: 18px; height: 18px; background: rgba(0, 212, 255, 0.25); border-radius: 50%; animation-delay: 1s;"></div>
+    
+    <div class="max-w-md w-full relative z-10">
+        <!-- Logo/Brand -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold gradient-text-primary mb-2">Orygns Portal</h1>
+            <p class="text-gray-300 text-lg">Enterprise Client Management</p>
+        </div>
+
+        <!-- Authentication Card -->
+        <div class="auth-card-enhanced">
+            <!-- Tabs -->
+            <div class="flex mb-8 bg-gray-800 rounded-lg p-1">
+                <button class="tab-auth flex-1 py-3 px-4 rounded-md text-sm font-medium active" onclick="switchTab('login')" id="loginTab">Login</button>
+                <button class="tab-auth flex-1 py-3 px-4 rounded-md text-sm font-medium" onclick="switchTab('signup')" id="signupTab">Sign Up</button>
+                <button class="tab-auth flex-1 py-3 px-4 rounded-md text-sm font-medium" onclick="switchTab('reset')" id="resetTab">Reset</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+                <form onsubmit="handleLogin(event)">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" required class="auth-input" placeholder="Enter your email">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" required class="auth-input" placeholder="Enter your password">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded border-gray-600 bg-gray-800 text-teal-500 focus:ring-teal-500">
+                                <span class="ml-2 text-sm text-gray-400">Remember me</span>
+                            </label>
+                            <button type="button" onclick="switchTab('reset')" class="text-sm text-teal-400 hover:text-teal-300">Forgot password?</button>
+                        </div>
+                        <button type="submit" class="btn-enhanced w-full py-3">
+                            <span class="text-lg font-medium">Sign In</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-8">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-600"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-gray-800 text-gray-400">Or continue with</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-2 gap-3">
+                        <button onclick="socialLogin('google')" class="btn-enhanced btn-secondary w-full inline-flex justify-center py-3">
+                            <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            <span>Google</span>
+                        </button>
+                        <button onclick="socialLogin('github')" class="btn-enhanced btn-secondary w-full inline-flex justify-center py-3">
+                            <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                            <span>GitHub</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signupForm" class="auth-form hidden">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Create Account</h2>
+                <form onsubmit="handleSignup(event)">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                                <input type="text" required class="auth-input" placeholder="First name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                                <input type="text" required class="auth-input" placeholder="Last name">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" required class="auth-input" placeholder="Enter your email">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
+                            <input type="text" required class="auth-input" placeholder="Your company name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" required id="signupPassword" class="auth-input" placeholder="Create a password" oninput="checkPasswordStrength(this.value)">
+                            <div class="mt-3">
+                                <div class="flex space-x-2">
+                                    <div class="flex-1 password-indicator" id="strengthBar1"></div>
+                                    <div class="flex-1 password-indicator" id="strengthBar2"></div>
+                                    <div class="flex-1 password-indicator" id="strengthBar3"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2" id="strengthText">Password strength: Weak</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                            <input type="password" required class="auth-input" placeholder="Confirm your password">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" required class="rounded border-gray-600 bg-gray-800 text-teal-500 focus:ring-teal-500">
+                            <label class="ml-2 text-sm text-gray-400">I agree to the <a href="#" class="text-teal-400 hover:text-teal-300">Terms of Service</a> and <a href="#" class="text-teal-400 hover:text-teal-300">Privacy Policy</a></label>
+                        </div>
+                        <button type="submit" class="btn-enhanced w-full py-3">
+                            <span class="text-lg font-medium">Create Account</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Password Reset Form -->
+            <div id="resetForm" class="auth-form hidden">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Reset Password</h2>
+                <p class="text-gray-400 text-center mb-6">Enter your email address and we'll send you a link to reset your password.</p>
+                <form onsubmit="handleReset(event)">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" required class="auth-input" placeholder="Enter your email">
+                        </div>
+                        <button type="submit" class="btn-enhanced w-full py-3">
+                            <span class="text-lg font-medium">Send Reset Link</span>
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-8 text-center">
+                    <button onclick="switchTab('login')" class="text-teal-400 hover:text-teal-300 text-sm font-medium">← Back to Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 relative z-10">
+            <p class="text-gray-400 text-sm">© 2024 Orygns Portal. Enterprise client management solutions.</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50 backdrop-filter backdrop-blur-sm">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span id="toastMessage">Action completed successfully!</span>
+        </div>
+    </div>
+
+    <script src="enhanced-main.js"></script>
+    <script>
+        // Authentication functions
+        function switchTab(tab) {
+            // Hide all forms
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // Show selected form and activate tab
+            document.getElementById(tab + 'Form').classList.remove('hidden');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            document.getElementById(tab + 'Tab').classList.remove('text-gray-600');
+            
+            // Animate form appearance
+            anime({
+                targets: `#${tab}Form`,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Signing In...';
+            submitBtn.disabled = true;
+            
+            // Simulate authentication
+            setTimeout(() => {
+                showToast('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }, 2000);
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('signupPassword').value;
+            if (password.length < 8) {
+                showToast('Password must be at least 8 characters long', 'error');
+                return;
+            }
+            
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+            
+            // Simulate account creation
+            setTimeout(() => {
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => {
+                    switchTab('login');
+                }, 1500);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        }
+
+        function handleReset(event) {
+            event.preventDefault();
+            
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate password reset
+            setTimeout(() => {
+                showToast('Password reset link sent to your email!', 'success');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        }
+
+        function socialLogin(provider) {
+            showToast(`Redirecting to ${provider} login...`, 'info');
+            // In a real app, this would redirect to OAuth provider
+        }
+
+        function checkPasswordStrength(password) {
+            const strengthBar1 = document.getElementById('strengthBar1');
+            const strengthBar2 = document.getElementById('strengthBar2');
+            const strengthBar3 = document.getElementById('strengthBar3');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+            
+            // Reset bars
+            strengthBar1.className = 'flex-1 password-indicator';
+            strengthBar2.className = 'flex-1 password-indicator';
+            strengthBar3.className = 'flex-1 password-indicator';
+            
+            if (strength <= 1) {
+                strengthBar1.classList.add('strength-weak');
+                strengthText.textContent = 'Password strength: Weak';
+                strengthText.className = 'text-xs text-red-400 mt-2';
+            } else if (strength <= 2) {
+                strengthBar1.classList.add('strength-medium');
+                strengthBar2.classList.add('strength-medium');
+                strengthText.textContent = 'Password strength: Medium';
+                strengthText.className = 'text-xs text-yellow-400 mt-2';
+            } else {
+                strengthBar1.classList.add('strength-strong');
+                strengthBar2.classList.add('strength-strong');
+                strengthBar3.classList.add('strength-strong');
+                strengthText.textContent = 'Password strength: Strong';
+                strengthText.className = 'text-xs text-green-400 mt-2';
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                
+                // Update toast style based on type
+                toast.className = toast.className.replace(/bg-\w+-500/, `bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500`);
+                
+                // Show toast
+                toast.classList.remove('translate-x-full');
+                
+                // Hide toast after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full');
+                }, 3000);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate card appearance
+            anime({
+                targets: '.auth-card',
+                opacity: [0, 1],
+                translateY: [50, 0],
+                duration: 800,
+                easing: 'easeOutExpo'
+            });
+        });
+    </script>
+</body>
+</html>) => {
+                    toast.classList.add('translate-x-full');
+                }, 3000);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate card appearance
+            anime({
+                targets: '.auth-card',
+                opacity: [0, 1],
+                translateY: [50, 0],
+                duration: 800,
+                easing: 'easeOutExpo'
+            });
+       

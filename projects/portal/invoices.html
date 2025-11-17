@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orygns Client Portal - Invoices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0D1B2A 0%, #1B263B 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .nav-link { transition: all 0.2s ease; }
+        .nav-link:hover { color: #00B4D8; transform: translateX(4px); }
+        .status-paid { background-color: #10B981; }
+        .status-pending { background-color: #F59E0B; }
+        .status-overdue { background-color: #EF4444; }
+        .table-row:hover { background-color: #f8fafc; }
+        .filter-active { background-color: #00B4D8; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold gradient-text-primary">Orygns Portal</h1>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="index.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Dashboard</a>
+                            <a href="invoices.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium bg-teal-600">Invoices</a>
+                            <a href="support.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Support</a>
+                            <a href="reports.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Reports</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"/>
+                        </svg>
+                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
+                    </button>
+                    <div class="relative">
+                        <button class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="User avatar">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Invoice Management</h1>
+                    <p class="text-gray-600 mt-1">Manage your invoices and payment history</p>
+                </div>
+                <button onclick="openInvoiceModal()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors duration-200">
+                    Create Invoice
+                </button>
+            </div>
+
+            <!-- Invoice Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Invoices</dt>
+                                <dd class="text-lg font-medium text-gray-900">24</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Paid</dt>
+                                <dd class="text-lg font-medium text-gray-900">18</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                                <dd class="text-lg font-medium text-gray-900">4</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-red-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Overdue</dt>
+                                <dd class="text-lg font-medium text-gray-900">2</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                    <div class="flex-1 max-w-lg">
+                        <div class="relative">
+                            <input type="text" placeholder="Search invoices..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" id="invoiceSearch">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button class="filter-btn filter-active px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200" onclick="filterInvoices('all')" id="filter-all">All</button>
+                        <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200" onclick="filterInvoices('paid')" id="filter-paid">Paid</button>
+                        <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200" onclick="filterInvoices('pending')" id="filter-pending">Pending</button>
+                        <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200" onclick="filterInvoices('overdue')" id="filter-overdue">Overdue</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Table -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="invoiceTable">
+                            <tr class="table-row" data-status="paid">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#INV-001</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                        <span class="ml-3 text-sm text-gray-900">Acme Corp</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-02-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$3,250.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-paid inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Paid</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="viewInvoice('INV-001')" class="text-teal-600 hover:text-teal-900 mr-3">View</button>
+                                    <button onclick="downloadInvoice('INV-001')" class="text-blue-600 hover:text-blue-900">Download</button>
+                                </td>
+                            </tr>
+                            
+                            <tr class="table-row" data-status="pending">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#INV-002</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                        <span class="ml-3 text-sm text-gray-900">TechStart Inc</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-02-01</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-03-01</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$1,850.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-pending inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="viewInvoice('INV-002')" class="text-teal-600 hover:text-teal-900 mr-3">View</button>
+                                    <button onclick="payInvoice('INV-002')" class="text-green-600 hover:text-green-900">Pay Now</button>
+                                </td>
+                            </tr>
+                            
+                            <tr class="table-row" data-status="overdue">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#INV-003</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                        <span class="ml-3 text-sm text-gray-900">Global Solutions</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-10</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">2024-02-10 (Overdue)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$5,420.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-overdue inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Overdue</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="viewInvoice('INV-003')" class="text-teal-600 hover:text-teal-900 mr-3">View</button>
+                                    <button onclick="payInvoice('INV-003')" class="text-green-600 hover:text-green-900">Pay Now</button>
+                                </td>
+                            </tr>
+                            
+                            <tr class="table-row" data-status="paid">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#INV-004</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                        <span class="ml-3 text-sm text-gray-900">Acme Corp</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-01-20</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-02-20</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$2,100.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-paid inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Paid</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="viewInvoice('INV-004')" class="text-teal-600 hover:text-teal-900 mr-3">View</button>
+                                    <button onclick="downloadInvoice('INV-004')" class="text-blue-600 hover:text-blue-900">Download</button>
+                                </td>
+                            </tr>
+                            
+                            <tr class="table-row" data-status="pending">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#INV-005</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                        <span class="ml-3 text-sm text-gray-900">TechStart Inc</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-02-05</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-03-05</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$4,750.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-pending inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="viewInvoice('INV-005')" class="text-teal-600 hover:text-teal-900 mr-3">View</button>
+                                    <button onclick="payInvoice('INV-005')" class="text-green-600 hover:text-green-900">Pay Now</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">24</span> invoices
+                </div>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</button>
+                    <button class="px-3 py-2 border border-teal-500 bg-teal-50 text-teal-600 rounded-md text-sm font-medium">1</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50">Next</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900">Invoice Details</h3>
+                        <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="invoiceContent">
+                        <!-- Invoice content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Process Payment</h3>
+                    <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="paymentContent">
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Invoice #<span id="paymentInvoiceNumber"></span></span>
+                                <span class="font-semibold text-gray-900">$<span id="paymentAmount"></span></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                            <input type="text" placeholder="1234 5678 9012 3456" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                                <input type="text" placeholder="MM/YY" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                                <input type="text" placeholder="123" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="closePaymentModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button onclick="processPayment()" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">Pay Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Invoice management functions
+        function filterInvoices(status) {
+            const rows = document.querySelectorAll('.table-row');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('filter-active');
+                btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+            });
+            
+            const activeBtn = document.getElementById(`filter-${status}`);
+            activeBtn.classList.add('filter-active');
+            activeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+            
+            // Filter rows
+            rows.forEach(row => {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function viewInvoice(invoiceId) {
+            const modal = document.getElementById('invoiceModal');
+            const content = document.getElementById('invoiceContent');
+            
+            // Sample invoice content
+            content.innerHTML = `
+                <div class="bg-white p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Invoice ${invoiceId}</h2>
+                            <p class="text-gray-600">Date: February 15, 2024</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">Total Amount</div>
+                            <div class="text-2xl font-bold text-gray-900">$3,250.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Bill To:</h3>
+                            <p class="text-gray-600">Acme Corp</p>
+                            <p class="text-gray-600">123 Business St</p>
+                            <p class="text-gray-600">City, State 12345</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">From:</h3>
+                            <p class="text-gray-600">Origins Portal</p>
+                            <p class="text-gray-600">456 Tech Ave</p>
+                            <p class="text-gray-600">City, State 67890</p>
+                        </div>
+                    </div>
+                    
+                    <table class="w-full mb-6">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2 text-gray-600">Description</th>
+                                <th class="text-right py-2 text-gray-600">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="py-2">Professional Services</td>
+                                <td class="py-2 text-right">$2,500.00</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Hosting & Infrastructure</td>
+                                <td class="py-2 text-right">$500.00</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2">Support & Maintenance</td>
+                                <td class="py-2 text-right">$250.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="flex justify-end">
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">Subtotal: $3,250.00</div>
+                            <div class="text-sm text-gray-600">Tax: $0.00</div>
+                            <div class="text-lg font-bold text-gray-900 border-t pt-2">Total: $3,250.00</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        }
+
+        function closeInvoiceModal() {
+            const modal = document.getElementById('invoiceModal');
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [1, 0.8],
+                opacity: [1, 0],
+                duration: 200,
+                easing: 'easeInExpo',
+                complete: () => {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        function downloadInvoice(invoiceId) {
+            showToast('Downloading invoice...', 'info');
+            
+            // Simulate download
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,Invoice Data';
+                link.download = `${invoiceId}.pdf`;
+                link.click();
+                showToast('Invoice downloaded successfully!', 'success');
+            }, 1000);
+        }
+
+        function payInvoice(invoiceId) {
+            const modal = document.getElementById('paymentModal');
+            const invoiceNumber = document.getElementById('paymentInvoiceNumber');
+            const amount = document.getElementById('paymentAmount');
+            
+            // Sample amounts based on invoice
+            const amounts = {
+                'INV-002': '1,850.00',
+                'INV-003': '5,420.00',
+                'INV-005': '4,750.00'
+            };
+            
+            invoiceNumber.textContent = invoiceId;
+            amount.textContent = amounts[invoiceId] || '0.00';
+            
+            modal.classList.remove('hidden');
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [1, 0.8],
+                opacity: [1, 0],
+                duration: 200,
+                easing: 'easeInExpo',
+                complete: () => {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        function processPayment() {
+            showToast('Processing payment...', 'info');
+            
+            setTimeout(() => {
+                closePaymentModal();
+                showToast('Payment processed successfully!', 'success');
+                
+                // Update invoice status in table
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }, 2000);
+        }
+
+        function openInvoiceModal() {
+            showToast('Invoice creation form would open here', 'info');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Initialize page animations
+        document.addEventListener('DOMContentLoaded', function() {
+            anime({
+                targets: '.card-hover',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+    </script>
+    <script src="enhanced-main.js"></script>
+</body>
+</html>

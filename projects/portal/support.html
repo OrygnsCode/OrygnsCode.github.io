@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orygns Client Portal - Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0D1B2A 0%, #1B263B 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .nav-link { transition: all 0.2s ease; }
+        .nav-link:hover { color: #00B4D8; transform: translateX(4px); }
+        .priority-high { background-color: #EF4444; }
+        .priority-medium { background-color: #F59E0B; }
+        .priority-low { background-color: #10B981; }
+        .status-open { background-color: #3B82F6; }
+        .status-in-progress { background-color: #F59E0B; }
+        .status-resolved { background-color: #10B981; }
+        .status-closed { background-color: #6B7280; }
+        .chat-bubble-client { background-color: #00B4D8; }
+        .chat-bubble-support { background-color: #E5E7EB; color: #374151; }
+        .ticket-item:hover { background-color: #f8fafc; cursor: pointer; }
+        .active-ticket { background-color: #e0f2fe; border-left: 4px solid #00B4D8; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold gradient-text-primary">Orygns Portal</h1>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="index.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Dashboard</a>
+                            <a href="invoices.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Invoices</a>
+                            <a href="support.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium bg-teal-600">Support</a>
+                            <a href="reports.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700">Reports</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"/>
+                        </svg>
+                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"></span>
+                    </button>
+                    <div class="relative">
+                        <button class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="User avatar">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Support Center</h1>
+                    <p class="text-gray-600 mt-1">Get help and track your support requests</p>
+                </div>
+                <button onclick="openTicketModal()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors duration-200">
+                    New Ticket
+                </button>
+            </div>
+
+            <!-- Support Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Tickets</dt>
+                                <dd class="text-lg font-medium text-gray-900">12</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Open</dt>
+                                <dd class="text-lg font-medium text-gray-900">5</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">In Progress</dt>
+                                <dd class="text-lg font-medium text-gray-900">3</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Resolved</dt>
+                                <dd class="text-lg font-medium text-gray-900">4</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Support Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Ticket List -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Your Tickets</h3>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            <div class="ticket-item active-ticket p-4 border-b border-gray-100" onclick="selectTicket('ticket-1')">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900">Server Performance Issue</h4>
+                                    <span class="priority-high inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">High</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">Experiencing slow response times on our main server...</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="status-in-progress inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">In Progress</span>
+                                    <span class="text-xs text-gray-500">2 hours ago</span>
+                                </div>
+                            </div>
+                            
+                            <div class="ticket-item p-4 border-b border-gray-100" onclick="selectTicket('ticket-2')">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900">Billing Question</h4>
+                                    <span class="priority-medium inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Medium</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">Question about charges on last month's invoice...</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="status-open inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Open</span>
+                                    <span class="text-xs text-gray-500">1 day ago</span>
+                                </div>
+                            </div>
+                            
+                            <div class="ticket-item p-4 border-b border-gray-100" onclick="selectTicket('ticket-3')">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900">Feature Request</h4>
+                                    <span class="priority-low inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Low</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">Would like to request a new reporting feature...</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="status-resolved inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Resolved</span>
+                                    <span class="text-xs text-gray-500">3 days ago</span>
+                                </div>
+                            </div>
+                            
+                            <div class="ticket-item p-4 border-b border-gray-100" onclick="selectTicket('ticket-4')">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900">Login Issues</h4>
+                                    <span class="priority-high inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">High</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">Unable to access the admin dashboard...</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="status-closed inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white">Closed</span>
+                                    <span class="text-xs text-gray-500">1 week ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Conversation -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md h-full">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-gray-900">Ticket #1234 - Server Performance Issue</h3>
+                                <div class="flex space-x-2">
+                                    <button onclick="closeTicket()" class="text-sm text-red-600 hover:text-red-800">Close Ticket</button>
+                                    <button onclick="escalateTicket()" class="text-sm text-teal-600 hover:text-teal-800">Escalate</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 h-96 overflow-y-auto" id="chatContainer">
+                            <!-- Chat messages -->
+                            <div class="mb-4">
+                                <div class="flex items-start">
+                                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                    <div class="ml-3 flex-1">
+                                        <div class="chat-bubble-client text-white px-4 py-2 rounded-lg max-w-xs">
+                                            <p class="text-sm">Hi, we're experiencing very slow response times on our main server. This is affecting our daily operations. Can you please look into this urgently?</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">John Smith • 2 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-start justify-end">
+                                    <div class="mr-3 flex-1 text-right">
+                                        <div class="chat-bubble-support px-4 py-2 rounded-lg max-w-xs inline-block">
+                                            <p class="text-sm">Thank you for reaching out. I've received your ticket and am investigating the server performance issues. I'll update you shortly with my findings.</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Support Team • 1 hour ago</p>
+                                    </div>
+                                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Support">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-start">
+                                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                                    <div class="ml-3 flex-1">
+                                        <div class="chat-bubble-client text-white px-4 py-2 rounded-lg max-w-xs">
+                                            <p class="text-sm">Thank you. I've also noticed that the database queries are taking longer than usual. Could this be related?</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">John Smith • 45 minutes ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-start justify-end">
+                                    <div class="mr-3 flex-1 text-right">
+                                        <div class="chat-bubble-support px-4 py-2 rounded-lg max-w-xs inline-block">
+                                            <p class="text-sm">Yes, that's likely related. I've identified the issue - there was a recent database optimization that didn't complete properly. I'm working on fixing it now and will monitor the performance.</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Support Team • 30 minutes ago</p>
+                                    </div>
+                                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Support">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-start justify-end">
+                                    <div class="mr-3 flex-1 text-right">
+                                        <div class="chat-bubble-support px-4 py-2 rounded-lg max-w-xs inline-block">
+                                            <p class="text-sm">Update: I've completed the database optimization and performance has improved significantly. Can you please test and confirm that everything is working properly now?</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Support Team • 15 minutes ago</p>
+                                    </div>
+                                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Support">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Message Input -->
+                        <div class="border-t border-gray-200 p-4">
+                            <div class="flex space-x-3">
+                                <input type="text" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" id="messageInput">
+                                <button onclick="sendMessage()" class="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors duration-200">
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Ticket Modal -->
+    <div id="ticketModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Create New Support Ticket</h3>
+                    <button onclick="closeTicketModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form onsubmit="submitTicket(event)">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Subject</label>
+                                <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Brief description of the issue" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Priority</label>
+                                <select class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                                    <option value="">Select priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Category</label>
+                            <select class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                                <option value="">Select category</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="account">Account Management</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea rows="6" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Please provide detailed information about your issue or request..." required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Attachments (Optional)</label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-teal-500">
+                                            <span>Upload a file</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeTicketModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-md text-sm font-medium hover:bg-teal-700">Create Ticket</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Support ticket functions
+        function selectTicket(ticketId) {
+            // Remove active class from all tickets
+            document.querySelectorAll('.ticket-item').forEach(item => {
+                item.classList.remove('active-ticket');
+            });
+            
+            // Add active class to selected ticket
+            event.currentTarget.classList.add('active-ticket');
+            
+            // Update conversation (in a real app, this would load the actual conversation)
+            showToast(`Loading ticket ${ticketId}...`, 'info');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add message to chat
+            const chatContainer = document.getElementById('chatContainer');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'mb-4';
+            messageElement.innerHTML = `
+                <div class="flex items-start">
+                    <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Client">
+                    <div class="ml-3 flex-1">
+                        <div class="chat-bubble-client text-white px-4 py-2 rounded-lg max-w-xs">
+                            <p class="text-sm">${message}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">You • Just now</p>
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            input.value = '';
+            
+            // Simulate support response
+            setTimeout(() => {
+                const responseElement = document.createElement('div');
+                responseElement.className = 'mb-4';
+                responseElement.innerHTML = `
+                    <div class="flex items-start justify-end">
+                        <div class="mr-3 flex-1 text-right">
+                            <div class="chat-bubble-support px-4 py-2 rounded-lg max-w-xs inline-block">
+                                <p class="text-sm">Thank you for your message. I'll look into this and get back to you shortly.</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Support Team • Just now</p>
+                        </div>
+                        <img class="h-8 w-8 rounded-full" src="resources/business-team.jpg" alt="Support">
+                    </div>
+                `;
+                chatContainer.appendChild(responseElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1500);
+        }
+
+        function openTicketModal() {
+            const modal = document.getElementById('ticketModal');
+            modal.classList.remove('hidden');
+            
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        }
+
+        function closeTicketModal() {
+            const modal = document.getElementById('ticketModal');
+            anime({
+                targets: modal.querySelector('.bg-white'),
+                scale: [1, 0.8],
+                opacity: [1, 0],
+                duration: 200,
+                easing: 'easeInExpo',
+                complete: () => {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        function submitTicket(event) {
+            event.preventDefault();
+            
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                closeTicketModal();
+                showToast('Support ticket created successfully!', 'success');
+                event.target.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 1500);
+        }
+
+        function closeTicket() {
+            if (confirm('Are you sure you want to close this ticket?')) {
+                showToast('Ticket closed successfully!', 'success');
+            }
+        }
+
+        function escalateTicket() {
+            showToast('Ticket escalated to senior support team!', 'info');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500 text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Initialize page animations
+        document.addEventListener('DOMContentLoaded', function() {
+            anime({
+                targets: '.card-hover',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+    </script>
+    <script src="enhanced-main.js"></script>
+</body>
+</html>
