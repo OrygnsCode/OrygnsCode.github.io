@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -9,13 +10,16 @@
     <title>OrygnsCode | Interactive AI Projects</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
+
 <body>
     <!-- Enhanced Loading Screen -->
     <div id="loading-screen">
@@ -38,7 +42,8 @@
                 <div class="loading-status">Initializing quantum matrices...</div>
             </div>
         </div>
-    </div></div>
+    </div>
+    </div>
 
     <!-- Main Content -->
     <div id="main-content">
@@ -65,6 +70,7 @@
                 <div class="nav-menu" id="nav-menu">
                     <div class="nav-links">
                         <a href="#hero" class="nav-link" data-section="hero">Home</a>
+                        <a href="#apps" class="nav-link" data-section="apps">Apps</a>
                         <a href="#games" class="nav-link" data-section="games">Games</a>
                         <a href="#about" class="nav-link" data-section="about">About</a>
                     </div>
@@ -85,7 +91,9 @@
                         <span class="title-line highlight">AI Projects</span>
                     </h1>
                     <p class="hero-description">
-                        Immersive AI-built apps showcasing modern web development. This work-in-progress platform features an AI agent that continuously improves the experience through automated updates (features, bug fixes, etc).
+                        Immersive AI-built apps showcasing modern web development. This work-in-progress platform
+                        features an AI agent that continuously improves the experience through automated updates
+                        (features, bug fixes, etc).
                     </p>
                     <div class="hero-actions">
                         <a href="#games" class="btn btn-primary">
@@ -112,6 +120,44 @@
             </div>
         </section>
 
+        <!-- Apps / Demos Section -->
+        <section id="apps" class="apps-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">Apps / Demos</h2>
+                    <p class="section-subtitle">Practical applications and functional demonstrations</p>
+                </div>
+
+                <div class="games-grid">
+                    <!-- CLIENT PORTAL CARD -->
+                    <article class="game-card" data-category="utility">
+                        <div class="card-visual">
+                            <div class="card-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="card-glow"></div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Client Portal</h3>
+                            <p class="card-description">
+                                Secure dashboard for clients to access invoices, reports, files, and support.
+                            </p>
+                            <div class="card-tags">
+                                <span class="tag">Business</span>
+                                <span class="tag">Dashboard</span>
+                                <span class="tag">AI</span>
+                            </div>
+                        </div>
+
+                        <a href="projects/portal/login.html" class="card-link">
+                            <span>Open Portal</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <!-- Games Section -->
         <section id="games" class="games-section">
             <div class="section-container">
@@ -121,31 +167,7 @@
                 </div>
 
                 <div class="games-grid">
-                    <!-- CLIENT PORTAL CARD (FIRST CARD) -->
-<article class="game-card" data-category="utility">
-    <div class="card-visual">
-        <div class="card-icon">
-            <i class="fas fa-user-shield"></i> <!-- Portal icon -->
-        </div>
-        <div class="card-glow"></div>
-    </div>
-    <div class="card-content">
-        <h3 class="card-title">Client Portal</h3>
-        <p class="card-description">
-            Secure dashboard for clients to access invoices, reports, files, and support.
-        </p>
-        <div class="card-tags">
-            <span class="tag">Business</span>
-            <span class="tag">Dashboard</span>
-            <span class="tag">AI</span>
-        </div>
-    </div>
-
-    <a href="projects/portal/login.html" class="card-link">
-        <span>Open Portal</span>
-        <i class="fas fa-external-link-alt"></i>
-    </a>
-</article>
+                    <!-- CLIENT PORTAL CARD MOVED TO APPS SECTION -->
                     <article class="game-card" data-category="puzzle">
                         <div class="card-visual">
                             <div class="card-icon">
@@ -155,7 +177,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">2048</h3>
-                            <p class="card-description">Classic tile-merging puzzle game with smooth animations and responsive controls.</p>
+                            <p class="card-description">Classic tile-merging puzzle game with smooth animations and
+                                responsive controls.</p>
                             <div class="card-tags">
                                 <span class="tag">Puzzle</span>
                                 <span class="tag">Logic</span>
@@ -176,7 +199,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">AstroDuel</h3>
-                            <p class="card-description">Epic space combat experience. Rotate device horizontally for optimal gameplay.</p>
+                            <p class="card-description">Epic space combat experience. Rotate device horizontally for
+                                optimal gameplay.</p>
                             <div class="card-tags">
                                 <span class="tag">Action</span>
                                 <span class="tag">Space</span>
@@ -197,7 +221,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Connect 4</h3>
-                            <p class="card-description">Strategic gameplay against AI with five difficulty levels to challenge your skills.</p>
+                            <p class="card-description">Strategic gameplay against AI with five difficulty levels to
+                                challenge your skills.</p>
                             <div class="card-tags">
                                 <span class="tag">Strategy</span>
                                 <span class="tag">AI</span>
@@ -219,7 +244,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Endless Boxy Run</h3>
-                            <p class="card-description">Temple Run inspired endless runner with dynamic obstacles and fluid controls.</p>
+                            <p class="card-description">Temple Run inspired endless runner with dynamic obstacles and
+                                fluid controls.</p>
                             <div class="card-tags">
                                 <span class="tag">Endless</span>
                                 <span class="tag">Runner</span>
@@ -240,7 +266,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Interactive Piano</h3>
-                            <p class="card-description">A playable piano with realistic sound and responsive key controls.</p>
+                            <p class="card-description">A playable piano with realistic sound and responsive key
+                                controls.</p>
                             <div class="card-tags">
                                 <span class="tag">Music</span>
                                 <span class="tag">Creative</span>
@@ -261,7 +288,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">AI Piano Collaboration</h3>
-                            <p class="card-description">Play piano with AI assistance using Google Magenta's neural networks for real-time melody continuation.</p>
+                            <p class="card-description">Play piano with AI assistance using Google Magenta's neural
+                                networks for real-time melody continuation.</p>
                             <div class="card-tags">
                                 <span class="tag">AI</span>
                                 <span class="tag">Music</span>
@@ -283,7 +311,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">AI Drum Machine</h3>
-                            <p class="card-description">Create and generate drum patterns with AI assistance using neural networks for intelligent beat generation.</p>
+                            <p class="card-description">Create and generate drum patterns with AI assistance using
+                                neural networks for intelligent beat generation.</p>
                             <div class="card-tags">
                                 <span class="tag">AI</span>
                                 <span class="tag">Music</span>
@@ -305,7 +334,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Rack 'Em</h3>
-                            <p class="card-description">Precision billiards challenge with realistic physics and strategic gameplay.</p>
+                            <p class="card-description">Precision billiards challenge with realistic physics and
+                                strategic gameplay.</p>
                             <div class="card-tags">
                                 <span class="tag">Sports</span>
                                 <span class="tag">Physics</span>
@@ -317,7 +347,7 @@
                         </a>
                     </article>
 
- <article class="game-card" data-category="sports">
+                    <article class="game-card" data-category="sports">
                         <div class="card-visual">
                             <div class="card-icon">
                                 <i class="fas fa-car"></i> <!-- Using a car icon, can change later if needed -->
@@ -348,7 +378,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Simon</h3>
-                            <p class="card-description">Test your memory with this classic sequence game featuring audio-visual feedback.</p>
+                            <p class="card-description">Test your memory with this classic sequence game featuring
+                                audio-visual feedback.</p>
                             <div class="card-tags">
                                 <span class="tag">Memory</span>
                                 <span class="tag">Classic</span>
@@ -369,16 +400,17 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Snake</h3>
-                            <p class="card-description">Timeless arcade classic with modern visuals and responsive gameplay mechanics.</p>
+                            <p class="card-description">Timeless arcade classic with modern visuals and responsive
+                                gameplay mechanics.</p>
                             <div class="card-tags">
                                 <span class="tag">Arcade</span>
                                 <span class="tag">Classic</span>
-                            </span>
-                        </div>
-                        <a href="projects/game-snake/index.html" class="card-link">
-                            <span>Play Snake</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
+                                </span>
+                            </div>
+                            <a href="projects/game-snake/index.html" class="card-link">
+                                <span>Play Snake</span>
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
                     </article>
 
                     <article class="game-card" data-category="skill">
@@ -390,7 +422,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Stick Hero</h3>
-                            <p class="card-description">Precision timing game where perfect length calculation is the key to survival.</p>
+                            <p class="card-description">Precision timing game where perfect length calculation is the
+                                key to survival.</p>
                             <div class="card-tags">
                                 <span class="tag">Skill</span>
                                 <span class="tag">Timing</span>
@@ -411,7 +444,8 @@
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">Tetris</h3>
-                            <p class="card-description">Classic falling blocks puzzle with smooth rotations. Desktop optimized experience.</p>
+                            <p class="card-description">Classic falling blocks puzzle with smooth rotations. Desktop
+                                optimized experience.</p>
                             <div class="card-tags">
                                 <span class="tag">Puzzle</span>
                                 <span class="tag">Desktop</span>
@@ -432,7 +466,8 @@
                 <div class="about-content">
                     <div class="about-text">
                         <h2 class="section-title">About This Project</h2>
-                        <p>A cutting-edge collection of interactive applications built with modern web technologies, advanced 3D graphics, and AI-driven development workflows.</p>
+                        <p>A cutting-edge collection of interactive applications built with modern web technologies,
+                            advanced 3D graphics, and AI-driven development workflows.</p>
 
                         <div class="tech-stack">
                             <h3 class="stack-title">Technologies Used</h3>
@@ -559,7 +594,8 @@
     </div>
 
 </body>
-    <script src="js/three-background.js"></script>
-    <script src="js/animations.js"></script>
-    <script src="js/main.js"></script>
+<script src="js/three-background.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/main.js"></script>
+
 </html>
