@@ -637,18 +637,15 @@ body {
     padding-top: 2rem;
     scroll-margin-top: 100px;
     /* Ensure sticky header doesn't cover content */
-    background: linear-gradient(180deg,
-            rgba(10, 10, 15, 0.65) 0%,
-            rgba(10, 10, 15, 0.80) 100%);
-    backdrop-filter: blur(15px);
+    /* Ensure sticky header doesn't cover content */
+    background: transparent;
+    /* backdrop-filter: blur(15px); - Removed to show 3D background clearly */
 }
 
 .light-theme .apps-section,
 .light-theme .games-section,
 .light-theme .about-section {
-    background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.65) 0%,
-            rgba(255, 255, 255, 0.80) 100%);
+    background: transparent;
 }
 
 /* Enhanced 3D Background System */

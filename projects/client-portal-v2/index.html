@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal V2 | OrysPanel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <div id="app" class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-cube"></i>
+                    <span>OrysPanel</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#/dashboard" class="nav-item active" data-path="/dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#/projects" class="nav-item" data-path="/projects">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Projects</span>
+                </a>
+                <a href="#/messages" class="nav-item" data-path="/messages">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="#/files" class="nav-item" data-path="/files">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span>Files</span>
+                </a>
+                <a href="#/billing" class="nav-item" data-path="/billing">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Billing</span>
+                </a>
+                <a href="#/activity" class="nav-item" data-path="/activity">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Activity</span>
+                </a>
+                <a href="#/settings" class="nav-item" data-path="/settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-mini-profile" id="sidebar-user-profile">
+                    <!-- Injected by JS -->
+                    <div class="skeleton" style="width: 32px; height: 32px; border-radius: 50%;"></div>
+                    <div style="flex: 1;">
+                        <div class="skeleton" style="width: 80px; height: 12px; margin-bottom: 4px;"></div>
+                        <div class="skeleton" style="width: 60px; height: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <!-- Global Search -->
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="global-search" class="search-input"
+                            placeholder="Search projects, files, messages...">
+                        <div id="search-results" class="search-results-dropdown">
+                            <!-- Results injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <button class="notification-btn" id="notification-trigger">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="notification-badge" id="notification-badge" style="display: none;"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page View -->
+            <div id="page-view" class="page-content">
+                <!-- Views rendered here -->
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
