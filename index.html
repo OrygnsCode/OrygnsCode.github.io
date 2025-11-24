@@ -3,602 +3,118 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>OrygnsCode | Interactive AI Projects</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="OrygnsCode - Innovative Web Projects & Games. Explore a collection of interactive web applications, games, and experiments.">
+    <meta property="og:title" content="OrygnsCode Portfolio">
+    <meta property="og:description"
+        content="Innovative Web Projects & Games. Explore a collection of interactive web applications, games, and experiments.">
+    <meta property="og:image" content="assets/og-image.jpg">
+    <meta property="og:url" content="https://orygnscode.github.io">
+    <meta name="theme-color" content="#0a0a0a">
+
+    <title>OrygnsCode | Digital Portfolio</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Three.js (Deferred) -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+        }
+      }
+    </script>
 </head>
 
 <body>
-    <!-- Enhanced Loading Screen -->
-    <div id="loading-screen">
+    <canvas id="bg-canvas"></canvas>
 
+    <div class="overlay"></div>
 
-        <div class="loading-container">
-            <div class="loading-logo">
-                <div class="logo-text">OrygnsCode</div>
-                <div class="loading-subtitle-main"></div>
-            </div>
-
-            <div class="loading-progress-container">
-                <div class="loading-bar">
-                    <div class="loading-progress"></div>
-                </div>
-                <div class="loading-stats">
-                    <span id="loading-percentage">0%</span>
-                    <span class="loading-subtitle">System startup...</span>
-                </div>
-                <div class="loading-status">Initializing quantum matrices...</div>
-            </div>
+    <nav class="navbar">
+        <div class="logo">ORYGNS<span class="highlight">CODE</span></div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+        <div class="menu-toggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
-    </div>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div id="main-content">
-        <!-- 3D Background -->
-        <div id="three-bg"></div>
-
-        <!-- Navigation -->
-        <nav class="main-nav">
-            <div class="nav-container">
-                <div class="nav-logo">
-                    <div class="logo-container">
-                        <div class="logo-brand">
-                            <span class="logo-o"></span>
-                            <span class="logo-text">OrygnsCode</span>
-                            <div class="logo-pulse"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="nav-toggle" id="nav-toggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="nav-menu" id="nav-menu">
-                    <div class="nav-links">
-                        <a href="#hero" class="nav-link" data-section="hero">Home</a>
-                        <a href="#apps" class="nav-link" data-section="apps">Apps</a>
-                        <a href="#games" class="nav-link" data-section="games">Games</a>
-                        <a href="#about" class="nav-link" data-section="about">About</a>
-                    </div>
-                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                        <i class="fas fa-sun"></i>
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>
+                    <span id="typewriter-text"></span><span class="cursor">|</span>
+                </h1>
+                <p class="subtitle">Interactive Web Experiences & Games</p>
+                <a href="#projects" class="cta-button">Explore Projects</a>
             </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section id="hero" class="hero-section">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <h1 class="hero-title">
-                        <span class="title-line">Interactive</span>
-                        <span class="title-line highlight">AI Projects</span>
-                    </h1>
-                    <p class="hero-description">
-                        Immersive AI-built apps showcasing modern web development. This work-in-progress platform
-                        features an AI agent that continuously improves the experience through automated updates
-                        (features, bug fixes, etc).
-                    </p>
-                    <div class="hero-actions">
-                        <a href="#games" class="btn btn-primary">
-                            <span>Explore Games</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="https://github.com/OrygnsCode" target="_blank" class="btn btn-secondary">
-                            <i class="fab fa-github"></i>
-                            <span>View Source</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="floating-cards">
-                        <div class="game-card mini" data-game="2048">2048</div>
-                        <div class="game-card mini" data-game="tetris">Tetris</div>
-                        <div class="game-card mini" data-game="snake">Snake</div>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-scroll">
-                <span>Scroll to explore</span>
-                <div class="scroll-indicator"></div>
+            <div class="scroll-indicator">
+                <span></span>
             </div>
         </section>
 
-        <!-- Apps / Demos Section -->
-        <section id="apps" class="apps-section">
-            <div class="section-container">
-                <div class="section-header">
-                    <h2 class="section-title">Apps / Demos</h2>
-                    <p class="section-subtitle">Practical applications and functional demonstrations</p>
-                </div>
+        <section id="projects">
+            <div class="section-header">
+                <h2>PROJECTS</h2>
+                <div class="line"></div>
+            </div>
 
-                <div class="games-grid">
-                    <!-- CLIENT PORTAL V2 CARD -->
-                    <article class="game-card featured" data-category="utility">
-                        <div class="featured-badge">New</div>
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-building-user"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Client Portal V2</h3>
-                            <p class="card-description">
-                                Secure dashboard for clients to view projects, messages, files, and invoices.
-                            </p>
-                            <div class="card-tags">
-                                <span class="tag">Business</span>
-                                <span class="tag">Dashboard</span>
-                                <span class="tag">V2</span>
-                            </div>
-                        </div>
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="App">Apps</button>
+                <button class="filter-btn" data-filter="Game">Games</button>
+            </div>
 
-                        <a href="projects/client-portal-v2/index.html" class="card-link">
-                            <span>Open Portal V2</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-
-                </div>
+            <div class="projects-grid" id="projects-grid">
+                <!-- Projects injected via JS -->
             </div>
         </section>
 
-        <!-- Games Section -->
-        <section id="games" class="games-section">
-            <div class="section-container">
-                <div class="section-header">
-                    <h2 class="section-title">Game Collection</h2>
-                    <p class="section-subtitle">Interactive experiences for you to explore and enjoy</p>
-                </div>
-
-                <div class="games-grid">
-                    <!-- CLIENT PORTAL CARD MOVED TO APPS SECTION -->
-                    <article class="game-card" data-category="puzzle">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-border-all"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">2048</h3>
-                            <p class="card-description">Classic tile-merging puzzle game with smooth animations and
-                                responsive controls.</p>
-                            <div class="card-tags">
-                                <span class="tag">Puzzle</span>
-                                <span class="tag">Logic</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-2048/index.html" class="card-link">
-                            <span>Play Now</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="action">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-rocket"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">AstroDuel</h3>
-                            <p class="card-description">Epic space combat experience. Rotate device horizontally for
-                                optimal gameplay.</p>
-                            <div class="card-tags">
-                                <span class="tag">Action</span>
-                                <span class="tag">Space</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-AstroDuel/index.html" class="card-link">
-                            <span>Launch Game</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="strategy">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-braille"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Connect 4</h3>
-                            <p class="card-description">Strategic gameplay against AI with five difficulty levels to
-                                challenge your skills.</p>
-                            <div class="card-tags">
-                                <span class="tag">Strategy</span>
-                                <span class="tag">AI</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-Align/index.html" class="card-link">
-                            <span>Play Now</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card featured" data-category="action">
-                        <div class="featured-badge">Featured</div>
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-person-running"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Endless Boxy Run</h3>
-                            <p class="card-description">Temple Run inspired endless runner with dynamic obstacles and
-                                fluid controls.</p>
-                            <div class="card-tags">
-                                <span class="tag">Endless</span>
-                                <span class="tag">Runner</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-EndlessBoxyRun/index.html" class="card-link">
-                            <span>Start Running</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="music">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-music"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Interactive Piano</h3>
-                            <p class="card-description">A playable piano with realistic sound and responsive key
-                                controls.</p>
-                            <div class="card-tags">
-                                <span class="tag">Music</span>
-                                <span class="tag">Creative</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-InteractivePiano/index.html" class="card-link">
-                            <span>Make Music</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="music">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">AI Piano Collaboration</h3>
-                            <p class="card-description">Play piano with AI assistance using Google Magenta's neural
-                                networks for real-time melody continuation.</p>
-                            <div class="card-tags">
-                                <span class="tag">AI</span>
-                                <span class="tag">Music</span>
-                                <span class="tag">Machine Learning</span>
-                            </div>
-                        </div>
-                        <a href="projects/app-AIPiano/index.html" class="card-link">
-                            <span>Jam with AI</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="music">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-drum"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">AI Drum Machine</h3>
-                            <p class="card-description">Create and generate drum patterns with AI assistance using
-                                neural networks for intelligent beat generation.</p>
-                            <div class="card-tags">
-                                <span class="tag">AI</span>
-                                <span class="tag">Music</span>
-                                <span class="tag">Beats</span>
-                            </div>
-                        </div>
-                        <a href="projects/app-AIDrumMachine/index.html" class="card-link">
-                            <span>Make Beats</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="sports">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-bowling-ball"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Rack 'Em</h3>
-                            <p class="card-description">Precision billiards challenge with realistic physics and
-                                strategic gameplay.</p>
-                            <div class="card-tags">
-                                <span class="tag">Sports</span>
-                                <span class="tag">Physics</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-Billards/index.html" class="card-link">
-                            <span>Break Rack</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="sports">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-car"></i> <!-- Using a car icon, can change later if needed -->
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">MotorBall</h3>
-                            <p class="card-description">Fast-paced car soccer against a smart AI opponent.</p>
-                            <div class="card-tags">
-                                <span class="tag">Sports</span>
-                                <span class="tag">AI</span>
-                                <span class="tag">Action</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-MotorBall/index.html" class="card-link">
-                            <span>Play Now</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="memory">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Simon</h3>
-                            <p class="card-description">Test your memory with this classic sequence game featuring
-                                audio-visual feedback.</p>
-                            <div class="card-tags">
-                                <span class="tag">Memory</span>
-                                <span class="tag">Classic</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-simon/index.html" class="card-link">
-                            <span>Test Memory</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="arcade">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-staff-snake"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Snake</h3>
-                            <p class="card-description">Timeless arcade classic with modern visuals and responsive
-                                gameplay mechanics.</p>
-                            <div class="card-tags">
-                                <span class="tag">Arcade</span>
-                                <span class="tag">Classic</span>
-                                </span>
-                            </div>
-                            <a href="projects/game-snake/index.html" class="card-link">
-                                <span>Play Snake</span>
-                                <i class="fas fa-external-link-alt"></i>
-                            </a>
-                    </article>
-
-                    <article class="game-card" data-category="skill">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-ruler-horizontal"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Stick Hero</h3>
-                            <p class="card-description">Precision timing game where perfect length calculation is the
-                                key to survival.</p>
-                            <div class="card-tags">
-                                <span class="tag">Skill</span>
-                                <span class="tag">Timing</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-stickhero/index.html" class="card-link">
-                            <span>Test Precision</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-
-                    <article class="game-card" data-category="puzzle">
-                        <div class="card-visual">
-                            <div class="card-icon">
-                                <i class="fas fa-cubes"></i>
-                            </div>
-                            <div class="card-glow"></div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Tetris</h3>
-                            <p class="card-description">Classic falling blocks puzzle with smooth rotations. Desktop
-                                optimized experience.</p>
-                            <div class="card-tags">
-                                <span class="tag">Puzzle</span>
-                                <span class="tag">Desktop</span>
-                            </div>
-                        </div>
-                        <a href="projects/game-Tetris/index.html" class="card-link">
-                            <span>Stack Blocks</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="about-section">
-            <div class="section-container">
+        <section id="about">
+            <div class="container">
                 <div class="about-content">
-                    <div class="about-text">
-                        <h2 class="section-title">About This Project</h2>
-                        <p>A cutting-edge collection of interactive applications built with modern web technologies,
-                            advanced 3D graphics, and AI-driven development workflows.</p>
-
-                        <div class="tech-stack">
-                            <h3 class="stack-title">Technologies Used</h3>
-                            <div class="tech-grid">
-                                <div class="tech-card" data-tech="html">
-                                    <div class="tech-icon">
-                                        <i class="fab fa-html5"></i>
-                                    </div>
-                                    <span class="tech-name">HTML5</span>
-                                </div>
-                                <div class="tech-card" data-tech="css">
-                                    <div class="tech-icon">
-                                        <i class="fab fa-css3-alt"></i>
-                                    </div>
-                                    <span class="tech-name">CSS3</span>
-                                </div>
-                                <div class="tech-card" data-tech="js">
-                                    <div class="tech-icon">
-                                        <i class="fab fa-js-square"></i>
-                                    </div>
-                                    <span class="tech-name">JavaScript</span>
-                                </div>
-                                <div class="tech-card" data-tech="sass">
-                                    <div class="tech-icon">
-                                        <i class="fab fa-sass"></i>
-                                    </div>
-                                    <span class="tech-name">SCSS</span>
-                                </div>
-                                <div class="tech-card" data-tech="threejs">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-cube"></i>
-                                    </div>
-                                    <span class="tech-name">Three.js</span>
-                                </div>
-                                <div class="tech-card" data-tech="gsap">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-magic"></i>
-                                    </div>
-                                    <span class="tech-name">GSAP</span>
-                                </div>
-                                <div class="tech-card" data-tech="webgl">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-chess-board"></i>
-                                    </div>
-                                    <span class="tech-name">WebGL</span>
-                                </div>
-                                <div class="tech-card" data-tech="nodejs">
-                                    <div class="tech-icon">
-                                        <i class="fab fa-node-js"></i>
-                                    </div>
-                                    <span class="tech-name">Node.js</span>
-                                </div>
-                                <div class="tech-card" data-tech="express">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-server"></i>
-                                    </div>
-                                    <span class="tech-name">Express</span>
-                                </div>
-                                <div class="tech-card" data-tech="magenta">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-brain"></i>
-                                    </div>
-                                    <span class="tech-name">Magenta.js</span>
-                                </div>
-                                <div class="tech-card" data-tech="tensorflow">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-robot"></i>
-                                    </div>
-                                    <span class="tech-name">TensorFlow.js</span>
-                                </div>
-                                <div class="tech-card" data-tech="tonejs">
-                                    <div class="tech-icon">
-                                        <i class="fas fa-music"></i>
-                                    </div>
-                                    <span class="tech-name">Tone.js</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="about-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">13</span>
-                            <span class="stat-label">Games</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">AI Assisted</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">∞</span>
-                            <span class="stat-label">Possibilities</span>
-                        </div>
+                    <h2>ABOUT ME</h2>
+                    <p>Immersive AI-built apps showcasing modern web development. Pushing the boundaries of what's
+                        possible in the browser with cutting-edge technologies and creative coding.</p>
+                    <div class="tech-stack">
+                        <span>JavaScript</span>
+                        <span>Three.js</span>
+                        <span>React</span>
+                        <span>Node.js</span>
+                        <span>WebGL</span>
+                        <span>AI Integration</span>
                     </div>
                 </div>
             </div>
         </section>
+    </main>
 
-        <!-- Footer -->
-        <footer class="main-footer">
-            <div class="footer-container">
-                <div class="footer-content">
-                    <div class="footer-brand">
-                        <div class="logo-container">
-                            <div class="logo-brand">
-                                <span class="logo-o"></span>
-                                <span class="logo-text">OrygnsCode</span>
-                                <div class="logo-pulse"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer-links">
-                        <a href="https://github.com/OrygnsCode" target="_blank" class="footer-link">
-                            <i class="fab fa-github"></i>
-                            <span>GitHub</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2025 OrygnsCode - Powered by creativity and AI collaboration</p>
-                    <div id="dynamic-message" class="dynamic-message"></div>
-                </div>
-            </div>
-        </footer>
-    </div>
+    <footer>
+        <p>&copy; <span id="year"></span> OrygnsCode. Built with <span class="heart">♥</span>.</p>
+        <div class="socials">
+            <a href="https://github.com/OrygnsCode" target="_blank" aria-label="GitHub">GitHub</a>
+        </div>
+    </footer>
 
+    <script defer src="js/app.js"></script>
+    <script type="module" src="js/three-bg.js"></script>
 </body>
-<script src="js/three-background.js"></script>
-<script src="js/animations.js"></script>
-<script src="js/main.js"></script>
 
 </html>

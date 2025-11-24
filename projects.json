@@ -1,0 +1,114 @@
+[
+    {
+        "id": "client-portal-v2",
+        "title": "Client Portal V2",
+        "category": "App",
+        "description": "A modern, responsive client portal dashboard with project management features.",
+        "path": "projects/client-portal-v2/",
+        "image": "assets/icons/client-portal-v2.svg"
+    },
+    {
+        "id": "app-AIDrumMachine",
+        "title": "AI Drum Machine",
+        "category": "App",
+        "description": "An interactive drum machine powered by AI for beat generation.",
+        "path": "projects/app-AIDrumMachine/",
+        "image": "assets/icons/app-AIDrumMachine.svg"
+    },
+    {
+        "id": "app-AIPiano",
+        "title": "AI Piano",
+        "category": "App",
+        "description": "Play the piano with AI accompaniment.",
+        "path": "projects/app-AIPiano/",
+        "image": "assets/icons/app-AIPiano.svg"
+    },
+    {
+        "id": "game-2048",
+        "title": "2048",
+        "category": "Game",
+        "description": "The classic sliding tile puzzle game. Join the numbers to get to 2048!",
+        "path": "projects/game-2048/",
+        "image": "assets/icons/game-2048.svg"
+    },
+    {
+        "id": "game-Align",
+        "title": "Align",
+        "category": "Game",
+        "description": "Test your reflexes and alignment skills in this fast-paced game.",
+        "path": "projects/game-Align/",
+        "image": "assets/icons/game-Align.svg"
+    },
+    {
+        "id": "game-AstroDuel",
+        "title": "Astro Duel",
+        "category": "Game",
+        "description": "Retro-style space shooter duel game.",
+        "path": "projects/game-AstroDuel/",
+        "image": "assets/icons/game-AstroDuel.svg"
+    },
+    {
+        "id": "game-Billards",
+        "title": "Billiards",
+        "category": "Game",
+        "description": "Classic billiards game simulation.",
+        "path": "projects/game-Billards/",
+        "image": "assets/icons/game-Billards.svg"
+    },
+    {
+        "id": "game-EndlessBoxyRun",
+        "title": "Endless Boxy Run",
+        "category": "Game",
+        "description": "An infinite runner game with a boxy character.",
+        "path": "projects/game-EndlessBoxyRun/",
+        "image": "assets/icons/game-EndlessBoxyRun.svg"
+    },
+    {
+        "id": "game-InteractivePiano",
+        "title": "Interactive Piano",
+        "category": "Game",
+        "description": "A fun, interactive virtual piano.",
+        "path": "projects/game-InteractivePiano/",
+        "image": "assets/icons/game-InteractivePiano.svg"
+    },
+    {
+        "id": "game-MotorBall",
+        "title": "Motor Ball",
+        "category": "Game",
+        "description": "Physics-based ball control game.",
+        "path": "projects/game-MotorBall/",
+        "image": "assets/icons/game-MotorBall.svg"
+    },
+    {
+        "id": "game-Tetris",
+        "title": "Tetris",
+        "category": "Game",
+        "description": "The timeless block-stacking puzzle game.",
+        "path": "projects/game-Tetris/",
+        "image": "assets/icons/game-Tetris.svg"
+    },
+    {
+        "id": "game-simon",
+        "title": "Simon",
+        "category": "Game",
+        "description": "Test your memory with this classic color sequence game.",
+        "path": "projects/game-simon/",
+        "image": "assets/icons/game-simon.svg"
+    },
+    {
+        "id": "game-snake",
+        "title": "Snake",
+        "category": "Game",
+        "description": "Eat the food and grow your snake without hitting the walls!",
+        "path": "projects/game-snake/",
+        "image": "assets/icons/game-snake.svg"
+    },
+    {
+        "id": "game-stickhero",
+        "title": "Stick Hero",
+        "category": "Game",
+        "description": "Stretch the stick to cross the platforms.",
+        "path": "projects/game-stickhero/",
+        "image": "assets/icons/game-stickhero.svg"
+    }
+]
