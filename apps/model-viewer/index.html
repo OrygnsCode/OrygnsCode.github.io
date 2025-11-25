@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer | OrygnsCode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js Import Map -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+        }
+      }
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <canvas id="viewer-canvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div class="ui-layer">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h1>MODEL VIEWER <span class="version">V2</span></h1>
+                </div>
+
+                <!-- Info Section -->
+                <div class="sidebar-section">
+                    <h2>INFO</h2>
+                    <div id="model-info" class="info-content">
+                        <div class="info-row">
+                            <span class="label">FILE</span>
+                            <span class="value" id="info-filename">No model</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">SIZE</span>
+                            <span class="value" id="info-size">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">VERTS</span>
+                            <span class="value" id="info-vertices">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">TRIS</span>
+                            <span class="value" id="info-triangles">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation Section -->
+                <div class="sidebar-section">
+                    <h2>ANIMATION</h2>
+                    <div class="control-group">
+                        <select id="anim-select" class="dropdown" disabled>
+                            <option value="">No Animations</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="playback-controls">
+                            <button id="btn-play" class="icon-btn" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                            <input type="range" id="anim-slider" class="slider" min="0" max="100" value="0" disabled>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Speed</label>
+                        <select id="anim-speed" class="dropdown small">
+                            <option value="0.5">0.5x</option>
+                            <option value="1.0" selected>1.0x</option>
+                            <option value="2.0">2.0x</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Visuals Section -->
+                <div class="sidebar-section">
+                    <h2>VISUALS</h2>
+                    <div class="control-group">
+                        <label>Exposure</label>
+                        <input type="range" id="exposure-slider" class="slider" min="0" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="toggle-group">
+                        <button id="btn-wireframe" class="toggle-btn">Wireframe</button>
+                        <button id="btn-grid" class="toggle-btn active">Grid</button>
+                        <button id="btn-auto-rotate" class="toggle-btn">Rotate</button>
+                    </div>
+                </div>
+
+                <!-- Camera Section -->
+                <div class="sidebar-section">
+                    <h2>CAMERA</h2>
+                    <div class="preset-group">
+                        <button class="preset-btn" data-view="default">Reset</button>
+                        <button class="preset-btn" data-view="front">Front</button>
+                        <button class="preset-btn" data-view="side">Side</button>
+                        <button class="preset-btn" data-view="top">Top</button>
+                    </div>
+                    <div class="control-group" style="margin-top: 10px;">
+                        <div class="playback-controls">
+                            <button id="btn-zoom-out" class="icon-btn" title="Zoom Out">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                            <button id="btn-zoom-in" class="icon-btn" title="Zoom In">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="sidebar-footer" style="margin-top: auto;">
+                    <a href="../../index.html" class="nav-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        BACK TO HOME
+                    </a>
+                    <div style="height: 15px;"></div> <!-- Spacer -->
+                    <p class="format-list">Supports: .glb .gltf .obj .fbx .ply .stl</p>
+                    <p class="format-list" style="margin-top: -5px; opacity: 0.7;">*Textures may not load for non-GLB
+                        formats</p>
+                    <button id="btn-open" class="action-btn primary">OPEN / DRAG & DROP</button>
+                </div>
+            </div>
+
+            <!-- Drop Zone -->
+            <div id="drop-zone" class="drop-zone hidden">
+                <div class="drop-content">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h2>DROP MODEL HERE</h2>
+                    <p>.glb .gltf .obj .fbx .ply .stl</p>
+                </div>
+            </div>
+
+            <!-- Hidden Inputs -->
+            <input type="file" id="file-input" accept=".glb,.gltf,.obj,.fbx,.ply,.stl" style="display: none;">
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

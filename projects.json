@@ -8,6 +8,14 @@
         "image": "assets/icons/client-portal-v2.svg"
     },
     {
+        "id": "app-model-viewer",
+        "title": "3D Model Viewer",
+        "category": "App",
+        "description": "A client-side 3D model viewer supporting GLTF, OBJ, and STL formats.",
+        "path": "apps/model-viewer/",
+        "image": "assets/icons/app-model-viewer.svg"
+    },
+    {
         "id": "app-AIDrumMachine",
         "title": "AI Drum Machine",
         "category": "App",
