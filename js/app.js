@@ -12,6 +12,10 @@ async function loadProjects() {
     try {
         const response = await fetch('projects.json');
         const projects = await response.json();
+
+        // Sort projects alphabetically by title
+        projects.sort((a, b) => a.title.localeCompare(b.title));
+
         renderProjects(projects);
         setupFilters(projects);
     } catch (error) {
