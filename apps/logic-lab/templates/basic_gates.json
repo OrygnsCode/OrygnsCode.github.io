@@ -1,0 +1,56 @@
+{
+    "components": [
+        {
+            "type": "Switch",
+            "x": 100,
+            "y": 100,
+            "id": "sw1",
+            "state": 0
+        },
+        {
+            "type": "Switch",
+            "x": 100,
+            "y": 160,
+            "id": "sw2",
+            "state": 0
+        },
+        {
+            "type": "AND",
+            "x": 240,
+            "y": 120,
+            "id": "and1"
+        },
+        {
+            "type": "Light",
+            "x": 360,
+            "y": 130,
+            "id": "light1"
+        }
+    ],
+    "wires": [
+        {
+            "startCompId": "sw1",
+            "startPinIndex": 0,
+            "startPinType": "output",
+            "endCompId": "and1",
+            "endPinIndex": 0,
+            "endPinType": "input"
+        },
+        {
+            "startCompId": "sw2",
+            "startPinIndex": 0,
+            "startPinType": "output",
+            "endCompId": "and1",
+            "endPinIndex": 1,
+            "endPinType": "input"
+        },
+        {
+            "startCompId": "and1",
+            "startPinIndex": 0,
+            "startPinType": "output",
+            "endCompId": "light1",
+            "endPinIndex": 0,
+            "endPinType": "input"
+        }
+    ]
+}

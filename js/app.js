@@ -44,10 +44,13 @@ function renderProjects(projects) {
                 <span class="card-category">${project.category}</span>
                 <h3 class="card-title">${project.title}</h3>
                 <p class="card-desc">${project.description}</p>
-                <a href="${project.path}" class="card-link">
-                    View Project 
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
+                ${project.status === 'development'
+                ? `<a href="#" class="card-link disabled">Under Development</a>`
+                : `<a href="${project.path}" class="card-link">
+                        View Project 
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                       </a>`
+            }
             </div>
         `;
         grid.appendChild(card);

@@ -118,5 +118,14 @@
         "description": "Stretch the stick to cross the platforms.",
         "path": "projects/game-stickhero/",
         "image": "assets/icons/game-stickhero.svg"
+    },
+    {
+        "id": "app-logic-lab",
+        "title": "Logic Lab",
+        "category": "App",
+        "description": "A cyberpunk digital logic simulator. Build and simulate complex circuits.",
+        "path": "apps/logic-lab/index.html",
+        "image": "assets/icons/logic-lab.svg",
+        "status": "development"
     }
 ]
