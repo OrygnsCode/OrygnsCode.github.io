@@ -1,6 +1,6 @@
 import os
 
-assets_dir = 'apps/circuit-lab/assets'
+assets_dir = '../apps/circuit-lab/assets'
 os.makedirs(assets_dir, exist_ok=True)
 
 icons = {

@@ -76,33 +76,42 @@
 }
 
 /* Content inside loader */
-.loader-content {
+.loader-text {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     z-index: 10000;
     color: #fff;
     font-family: 'JetBrains Mono', monospace;
-    /* Tech font */
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 0.3em;
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
     opacity: 1;
     transition: opacity 0.3s ease;
-    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    text-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
+    white-space: nowrap;
     display: flex;
     align-items: center;
-    white-space: nowrap;
 }
 
-.loader-content .highlight {
+/* Position text relative to the split line */
+.loader-half.left .loader-text {
+    right: 0;
+    padding-right: 15px;
+}
+
+.loader-half.right .loader-text {
+    left: 0;
+    padding-left: 15px;
+}
+
+.loader-text .highlight {
     color: #00f3ff;
-    text-shadow: 0 0 15px rgba(0, 243, 255, 0.8);
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.9);
 }
 
 /* Glitch/Scanline Effect on Text */
-.loader-content::after {
+.loader-text::after {
     content: '';
     position: absolute;
     top: 0;
@@ -125,23 +134,22 @@
     }
 }
 
-.loader-overlay.loaded .loader-content {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.1);
-    /* Subtle zoom out on fade */
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-    .loader-content {
-        font-size: 1.2rem;
-        /* Smaller font for mobile */
-        letter-spacing: 0.2em;
+    .loader-text {
+        font-size: 1.5rem;
+        letter-spacing: 0.1em;
+    }
+
+    .loader-half.left .loader-text {
+        padding-right: 10px;
+    }
+
+    .loader-half.right .loader-text {
+        padding-left: 10px;
     }
 
     .loader-half::before {
         background-size: 20px 20px;
-        /* Smaller grid for mobile */
     }
 }

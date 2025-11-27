@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load Projects from JSON
 async function loadProjects() {
     try {
-        const response = await fetch('projects.json');
+        const response = await fetch('assets/data/projects.json');
         const projects = await response.json();
 
         // Sort projects alphabetically by title
