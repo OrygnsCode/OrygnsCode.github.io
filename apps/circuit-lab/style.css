@@ -159,6 +159,29 @@ body.cyberpunk .component-item:hover {
     transform: scale(1.1);
 }
 
+/* Icon Button Styles (Shared for Help and Home) */
+.icon-btn {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.icon-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* Main Workspace */
 #workspace {
     flex: 1;
@@ -298,29 +321,30 @@ select {
     border: 1px solid var(--border-color);
     border-radius: 4px;
 }
+
 /* Help Modal Styles */
 .modal {
-    display: none; 
-    position: fixed; 
-    z-index: 2000; 
+    display: none;
+    position: fixed;
+    z-index: 2000;
     left: 0;
     top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.6); 
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background-color: var(--panel-bg);
-    margin: 10% auto; 
+    margin: 10% auto;
     padding: 20px;
     border: 1px solid var(--border-color);
-    width: 80%; 
+    width: 80%;
     max-width: 500px;
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     color: var(--text-color);
     font-family: 'Inter', sans-serif;
 }
@@ -351,7 +375,7 @@ select {
 
 .modal li {
     padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal li strong {
@@ -398,7 +422,7 @@ select {
 }
 
 .panel-section {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     padding: 10px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -424,7 +448,7 @@ select {
 
 /* Remove old floating panel styles if present */
 .floating-panel {
-    display: none !important; 
+    display: none !important;
 }
 
 .options-panel {
