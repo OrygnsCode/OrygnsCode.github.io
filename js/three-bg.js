@@ -299,7 +299,8 @@ const tick = () => {
     particlesMaterial.uniforms.uTime.value = elapsedTime;
     linesMaterial.uniforms.uTime.value = elapsedTime;
 
-    camera.position.z -= 0.05;
+    // Gentle oscillation instead of infinite movement
+    camera.position.z = 50 + Math.sin(elapsedTime * 0.1) * 5;
     scene.rotation.y = elapsedTime * 0.01;
 
     targetX = mouseX * 8;
