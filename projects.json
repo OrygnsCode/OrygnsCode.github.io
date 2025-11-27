@@ -8,6 +8,14 @@
         "image": "assets/icons/client-portal-v2.svg"
     },
     {
+        "id": "app-circuit-lab",
+        "title": "Circuit Lab",
+        "category": "App",
+        "description": "A professional-grade circuit simulator with advanced physics, undo/redo, and multi-selection.",
+        "path": "apps/circuit-lab/",
+        "image": "assets/icons/app-circuit-lab.svg"
+    },
+    {
         "id": "app-model-viewer",
         "title": "3D Model Viewer",
         "category": "App",

@@ -1,0 +1,432 @@
+:root {
+    --bg-color: #f0f8ff;
+    /* PhET-style light blue */
+    --sidebar-bg: #2c3e50;
+    --sidebar-text: #ecf0f1;
+    --accent-color: #3498db;
+    --panel-bg: #ffffff;
+    --text-color: #333;
+    --border-color: #ccc;
+    --grid-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Cyberpunk Theme Variables */
+body.cyberpunk {
+    --bg-color: #0d0d15;
+    --sidebar-bg: #050508;
+    --sidebar-text: #00ff9d;
+    --accent-color: #ff0055;
+    --panel-bg: #111118;
+    --text-color: #00ff9d;
+    --border-color: #333;
+    --grid-color: rgba(0, 255, 157, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#app {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* Left Sidebar */
+#palette {
+    width: 200px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    border-right: 1px solid var(--border-color);
+}
+
+.logo h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    text-align: center;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.component-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.component-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    /* Changed from grab to pointer */
+    transition: background 0.2s, transform 0.1s;
+    border: 1px solid transparent;
+}
+
+body.cyberpunk .component-item {
+    background: rgba(0, 255, 157, 0.05);
+    border: 1px solid rgba(0, 255, 157, 0.2);
+}
+
+.component-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+body.cyberpunk .component-item:hover {
+    background: rgba(0, 255, 157, 0.1);
+    border-color: var(--sidebar-text);
+}
+
+.component-item .icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Placeholder icons - will be replaced by SVGs */
+.wire-icon {
+    background-image: url('../assets/wire_icon.svg');
+}
+
+.battery-icon {
+    background-image: url('../assets/battery_icon.svg');
+}
+
+.bulb-icon {
+    background-image: url('../assets/bulb_icon.svg');
+}
+
+.resistor-icon {
+    background-image: url('../assets/resistor_icon.svg');
+}
+
+.switch-icon {
+    background-image: url('../assets/switch_icon.svg');
+}
+
+.voltmeter-icon {
+    background-image: url('../assets/voltmeter_icon.svg');
+}
+
+.ammeter-icon {
+    background-image: url('../assets/ammeter_icon.svg');
+}
+
+.tools {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tools button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--sidebar-text);
+    transition: transform 0.1s;
+}
+
+.tools button:hover {
+    transform: scale(1.1);
+}
+
+/* Main Workspace */
+#workspace {
+    flex: 1;
+    position: relative;
+    background-color: var(--bg-color);
+    overflow: hidden;
+    cursor: grab;
+}
+
+#workspace:active {
+    cursor: grabbing;
+}
+
+#circuit-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Floating Properties Panel */
+#floating-properties {
+    position: absolute;
+    background: var(--panel-bg);
+    color: var(--text-color);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    min-width: 200px;
+    z-index: 100;
+    border: 1px solid var(--border-color);
+}
+
+#floating-properties.hidden {
+    display: none;
+}
+
+/* Right Sidebar */
+#options-panel {
+    width: 250px;
+    background-color: var(--panel-bg);
+    border-left: 1px solid var(--border-color);
+    padding: 15px;
+    overflow-y: auto;
+    z-index: 10;
+    color: var(--text-color);
+}
+
+.panel-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.toggle-row input {
+    margin-right: 10px;
+}
+
+.radio-group {
+    margin-left: 25px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.radio-group label {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.meter-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    margin-bottom: 8px;
+    border-radius: 4px;
+    cursor: grab;
+}
+
+body.cyberpunk .meter-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.meter-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.cyberpunk .meter-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+button#btn-save,
+button#btn-load {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button#btn-save:hover,
+button#btn-load:hover {
+    opacity: 0.9;
+}
+
+select {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+/* Help Modal Styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: var(--panel-bg);
+    margin: 10% auto; 
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    width: 80%; 
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: var(--accent-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal h2 {
+    margin-top: 0;
+    color: var(--accent-color);
+}
+
+.modal ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.modal li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal li strong {
+    color: var(--text-color);
+    display: inline-block;
+    width: 80px;
+}
+
+/* Sidebar Layout */
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.palette {
+    width: 200px;
+    background-color: var(--panel-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.canvas-container {
+    flex-grow: 1;
+    position: relative;
+    background-color: var(--bg-color);
+    overflow: hidden;
+}
+
+.sidebar-right {
+    width: 250px;
+    background-color: var(--panel-bg);
+    border-left: 1px solid var(--border-color);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.panel-section {
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.panel-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.empty-state {
+    color: #888;
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Remove old floating panel styles if present */
+.floating-panel {
+    display: none !important; 
+}
+
+.options-panel {
+    display: none !important;
+}

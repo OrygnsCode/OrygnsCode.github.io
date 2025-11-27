@@ -1,0 +1,54 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00f3ff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#bc13fe;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="800" height="600" fill="#0a0a0a" />
+    
+    <!-- Circuit Design -->
+    <g transform="translate(400, 300) scale(1.2)" filter="url(#glow)">
+        
+        <!-- Central Chip -->
+        <rect x="-60" y="-60" width="120" height="120" rx="10" stroke="url(#neonGrad)" stroke-width="6" fill="none" />
+        <circle cx="0" cy="0" r="20" fill="#333" stroke="#00f3ff" stroke-width="2" />
+        
+        <!-- Traces -->
+        <!-- Top -->
+        <path d="M-30 -60 L-30 -100 M30 -60 L30 -100" stroke="#444" stroke-width="4" />
+        <circle cx="-30" cy="-100" r="6" fill="#00f3ff" />
+        <circle cx="30" cy="-100" r="6" fill="#bc13fe" />
+        
+        <!-- Bottom -->
+        <path d="M0 60 L0 100" stroke="#444" stroke-width="4" />
+        <circle cx="0" cy="100" r="6" fill="#00f3ff" />
+        
+        <!-- Left (Resistor Symbol) -->
+        <path d="M-60 0 L-90 0 L-100 -10 L-120 10 L-140 -10 L-150 0 L-180 0" stroke="url(#neonGrad)" stroke-width="4" fill="none" />
+        <circle cx="-180" cy="0" r="6" fill="#bc13fe" />
+        
+        <!-- Right (Battery Symbol) -->
+        <path d="M60 0 L100 0" stroke="#444" stroke-width="4" />
+        <path d="M100 -15 L100 15" stroke="#00f3ff" stroke-width="4" /> <!-- Plate 1 -->
+        <path d="M115 -25 L115 25" stroke="#bc13fe" stroke-width="4" /> <!-- Plate 2 -->
+        <path d="M115 0 L150 0" stroke="#444" stroke-width="4" />
+        <circle cx="150" cy="0" r="6" fill="#00f3ff" />
+
+        <!-- Decorative Dots -->
+        <circle cx="-40" cy="-40" r="3" fill="#555" />
+        <circle cx="40" cy="-40" r="3" fill="#555" />
+        <circle cx="-40" cy="40" r="3" fill="#555" />
+        <circle cx="40" cy="40" r="3" fill="#555" />
+        
+    </g>
+</svg>

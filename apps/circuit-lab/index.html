@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrygnsCode Circuit Lab</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div class="app-container">
+            <!-- Left Palette -->
+            <div class="palette">
+                <h3>Components</h3>
+                <div class="component-item" draggable="true" data-type="Battery">
+                    <div class="icon battery-icon"></div>
+                    <span>Battery</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="Resistor">
+                    <div class="icon resistor-icon"></div>
+                    <span>Resistor</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="LightBulb">
+                    <div class="icon bulb-icon"></div>
+                    <span>Light Bulb</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="Switch">
+                    <div class="icon switch-icon"></div>
+                    <span>Switch</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="Wire">
+                    <div class="icon wire-icon"></div>
+                    <span>Wire</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="Voltmeter">
+                    <div class="icon voltmeter-icon"></div>
+                    <span>Voltmeter</span>
+                </div>
+                <div class="component-item" draggable="true" data-type="Ammeter">
+                    <div class="icon ammeter-icon"></div>
+                    <span>Ammeter</span>
+                </div>
+            </div>
+
+            <!-- Main Canvas Area -->
+            <div class="canvas-container">
+                <canvas id="circuit-canvas"></canvas>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button id="btn-reset" class="icon-btn" title="Reset"><svg width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg></button>
+                    <button id="btn-trash" class="icon-btn" title="Delete"><svg width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg></button>
+                    <button id="btn-save" class="text-btn">Save</button>
+                    <button id="btn-load" class="text-btn">Load</button>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Right Sidebar (Properties & Options) -->
+            <div class="sidebar-right">
+                <div class="panel-section">
+                    <h3>Options</h3>
+                    <div class="control-group">
+                        <label><input type="checkbox" id="toggle-electrons" checked> Show Current</label>
+                    </div>
+                    <div class="control-group">
+                        <label><input type="radio" name="current-type" value="electrons" checked> Electrons</label>
+                        <label><input type="radio" name="current-type" value="conventional"> Conventional</label>
+                    </div>
+                    <div class="control-group">
+                        <label><input type="checkbox" id="toggle-values" checked> Show Values</label>
+                    </div>
+                    <div class="control-group">
+                        <label><input type="checkbox" id="toggle-labels"> Show Labels</label>
+                    </div>
+                </div>
+
+                <div class="panel-section" id="properties-panel">
+                    <h3>Properties</h3>
+                    <div id="properties-content" class="empty-state">Select a component to edit properties.</div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Advanced</h3>
+                    <div class="control-group">
+                        <label>Wire Resistivity</label>
+                        <input type="range" id="wire-resistivity" min="0.001" max="1" step="0.001" value="0.01">
+                    </div>
+                    <div class="control-group">
+                        <label>Batt. Resistance</label>
+                        <input type="range" id="battery-resistance" min="0" max="10" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label><input type="checkbox" id="toggle-real-bulbs"> Real Bulbs (Non-linear)</label>
+                    </div>
+                    <div class="control-group">
+                        <label>Theme</label>
+                        <select id="theme-select">
+                            <option value="default">Default</option>
+                            <option value="cyberpunk">Cyberpunk</option>
+                        </select>
+
+
+                        </aside>
+                    </div>
+
+                    <!-- Modules -->
+                    <!-- Help Button -->
+                    <button id="help-btn" class="icon-btn" title="Controls & Help"
+                        style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Help Modal -->
+                    <div id="help-modal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <span class="close-modal">&times;</span>
+                            <h2>Circuit Lab Controls</h2>
+                            <ul>
+                                <li><strong>Spawn</strong>: Click & Drag component from palette.</li>
+                                <li><strong>Connect</strong>: Use <strong>Wires</strong> to connect components.</li>
+                                <li><strong>Rotate</strong>: <strong>Double-click</strong> a component.</li>
+                                <li><strong>Split</strong>: <strong>Double-click</strong> a connection node.</li>
+                                <li><strong>Move</strong>: Drag component body or terminals.</li>
+                                <li><strong>Delete</strong>: Select & click Trash or press Delete.</li>
+                            </ul>
+                            <p><em>Tip: Solid components (Battery, Resistor) must be connected via Wires!</em></p>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Block Overlay -->
+                    <div id="mobile-block"
+                        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; color: #fff; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                        <h2 style="font-family: 'Inter', sans-serif; margin-bottom: 15px;">Desktop Required</h2>
+                        <p style="font-family: 'Inter', sans-serif; max-width: 400px; line-height: 1.6; color: #aaa;">
+                            This professional circuit simulator relies on keyboard shortcuts (Ctrl+Z, Delete) and
+                            precise mouse interactions (Shift+Drag) that are not supported on touch devices.
+                        </p>
+                        <a href="../../index.html"
+                            style="margin-top: 30px; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 4px; font-family: 'Inter', sans-serif; border: 1px solid #555;">Back
+                            to Home</a>
+                    </div>
+
+                    <script>
+                        function checkMobile() {
+                            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+                            if (isMobile) {
+                                document.getElementById('mobile-block').style.display = 'flex';
+                                document.getElementById('app').style.display = 'none';
+                            }
+                        }
+                        checkMobile();
+                        window.addEventListener('resize', checkMobile);
+                    </script>
+
+                    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

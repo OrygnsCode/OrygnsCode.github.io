@@ -1,0 +1,5 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="30" width="60" height="40" fill="#444" rx="5"/>
+        <rect x="80" y="40" width="10" height="20" fill="#aaa"/>
+        <text x="50" y="55" fill="white" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="middle">9V</text>
+    </svg>
