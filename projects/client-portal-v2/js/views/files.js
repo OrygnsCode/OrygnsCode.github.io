@@ -11,28 +11,30 @@ export class FilesView {
         const files = store.getState().files;
 
         this.container.innerHTML = `
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Files</h2>
-                <div class="flex gap-2">
-                    <div class="search-container" style="width: 250px;">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="file-search" class="search-input" placeholder="Search files...">
+            <div class="flex justify-between items-center mb-8 animate-fade-in">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-database text-accent"></i> Files_Repository
+                </h2>
+                <div class="flex gap-3">
+                    <div class="search-container relative group" style="width: 250px;">
+                        <i class="fa-solid fa-magnifying-glass search-icon text-muted group-focus-within:text-primary transition-colors"></i>
+                        <input type="text" id="file-search" class="search-input bg-card/50 border-border/50 focus:border-primary/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all" placeholder="Search data shards...">
                     </div>
-                    <button class="btn btn-primary" id="upload-btn">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                    <button class="btn btn-primary shadow-glow" id="upload-btn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload Data
                     </button>
                 </div>
             </div>
 
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-                <button class="filter-chip active" data-filter="all">All Files</button>
-                <button class="filter-chip" data-filter="image">Images</button>
-                <button class="filter-chip" data-filter="pdf">Documents</button>
-                <button class="filter-chip" data-filter="code">Code</button>
-                <button class="filter-chip" data-filter="zip">Archives</button>
+            <div class="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+                <button class="filter-chip active" data-filter="all"><i class="fa-solid fa-layer-group"></i> All Data</button>
+                <button class="filter-chip" data-filter="image"><i class="fa-regular fa-image"></i> Images</button>
+                <button class="filter-chip" data-filter="pdf"><i class="fa-regular fa-file-pdf"></i> Docs</button>
+                <button class="filter-chip" data-filter="code"><i class="fa-solid fa-code"></i> Code</button>
+                <button class="filter-chip" data-filter="zip"><i class="fa-regular fa-file-zipper"></i> Archives</button>
             </div>
 
-            <div class="grid grid-cols-4 gap-4" id="files-grid">
+            <div class="grid grid-cols-4 gap-6" id="files-grid">
                 ${this.renderFiles(files)}
             </div>
         `;
@@ -42,36 +44,48 @@ export class FilesView {
 
     renderFiles(files) {
         if (files.length === 0) {
-            return '<div class="col-span-4 text-center py-12 text-muted">No files found</div>';
+            return '<div class="col-span-4 text-center py-12 text-muted font-mono border border-dashed border-border/30 rounded-xl">NO_DATA_SHARDS_FOUND</div>';
         }
 
-        return files.map(file => `
-            <div class="card group hover:border-primary transition-colors cursor-pointer">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-lg bg-body flex items-center justify-center text-xl">
-                        ${this.getFileIcon(file.type)}
-                    </div>
-                    <button class="text-muted hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
+        return files.map((file, index) => `
+            <div class="card group hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden animate-slide-up" style="animation-delay: ${index * 0.05}s">
+                <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button class="w-8 h-8 rounded-full bg-body/80 hover:bg-primary hover:text-white flex items-center justify-center transition-colors backdrop-blur-sm">
+                        <i class="fa-solid fa-download text-xs"></i>
                     </button>
                 </div>
-                <h4 class="font-medium truncate mb-1" title="${file.name}">${file.name}</h4>
-                <div class="text-xs text-muted mb-3">${file.size} • ${new Date(file.date).toLocaleDateString()}</div>
-                <div class="flex items-center gap-2">
-                    <span class="badge badge-neutral text-[10px]">${file.project}</span>
+                
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-body/50 border border-white/5 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                        ${this.getFileIcon(file.type)}
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-success shadow-[0_0_5px_var(--color-success)]"></div>
                 </div>
+                
+                <h4 class="font-medium truncate mb-1 text-white group-hover:text-primary transition-colors" title="${file.name}">${file.name}</h4>
+                <div class="text-xs text-muted mb-4 font-mono flex items-center gap-2">
+                    <span>${file.size}</span>
+                    <span class="text-border">|</span>
+                    <span>${new Date(file.date).toLocaleDateString()}</span>
+                </div>
+                
+                <div class="flex items-center gap-2 pt-3 border-t border-border/30">
+                    <span class="badge badge-neutral text-[10px] border border-white/5 group-hover:border-primary/30 transition-colors">${file.project}</span>
+                </div>
+                
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
         `).join('');
     }
 
     getFileIcon(type) {
         const icons = {
-            'image': '<i class="fa-regular fa-image text-info"></i>',
-            'pdf': '<i class="fa-regular fa-file-pdf text-danger"></i>',
-            'doc': '<i class="fa-regular fa-file-word text-primary"></i>',
-            'xls': '<i class="fa-regular fa-file-excel text-success"></i>',
-            'zip': '<i class="fa-regular fa-file-zipper text-warning"></i>',
-            'code': '<i class="fa-regular fa-file-code text-secondary"></i>'
+            'image': '<i class="fa-regular fa-image text-info drop-shadow-[0_0_5px_rgba(14,165,233,0.5)]"></i>',
+            'pdf': '<i class="fa-regular fa-file-pdf text-danger drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]"></i>',
+            'doc': '<i class="fa-regular fa-file-word text-primary drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]"></i>',
+            'xls': '<i class="fa-regular fa-file-excel text-success drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]"></i>',
+            'zip': '<i class="fa-regular fa-file-zipper text-warning drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]"></i>',
+            'code': '<i class="fa-regular fa-file-code text-secondary drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]"></i>'
         };
         return icons[type] || '<i class="fa-regular fa-file text-muted"></i>';
     }

@@ -121,34 +121,39 @@ export class ProjectsView {
 
     createProjectCard(project) {
         return `
-            <div class="card cursor-pointer hover:border-primary transition-colors" onclick="window.location.hash='#/projects/${project.id}'">
+            <div class="card relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-all duration-300" onclick="window.location.hash='#/projects/${project.id}'">
+                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
                 <div class="flex justify-between items-start mb-4">
-                    <div class="avatar bg-primary-bg text-primary border-none">
+                    <div class="avatar bg-primary-bg text-primary border border-primary/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
                         ${project.title.substring(0, 2).toUpperCase()}
                     </div>
-                    <span class="badge ${this.getStatusBadgeClass(project.status)}">${project.status}</span>
+                    <span class="badge ${this.getStatusBadgeClass(project.status)} shadow-sm">${project.status}</span>
                 </div>
-                <h3 class="text-lg font-bold mb-1">${project.title}</h3>
+                
+                <h3 class="text-lg font-bold mb-1 group-hover:text-primary transition-colors">${project.title}</h3>
                 <p class="text-sm text-muted mb-4">${project.client}</p>
                 
                 <div class="mb-4">
                     <div class="flex justify-between text-xs mb-1">
-                        <span class="text-muted">Progress</span>
-                        <span class="font-medium">${project.progress}%</span>
+                        <span class="text-muted font-mono">PROGRESS_Sequence</span>
+                        <span class="font-bold text-primary">${project.progress}%</span>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${project.progress}%"></div>
+                    <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-500 relative" style="width: ${project.progress}%">
+                            <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center pt-4 border-t border-border">
+                <div class="flex justify-between items-center pt-4 border-t border-border/50">
                     <div class="avatar-group">
                         ${project.team.map(member => `
-                            <div class="avatar avatar-sm" title="${member.name}">${member.avatar}</div>
+                            <div class="avatar avatar-sm border-2 border-bg-card" title="${member.name}">${member.avatar}</div>
                         `).join('')}
                     </div>
-                    <div class="text-xs text-muted">
-                        Due ${new Date(project.dueDate).toLocaleDateString()}
+                    <div class="text-xs text-muted font-mono">
+                        <i class="fa-regular fa-clock mr-1"></i> ${new Date(project.dueDate).toLocaleDateString()}
                     </div>
                 </div>
             </div>
@@ -158,39 +163,40 @@ export class ProjectsView {
     renderDetail(id) {
         const project = store.getState().projects.find(p => p.id === id);
         if (!project) {
-            this.container.innerHTML = '<div class="text-center mt-8">Project not found</div>';
+            this.container.innerHTML = '<div class="text-center mt-8 text-muted">Project not found</div>';
             return;
         }
 
         this.container.innerHTML = `
-            <div class="mb-6">
-                <a href="#/projects" class="text-sm text-muted hover:text-primary mb-2 inline-block">
+            <div class="mb-8 animate-fade-in">
+                <a href="#/projects" class="text-sm text-muted hover:text-primary mb-4 inline-flex items-center gap-2 transition-colors">
                     <i class="fa-solid fa-arrow-left"></i> Back to Projects
                 </a>
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-end">
                     <div>
-                        <h1 class="text-3xl font-bold mb-1">${project.title}</h1>
-                        <div class="flex items-center gap-3 text-sm text-muted">
-                            <span>${project.client}</span>
-                            <span>•</span>
-                            <span>Due ${new Date(project.dueDate).toLocaleDateString()}</span>
-                            <span>•</span>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h1 class="text-4xl font-bold text-white tracking-tight">${project.title}</h1>
                             <span class="badge ${this.getStatusBadgeClass(project.status)}">${project.status}</span>
                         </div>
+                        <div class="flex items-center gap-4 text-sm text-muted font-mono">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-building"></i> ${project.client}</span>
+                            <span class="text-border">|</span>
+                            <span class="flex items-center gap-2"><i class="fa-regular fa-calendar"></i> Due ${new Date(project.dueDate).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                    <button class="btn btn-secondary hover:border-primary hover:text-primary transition-colors">
+                    <button class="btn btn-secondary hover:border-primary hover:text-primary hover:shadow-glow transition-all">
                         <i class="fa-solid fa-pen"></i> Edit Project
                     </button>
                 </div>
             </div>
 
-            <div class="tabs">
+            <div class="tabs border-b border-border/50 mb-6">
                 <button class="tab-btn ${this.activeTab === 'overview' ? 'active' : ''}" data-tab="overview">Overview</button>
                 <button class="tab-btn ${this.activeTab === 'tasks' ? 'active' : ''}" data-tab="tasks">Tasks</button>
                 <button class="tab-btn ${this.activeTab === 'files' ? 'active' : ''}" data-tab="files">Files</button>
             </div>
 
-            <div id="tab-content">
+            <div id="tab-content" class="animate-slide-up">
                 ${this.getTabContent(project)}
             </div>
         `;
@@ -203,22 +209,26 @@ export class ProjectsView {
             case 'overview':
                 return `
                     <div class="grid grid-cols-3 gap-6">
-                        <div class="col-span-2">
-                            <div class="card mb-6">
-                                <h3 class="card-title mb-4">Description</h3>
+                        <div class="col-span-2 space-y-6">
+                            <div class="card">
+                                <h3 class="card-title mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-align-left text-primary"></i> Description
+                                </h3>
                                 <p class="text-secondary leading-relaxed">${project.description}</p>
                             </div>
                             
                             <div class="card">
-                                <h3 class="card-title mb-4">Milestones</h3>
-                                <div class="space-y-6 relative pl-4 border-l border-border ml-2">
+                                <h3 class="card-title mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-flag text-accent"></i> Milestones
+                                </h3>
+                                <div class="space-y-6 relative pl-4 border-l border-border/30 ml-2">
                                     ${project.milestones.map(m => `
-                                        <div class="relative pl-6">
-                                            <div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full ${m.status === 'Completed' ? 'bg-success' : m.status === 'In Progress' ? 'bg-primary' : 'bg-border'} border-2 border-bg-card"></div>
-                                            <div class="flex justify-between items-start">
+                                        <div class="relative pl-6 group">
+                                            <div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full ${m.status === 'Completed' ? 'bg-success shadow-[0_0_10px_var(--color-success)]' : m.status === 'In Progress' ? 'bg-primary shadow-[0_0_10px_var(--color-primary)]' : 'bg-border'} border-2 border-bg-card transition-all group-hover:scale-125"></div>
+                                            <div class="flex justify-between items-start p-3 rounded-lg hover:bg-white/5 transition-colors">
                                                 <div>
-                                                    <div class="font-medium ${m.status === 'Completed' ? 'text-muted line-through' : ''}">${m.title}</div>
-                                                    <div class="text-xs text-muted">${new Date(m.date).toLocaleDateString()}</div>
+                                                    <div class="font-medium ${m.status === 'Completed' ? 'text-muted line-through' : 'text-white'}">${m.title}</div>
+                                                    <div class="text-xs text-muted font-mono mt-1">${new Date(m.date).toLocaleDateString()}</div>
                                                 </div>
                                                 <span class="badge ${this.getStatusBadgeClass(m.status)}">${m.status}</span>
                                             </div>
@@ -228,15 +238,17 @@ export class ProjectsView {
                             </div>
                         </div>
                         
-                        <div>
-                            <div class="card mb-6">
-                                <h3 class="card-title mb-4">Team</h3>
+                        <div class="space-y-6">
+                            <div class="card">
+                                <h3 class="card-title mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-info"></i> Team
+                                </h3>
                                 <div class="space-y-3">
                                     ${project.team.map(member => `
-                                        <div class="flex items-center gap-3">
-                                            <div class="avatar avatar-sm">${member.avatar}</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                            <div class="avatar avatar-sm border border-border">${member.avatar}</div>
                                             <div>
-                                                <div class="text-sm font-medium">${member.name}</div>
+                                                <div class="text-sm font-medium text-white">${member.name}</div>
                                                 <div class="text-xs text-muted">${member.role}</div>
                                             </div>
                                         </div>
@@ -244,14 +256,17 @@ export class ProjectsView {
                                 </div>
                             </div>
                             
-                            <div class="card">
+                            <div class="card relative overflow-hidden">
+                                <div class="absolute top-0 right-0 p-4 opacity-5">
+                                    <i class="fa-solid fa-chart-pie text-6xl"></i>
+                                </div>
                                 <h3 class="card-title mb-4">Progress</h3>
-                                <div class="text-center py-4">
-                                    <div class="text-4xl font-bold text-primary mb-2">${project.progress}%</div>
-                                    <div class="progress-bar mb-2">
-                                        <div class="progress-fill" style="width: ${project.progress}%"></div>
+                                <div class="text-center py-6">
+                                    <div class="text-5xl font-bold text-primary mb-2" style="text-shadow: 0 0 20px rgba(6,182,212,0.3);">${project.progress}%</div>
+                                    <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+                                        <div class="h-full bg-primary shadow-[0_0_10px_var(--color-primary)]" style="width: ${project.progress}%"></div>
                                     </div>
-                                    <div class="text-xs text-muted">Based on completed tasks</div>
+                                    <div class="text-xs text-muted font-mono">COMPLETION_RATE</div>
                                 </div>
                             </div>
                         </div>
