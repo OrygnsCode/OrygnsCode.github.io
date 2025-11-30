@@ -1,18 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <filter id="glow">
-            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+        <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00f3ff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#bc13fe;stop-opacity:1" />
+        </linearGradient>
+        
+        <linearGradient id="ballGrad" x1="30%" y1="30%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fff;stop-opacity:0.9" />
+            <stop offset="20%" style="stop-color:#00f3ff;stop-opacity:0.8" />
+            <stop offset="100%" style="stop-color:#00f3ff;stop-opacity:0.1" />
+        </linearGradient>
+
+        <linearGradient id="eightBallGrad" x1="30%" y1="30%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#bc13fe;stop-opacity:0.8" />
+            <stop offset="100%" style="stop-color:#000;stop-opacity:0.8" />
+        </linearGradient>
+
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
             <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
             </feMerge>
         </filter>
     </defs>
-    <g filter="url(#glow)">
-        
-        <circle cx="40" cy="40" r="20" stroke="#00f3ff" stroke-width="2" fill="none"/>
-        <circle cx="65" cy="65" r="20" stroke="#bc13fe" stroke-width="2" fill="none"/>
-        <line x1="20" y1="80" x2="80" y2="20" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
     
+    <!-- Background -->
+    <rect width="800" height="600" fill="#0a0a0a" />
+    
+    <!-- Main Container -->
+    <g transform="translate(400, 300)" filter="url(#glow)">
+        
+        <!-- Table Surface Hint (Perspective Grid) -->
+        <path d="M-300 150 L300 150 L200 -100 L-200 -100 Z" fill="url(#neonGrad)" opacity="0.05" />
+        
+        <!-- The Rack (Triangle) -->
+        <g transform="translate(0, -20)">
+            <!-- Balls (Spherical Look) -->
+            <!-- Row 1 (Top - 5 balls) -->
+            <circle cx="-100" cy="-60" r="22" fill="url(#ballGrad)" />
+            <circle cx="-50" cy="-60" r="22" fill="url(#ballGrad)" />
+            <circle cx="0" cy="-60" r="22" fill="url(#ballGrad)" />
+            <circle cx="50" cy="-60" r="22" fill="url(#ballGrad)" />
+            <circle cx="100" cy="-60" r="22" fill="url(#ballGrad)" />
+            
+            <!-- Row 2 (4 balls) -->
+            <circle cx="-75" cy="-15" r="22" fill="url(#ballGrad)" />
+            <circle cx="-25" cy="-15" r="22" fill="url(#ballGrad)" />
+            <circle cx="25" cy="-15" r="22" fill="url(#ballGrad)" />
+            <circle cx="75" cy="-15" r="22" fill="url(#ballGrad)" />
+            
+            <!-- Row 3 (3 balls - 8 Ball in center) -->
+            <circle cx="-50" cy="30" r="22" fill="url(#ballGrad)" />
+            
+            <!-- The 8 Ball -->
+            <g>
+                <circle cx="0" cy="30" r="23" fill="#0a0a0a" stroke="#bc13fe" stroke-width="2" />
+                <circle cx="0" cy="30" r="10" fill="#fff" />
+                <text x="0" y="34" font-family="Arial" font-weight="bold" font-size="12" fill="#000" text-anchor="middle">8</text>
+            </g>
+            
+            <circle cx="50" cy="30" r="22" fill="url(#ballGrad)" />
+            
+            <!-- Row 4 (2 balls) -->
+            <circle cx="-25" cy="75" r="22" fill="url(#ballGrad)" />
+            <circle cx="25" cy="75" r="22" fill="url(#ballGrad)" />
+            
+            <!-- Row 5 (1 ball) -->
+            <circle cx="0" cy="120" r="22" fill="url(#ballGrad)" />
+        </g>
+
+        <!-- Cue Ball -->
+        <g transform="translate(-180, 50)">
+            <circle cx="0" cy="0" r="25" fill="#fff" opacity="0.9" />
+            <circle cx="0" cy="0" r="25" stroke="#00f3ff" stroke-width="2" fill="none" />
+        </g>
+
+        <!-- Cue Stick (Detailed) -->
+        <g transform="translate(-220, 0) rotate(-35)">
+            <!-- Stick Shaft -->
+            <path d="M-200 -6 L200 -4 L200 4 L-200 6 Z" fill="url(#neonGrad)" opacity="0.8" />
+            <!-- Handle Grip -->
+            <rect x="-200" y="-6" width="100" height="12" fill="#bc13fe" opacity="0.5" />
+            <!-- Tip -->
+            <rect x="200" y="-4" width="10" height="8" fill="#fff" />
+        </g>
+
     </g>
 </svg>
