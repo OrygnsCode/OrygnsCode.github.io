@@ -133,6 +133,6 @@
         "category": "Game",
         "description": "Guide your character through an endless series of obstacles using only perfectly-timed taps.",
         "path": "projects/taptofly/",
-        "image": ""
+        "image": "assets/icons/game-taptofly.svg"
     }
 ]

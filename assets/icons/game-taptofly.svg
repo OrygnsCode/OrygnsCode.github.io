@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <defs>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g filter="url(#glow)">
+        <!-- Top Pipe -->
+        <path d="M30 0 V20 H25 V30 H75 V20 H70 V0" stroke="#00f3ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        
+        <!-- Bottom Pipe -->
+        <path d="M30 100 V80 H25 V70 H75 V80 H70 V100" stroke="#00f3ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Bird -->
+        <g transform="translate(50, 50)">
+            <!-- Body -->
+            <path d="M-10 -5 Q-10 -15 5 -15 Q15 -15 15 0 Q15 15 0 15 Q-15 15 -10 5" stroke="#00f3ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Eye -->
+            <circle cx="8" cy="-5" r="2" fill="#00f3ff"/>
+            <!-- Beak -->
+            <path d="M15 0 L20 3 L15 6" stroke="#00f3ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Wing (Purple) -->
+            <path d="M-5 0 Q5 -5 10 5" stroke="#bc13fe" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M-5 0 Q0 5 10 5" stroke="#bc13fe" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Speed Lines (Purple) -->
+        <line x1="20" y1="45" x2="30" y2="45" stroke="#bc13fe" stroke-width="2" stroke-linecap="round"/>
+        <line x1="15" y1="50" x2="25" y2="50" stroke="#bc13fe" stroke-width="2" stroke-linecap="round"/>
+        <line x1="20" y1="55" x2="30" y2="55" stroke="#bc13fe" stroke-width="2" stroke-linecap="round"/>
+    </g>
+</svg>
