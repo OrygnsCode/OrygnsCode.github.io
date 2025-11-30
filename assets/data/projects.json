@@ -126,5 +126,13 @@
         "description": "Stretch the stick to cross the platforms.",
         "path": "projects/game-stickhero/",
         "image": "assets/icons/game-stickhero.svg"
+    },
+    {
+        "id": "game-taptofly",
+        "title": "TapToFly",
+        "category": "Game",
+        "description": "A polished Flappy Bird clone with authentic physics and retro pixel art style.",
+        "path": "projects/taptofly/",
+        "image": ""
     }
 ]
