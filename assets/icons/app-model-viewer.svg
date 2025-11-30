@@ -4,8 +4,15 @@
             <stop offset="0%" style="stop-color:#00f3ff;stop-opacity:1" />
             <stop offset="100%" style="stop-color:#bc13fe;stop-opacity:1" />
         </linearGradient>
-        <filter id="glow">
-            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+        
+        <linearGradient id="scanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#00f3ff;stop-opacity:0" />
+            <stop offset="50%" style="stop-color:#00f3ff;stop-opacity:0.8" />
+            <stop offset="100%" style="stop-color:#00f3ff;stop-opacity:0" />
+        </linearGradient>
+
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
             <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
@@ -13,29 +20,55 @@
         </filter>
     </defs>
     
-    <!-- Background (Optional, usually transparent for icons but good for tiles) -->
+    <!-- Background -->
     <rect width="800" height="600" fill="#0a0a0a" />
     
-    <!-- 3D Cube Wireframe -->
-    <g transform="translate(400, 300) scale(1.5)" filter="url(#glow)">
-        <!-- Back Lines -->
-        <path d="M-70 -70 L70 -70 L70 70 M-70 -70 L-70 70" stroke="#333" stroke-width="4" fill="none" />
+    <!-- Main Positioning Container (Centered) -->
+    <g transform="translate(400, 300)" filter="url(#glow)">
         
-        <!-- Connecting Lines -->
-        <path d="M-100 -40 L-70 -70 M100 -40 L70 -70 M100 100 L70 70 M-100 100 L-70 70" stroke="#444" stroke-width="4" fill="none" />
-        
-        <!-- Front Face -->
-        <rect x="-100" y="-40" width="200" height="140" rx="10" stroke="url(#neonGrad)" stroke-width="6" fill="none" />
-        
-        <!-- Inner Cube / Model Representation -->
-        <path d="M0 -10 L20 0 L0 10 L-20 0 Z M0 -10 L0 -30 M20 0 L40 10 M0 10 L0 30 M-20 0 L-40 10" stroke="url(#neonGrad)" stroke-width="4" fill="none" opacity="0.8">
-            <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="10s" repeatCount="indefinite" />
-        </path>
-        
-        <!-- Vertices -->
-        <circle cx="-100" cy="-40" r="4" fill="#00f3ff" />
-        <circle cx="100" cy="-40" r="4" fill="#00f3ff" />
-        <circle cx="100" cy="100" r="4" fill="#bc13fe" />
-        <circle cx="-100" cy="100" r="4" fill="#bc13fe" />
+        <!-- Animation Container (Floating) -->
+        <g>
+            <animateTransform attributeName="transform" type="translate" values="0 -15; 0 15; 0 -15" dur="4s" repeatCount="indefinite" />
+
+            <!-- Isometric Cube Structure -->
+            <g stroke="url(#neonGrad)" stroke-width="8" fill="none" stroke-linejoin="round" stroke-linecap="round">
+                <!-- Outer Hexagon -->
+                <path d="M0 -140 L121.2 -70 L121.2 70 L0 140 L-121.2 70 L-121.2 -70 Z" />
+                
+                <!-- Inner Y (Faces) -->
+                <path d="M0 0 L0 140 M0 0 L-121.2 -70 M0 0 L121.2 -70" />
+            </g>
+            
+            <!-- Inner Faces (Subtle Fill) -->
+            <g fill="url(#neonGrad)" opacity="0.1">
+                <path d="M0 -140 L121.2 -70 L0 0 L-121.2 -70 Z">
+                    <animate attributeName="opacity" values="0.1; 0.3; 0.1" dur="3s" repeatCount="indefinite" />
+                </path>
+                <path d="M121.2 -70 L121.2 70 L0 140 L0 0 Z">
+                    <animate attributeName="opacity" values="0.1; 0.3; 0.1" dur="3s" begin="1s" repeatCount="indefinite" />
+                </path>
+                <path d="M0 140 L-121.2 70 L-121.2 -70 L0 0 Z">
+                    <animate attributeName="opacity" values="0.1; 0.3; 0.1" dur="3s" begin="2s" repeatCount="indefinite" />
+                </path>
+            </g>
+
+            <!-- Scanning Effect -->
+            <g opacity="0.8">
+                 <rect x="-130" y="-150" width="260" height="20" fill="url(#scanGrad)">
+                    <animate attributeName="y" values="-160; 160; -160" dur="3s" repeatCount="indefinite" />
+                 </rect>
+            </g>
+
+            <!-- Vertices Dots -->
+            <g fill="#fff">
+                <circle cx="0" cy="-140" r="5" />
+                <circle cx="121.2" cy="-70" r="5" />
+                <circle cx="121.2" cy="70" r="5" />
+                <circle cx="0" cy="140" r="5" />
+                <circle cx="-121.2" cy="70" r="5" />
+                <circle cx="-121.2" cy="-70" r="5" />
+                <circle cx="0" cy="0" r="5" />
+            </g>
+        </g>
     </g>
 </svg>
