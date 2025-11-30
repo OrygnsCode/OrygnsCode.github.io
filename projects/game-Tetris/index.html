@@ -1,6 +1,43 @@
-<a id="homeLink" href="/" style="display:none;"></a>
-<div class="canvas-container">
-    <canvas id="cnv" height="600px" width="600px"></canvas>
-</div>
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tetris</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <a id="homeLink" href="/" style="display:none;"></a>
+    <div class="canvas-container">
+        <canvas id="cnv" height="600px" width="600px"></canvas>
+    </div>
+
+    <div class="mobile-controls">
+        <div class="control-row system-row">
+            <button id="btn-home" class="control-btn system-btn" title="Home">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+            </button>
+            <button id="btn-pause" class="control-btn system-btn" title="Pause">⏸</button>
+            <button id="btn-reset" class="control-btn system-btn" title="Reset">↺</button>
+        </div>
+        <div class="control-row">
+            <button id="btn-rotate" class="control-btn">↻</button>
+        </div>
+        <div class="control-row">
+            <button id="btn-left" class="control-btn">←</button>
+            <button id="btn-down" class="control-btn">↓</button>
+            <button id="btn-right" class="control-btn">→</button>
+        </div>
+        <div class="control-row">
+            <button id="btn-drop" class="control-btn">⤓</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
