@@ -1,0 +1,279 @@
+:root {
+    --neon-cyan: #00f3ff;
+    --neon-purple: #bc13fe;
+    --neon-red: #ff003c;
+    --bg-dark: #050505;
+    --tile-black: #000;
+    --tile-white: #1a1a1a;
+    /* Darker 'white' for cyber look */
+    --tile-active: #00f3ff;
+    --tile-wrong: #ff003c;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    color: white;
+    user-select: none;
+    touch-action: none;
+}
+
+.game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+}
+
+#game-board {
+    position: relative;
+    width: 400px;
+    /* Fixed width for gameplay consistency */
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    border-left: 2px solid var(--neon-purple);
+    border-right: 2px solid var(--neon-purple);
+    box-shadow: 0 0 20px rgba(188, 19, 254, 0.2);
+    overflow: hidden;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+    #game-board {
+        width: 100%;
+        border: none;
+    }
+}
+
+.row {
+    width: 100%;
+    height: 25%;
+    /* 4 rows visible */
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    /* We'll animate 'bottom' property */
+}
+
+.tile {
+    width: 25%;
+    /* 4 columns */
+    height: 100%;
+    background-color: var(--tile-white);
+    border: 1px solid #333;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    position: relative;
+}
+
+.tile::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.1);
+    font-weight: 800;
+}
+
+/* Add key hints to the bottom row */
+.row:first-child .tile:nth-child(1)::after {
+    content: 'F';
+}
+
+.row:first-child .tile:nth-child(2)::after {
+    content: 'G';
+}
+
+.row:first-child .tile:nth-child(3)::after {
+    content: 'H';
+}
+
+.row:first-child .tile:nth-child(4)::after {
+    content: 'J';
+}
+
+
+.tile.black {
+    background-color: var(--tile-black);
+    box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.1);
+}
+
+.tile.clicked {
+    background-color: #333 !important;
+    /* Greyed out after click */
+    transition: background-color 0.1s;
+}
+
+.tile.wrong {
+    background-color: var(--tile-wrong) !important;
+    animation: flashRed 0.2s;
+}
+
+@keyframes flashRed {
+    0% {
+        background-color: var(--tile-wrong);
+    }
+
+    50% {
+        background-color: #fff;
+    }
+
+    100% {
+        background-color: var(--tile-wrong);
+    }
+}
+
+/* Separator Line */
+#separator-line {
+    position: absolute;
+    bottom: 25%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--neon-purple);
+    box-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Active Row Highlighting */
+/* Active Row Highlighting */
+.row.active-row .tile.black {
+    background-color: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+    /* Reduced glow */
+    border: 1px solid #fff;
+}
+
+.row.active-row .tile.black::after {
+    color: #000;
+    /* Make text black for better contrast on cyan */
+    text-shadow: none;
+}
+
+/* UI Layer */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#score-display {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+    z-index: 20;
+}
+
+#timer-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background-color: var(--neon-red);
+    width: 0%;
+    transition: width 1s linear;
+}
+
+/* Overlays */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.neon-text {
+    font-size: 48px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.neon-text.red {
+    text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red);
+}
+
+.highlight {
+    color: var(--neon-cyan);
+    font-weight: bold;
+}
+
+.controls-hint {
+    margin-top: 20px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.key {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid var(--neon-purple);
+    border-radius: 4px;
+    color: var(--neon-purple);
+    margin: 0 2px;
+    font-weight: bold;
+}
+
+.neon-button {
+    margin-top: 40px;
+    padding: 15px 40px;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--neon-cyan);
+    background: transparent;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.neon-button:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+.back-link {
+    margin-top: 20px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.back-link:hover {
+    color: #fff;
+}

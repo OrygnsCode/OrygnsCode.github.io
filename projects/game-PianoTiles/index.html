@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Tiles - OrygnsCode</title>
+    <link rel="stylesheet" href="../../css/index.css"> <!-- Base styles if needed, though we might override most -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="ui-layer">
+            <div id="score-display">0</div>
+            <div id="timer-bar"></div>
+        </div>
+
+        <div id="game-board">
+            <div id="separator-line"></div>
+            <!-- Tiles will be generated here -->
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h1 class="neon-text">PIANO TILES</h1>
+            <p>Click the <span class="highlight">BLACK</span> tiles</p>
+            <p class="controls-hint">Use Mouse or Keys: <span class="key">F</span> <span class="key">G</span> <span
+                    class="key">H</span> <span class="key">J</span></p>
+            <button id="start-btn" class="neon-button">START GAME</button>
+            <a href="../../index.html" class="back-link">Back to Home</a>
+        </div>
+
+        <div id="game-over-screen" class="overlay hidden">
+            <h1 class="neon-text red">GAME OVER</h1>
+            <p>Score: <span id="final-score">0</span></p>
+            <p>Speed: <span id="final-speed">0</span> tiles/sec</p>
+            <button id="restart-btn" class="neon-button">PLAY AGAIN</button>
+            <a href="../../index.html" class="back-link">Back to Home</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

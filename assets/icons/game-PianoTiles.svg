@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="#050505"/>
+  
+  <!-- Grid/Tiles -->
+  <rect x="100" y="50" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="178" y="50" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="256" y="50" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="334" y="50" width="78" height="100" fill="#000" stroke="#00f3ff" stroke-width="4" filter="url(#neon-glow)"/>
+  
+  <rect x="100" y="150" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="178" y="150" width="78" height="100" fill="#000" stroke="#00f3ff" stroke-width="4" filter="url(#neon-glow)"/>
+  <rect x="256" y="150" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="334" y="150" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  
+  <rect x="100" y="250" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="178" y="250" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="256" y="250" width="78" height="100" fill="#000" stroke="#00f3ff" stroke-width="4" filter="url(#neon-glow)"/>
+  <rect x="334" y="250" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+
+  <rect x="100" y="350" width="78" height="100" fill="#000" stroke="#bc13fe" stroke-width="4" filter="url(#neon-glow)"/>
+  <rect x="178" y="350" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="256" y="350" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="334" y="350" width="78" height="100" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+</svg>

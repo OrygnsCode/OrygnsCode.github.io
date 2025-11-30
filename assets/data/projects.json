@@ -134,5 +134,13 @@
         "description": "Guide your character through an endless series of obstacles using only perfectly-timed taps.",
         "path": "projects/taptofly/",
         "image": "assets/icons/game-taptofly.svg"
+    },
+    {
+        "id": "game-PianoTiles",
+        "title": "Piano Tiles",
+        "category": "Game",
+        "description": "Test your speed and precision. Tap the black tiles as fast as you can!",
+        "path": "projects/game-PianoTiles/",
+        "image": "assets/icons/game-PianoTiles.svg"
     }
 ]
