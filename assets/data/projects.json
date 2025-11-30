@@ -131,7 +131,7 @@
         "id": "game-taptofly",
         "title": "TapToFly",
         "category": "Game",
-        "description": "A polished Flappy Bird clone with authentic physics and retro pixel art style.",
+        "description": "Guide your character through an endless series of obstacles using only perfectly-timed taps.",
         "path": "projects/taptofly/",
         "image": ""
     }
