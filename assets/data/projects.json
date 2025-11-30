@@ -53,7 +53,7 @@
         "category": "Game",
         "description": "Test your reflexes and alignment skills in this fast-paced game.",
         "path": "projects/game-Align/",
-        "image": "assets/icons/game-Align.svg"
+        "image": "assets/icons/game-align-v2.svg"
     },
     {
         "id": "game-AstroDuel",
