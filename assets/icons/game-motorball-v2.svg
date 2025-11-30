@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <defs>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g filter="url(#glow)">
+        <!-- Main Ball -->
+        <circle cx="45" cy="50" r="25" stroke="#00f3ff" stroke-width="3" fill="none"/>
+        
+        <!-- Inner detail (optional, keeps it simple) -->
+        <circle cx="45" cy="50" r="10" fill="#bc13fe" opacity="0.8"/>
+
+        <!-- Motion Lines (Trailing) -->
+        <path d="M80 35 L 90 35" stroke="#00f3ff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M75 50 L 95 50" stroke="#00f3ff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M80 65 L 90 65" stroke="#00f3ff" stroke-width="2" stroke-linecap="round"/>
+    </g>
+</svg>
