@@ -111,6 +111,64 @@
         </main>
     </div>
 
+    <script>
+        // Mobile device detection
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        }
+
+        // Check if mobile and show warning
+        if (isMobileDevice()) {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    font-family: 'Inter', sans-serif;
+                    text-align: center;
+                    padding: 20px;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    z-index: 99999;
+                ">
+                    <div style="
+                        background: rgba(255, 255, 255, 0.1);
+                        backdrop-filter: blur(10px);
+                        border-radius: 20px;
+                        padding: 40px;
+                        max-width: 400px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+                    ">
+                        <h1 style="margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Desktop View Required</h1>
+                        <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.5; opacity: 0.9;">
+                            The Client Portal V2 is a comprehensive dashboard designed for desktop productivity. 
+                            Please access this application on a computer for the full experience.
+                        </p>
+                        <a href="../../index.html" style="
+                            display: inline-block;
+                            background: #4285f4;
+                            color: white;
+                            text-decoration: none;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            transition: background 0.3s ease;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        " onmouseover="this.style.background='#3367d6'" onmouseout="this.style.background='#4285f4'">
+                            Back to OrygnsCode Home
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
     <script type="module" src="js/app.js"></script>
 </body>
 
