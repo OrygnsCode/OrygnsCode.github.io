@@ -7,6 +7,10 @@ class UIManager {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.groundHeight = 112;
+
+        // Button hitboxes
+        this.playAgainBtn = { x: 0, y: 0, width: 0, height: 0 };
+        this.homeBtn = { x: 0, y: 0, width: 0, height: 0 };
     }
 
     drawBackground(ctx) {
@@ -98,7 +102,7 @@ class UIManager {
         // Instructions box
         const boxY = 320;
         const boxWidth = 360;
-        const boxHeight = 180;
+        const boxHeight = 250; // Increased height to fit button
         const boxX = (this.canvasWidth - boxWidth) / 2;
 
         // Box background with border
@@ -125,6 +129,30 @@ class UIManager {
                 ctx.fillText(text, this.canvasWidth / 2, boxY + 40 + i * 35);
             }
         });
+
+        // Home Button - Inside the box at the bottom
+        const homeBtnWidth = 200;
+        const homeBtnHeight = 40;
+        const homeBtnX = (this.canvasWidth - homeBtnWidth) / 2;
+        const homeBtnY = boxY + boxHeight - 60;
+
+        // Store home button hitbox
+        this.homeBtn = { x: homeBtnX, y: homeBtnY, width: homeBtnWidth, height: homeBtnHeight };
+
+        // Home Button Background
+        ctx.fillStyle = '#70c5ce'; // Match sky color for button
+        ctx.strokeStyle = '#5db8c2';
+        ctx.lineWidth = 2;
+
+        ctx.fillRect(homeBtnX, homeBtnY, homeBtnWidth, homeBtnHeight);
+        ctx.strokeRect(homeBtnX, homeBtnY, homeBtnWidth, homeBtnHeight);
+
+        // Home Button Text
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 12px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('BACK TO HOME', this.canvasWidth / 2, homeBtnY + homeBtnHeight / 2);
 
         // Pulsing "Tap to Start" prompt
         const alpha = 0.4 + Math.sin(Date.now() / 400) * 0.6;
@@ -269,6 +297,9 @@ class UIManager {
         const buttonHeight = 50;
         const buttonX = (this.canvasWidth - buttonWidth) / 2;
 
+        // Store button hitbox
+        this.playAgainBtn = { x: buttonX, y: buttonY, width: buttonWidth, height: buttonHeight };
+
         // Button animation
         const pulseScale = 1 + Math.sin(Date.now() / 350) * 0.025;
         ctx.save();
@@ -312,5 +343,19 @@ class UIManager {
         if (score >= 20) return { name: 'SILVER', color: '#C0C0C0' };
         if (score >= 10) return { name: 'BRONZE', color: '#CD7F32' };
         return null;
+    }
+
+    isPlayAgainButtonClicked(x, y) {
+        return x >= this.playAgainBtn.x &&
+            x <= this.playAgainBtn.x + this.playAgainBtn.width &&
+            y >= this.playAgainBtn.y &&
+            y <= this.playAgainBtn.y + this.playAgainBtn.height;
+    }
+
+    isHomeButtonClicked(x, y) {
+        return x >= this.homeBtn.x &&
+            x <= this.homeBtn.x + this.homeBtn.width &&
+            y >= this.homeBtn.y &&
+            y <= this.homeBtn.y + this.homeBtn.height;
     }
 }

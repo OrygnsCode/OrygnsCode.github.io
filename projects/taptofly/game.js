@@ -72,19 +72,36 @@ class Game {
         });
 
         // Mouse
-        this.canvas.addEventListener('click', () => {
-            this.handleInput();
+        this.canvas.addEventListener('click', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            this.handleInput(x, y);
         });
 
         // Touch
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            this.handleInput();
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+            const touch = e.touches[0];
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            this.handleInput(x, y);
         });
     }
 
-    handleInput() {
+    handleInput(x, y) {
         if (this.state === GameState.READY) {
+            // Check if Home button was clicked
+            if (x !== undefined && y !== undefined && this.uiManager.isHomeButtonClicked(x, y)) {
+                window.location.href = '../../index.html';
+                return;
+            }
+
             this.startGame();
         } else if (this.state === GameState.PLAYING) {
             this.bird.flap();
