@@ -1,26 +1,26 @@
 [
     {
-        "id": "client-portal-v2",
+        "id": "app-clientportalv2",
         "title": "Client Portal V2",
         "category": "App",
         "description": "A modern, responsive client portal dashboard with project management features.",
-        "path": "projects/client-portal-v2/",
+        "path": "projects/app-clientportalv2/",
         "image": "assets/icons/client-portal-v2.svg"
     },
     {
-        "id": "app-circuit-lab",
+        "id": "app-CircuitLab",
         "title": "Circuit Lab",
         "category": "App",
         "description": "A professional-grade circuit simulator with advanced physics, undo/redo, and multi-selection.",
-        "path": "apps/circuit-lab/",
+        "path": "projects/app-CircuitLab/",
         "image": "assets/icons/app-circuit-lab.svg"
     },
     {
-        "id": "app-model-viewer",
+        "id": "app-3dmodelviewer",
         "title": "3D Model Viewer",
         "category": "App",
         "description": "A client-side 3D model viewer supporting GLTF, OBJ, and STL formats.",
-        "path": "apps/model-viewer/",
+        "path": "projects/app-3dmodelviewer/",
         "image": "assets/icons/app-model-viewer.svg"
     },
     {
@@ -128,11 +128,11 @@
         "image": "assets/icons/game-stickhero.svg"
     },
     {
-        "id": "game-taptofly",
+        "id": "game-TapToFly",
         "title": "TapToFly",
         "category": "Game",
         "description": "Guide your character through an endless series of obstacles using only perfectly-timed taps.",
-        "path": "projects/taptofly/",
+        "path": "projects/game-TapToFly/",
         "image": "assets/icons/game-taptofly.svg"
     },
     {
