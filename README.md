@@ -1,5 +1,5 @@
 OrygnsCode.github.io
 
-Practicing building and deploying code using various AI tools.
+Practicing building and deploying code using various tools.
 
-Visit my project: https://orygnscode.github.io/index.html 😄
+View my project: https://orygnscode.github.io/index.html
