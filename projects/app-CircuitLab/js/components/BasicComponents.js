@@ -26,10 +26,7 @@ export class Battery extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        // Simple bounding box check (rotation ignored for hit test simplicity initially)
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside for rotation support
 
     draw(ctx, theme) {
         ctx.save();
@@ -101,9 +98,7 @@ export class Resistor extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside
 
     draw(ctx, theme) {
         ctx.save();
@@ -165,9 +160,7 @@ export class LightBulb extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside
 
     draw(ctx) {
         ctx.save();
@@ -243,9 +236,7 @@ export class Switch extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside
 
     toggle() {
         this.properties.isOpen = !this.properties.isOpen;
@@ -341,7 +332,7 @@ export class Wire extends Component {
 
         const dx = x - xx;
         const dy = y - yy;
-        return Math.sqrt(dx * dx + dy * dy) < 10; // 10px threshold
+        return Math.sqrt(dx * dx + dy * dy) < 20; // Increased threshold from 10px to 20px for easier selection
     }
 
     draw(ctx, theme) {
@@ -396,9 +387,7 @@ export class Voltmeter extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside
 
     draw(ctx) {
         ctx.save();
@@ -465,9 +454,7 @@ export class Ammeter extends Component {
         this.nodes[1].y = this.y + 40 * sin;
     }
 
-    isPointInside(x, y) {
-        return Math.abs(x - this.x) < this.width / 2 && Math.abs(y - this.y) < this.height / 2;
-    }
+    // Uses base class isPointInside
 
     draw(ctx) {
         ctx.save();

@@ -7,7 +7,7 @@ export class Renderer {
         this.currentType = 'electrons'; // 'electrons' or 'conventional'
         this.showValues = true;
         this.showLabels = false;
-        this.theme = 'default';
+        this.theme = 'cyberpunk';
 
         this.hoverTarget = null;
         this.snapTarget = null;

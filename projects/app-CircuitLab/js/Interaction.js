@@ -50,9 +50,11 @@ export class Interaction {
 
     getMousePos(e) {
         const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
         return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
         };
     }
 
@@ -309,7 +311,7 @@ export class Interaction {
         }
 
         // Selection Logic (Click without drag)
-        if (dist < 5 && !this.snapTarget && !this.isDragging) { // Don't select if we just snapped
+        if (dist < 15 && !this.snapTarget && !this.isDragging) { // Increased threshold from 5 to 15 for easier clicking
             // If we clicked a node, maybe select the component it belongs to?
             // Or just select component if clicked body.
             const component = this.circuit.findComponentAt(pos.x, pos.y);

@@ -22,7 +22,23 @@ export class Component {
 
     // Abstract methods
     draw(ctx) { }
-    isPointInside(x, y) { }
+    isPointInside(x, y) {
+        if (!this.width || !this.height) return false;
+
+        // Translate point to local coordinate system relative to center
+        const dx = x - this.x;
+        const dy = y - this.y;
+
+        // Rotate point by -rotation to align with axis-aligned box
+        const cos = Math.cos(-this.rotation);
+        const sin = Math.sin(-this.rotation);
+
+        const localX = dx * cos - dy * sin;
+        const localY = dx * sin + dy * cos;
+
+        // Check axis-aligned box
+        return Math.abs(localX) < this.width / 2 && Math.abs(localY) < this.height / 2;
+    }
 
     // Common helpers
     getCenter() {
