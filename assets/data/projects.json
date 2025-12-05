@@ -1,5 +1,14 @@
 [
     {
+        "id": "app-orygn-casino",
+        "title": "Orygns Casino",
+        "category": "Game",
+        "description": "A web-based casino featuring Crash, Plinko, Mines, and other interactive games.",
+        "path": "projects/orygn-casino/index.html",
+        "image": "assets/icons/game-orygn-casino.svg",
+        "featured": true
+    },
+    {
         "id": "app-clientportalv2",
         "title": "Client Portal V2",
         "category": "App",

@@ -10,11 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load Projects from JSON
 async function loadProjects() {
     try {
-        const response = await fetch('assets/data/projects.json');
+        const response = await fetch('assets/data/projects.json?v=' + new Date().getTime());
         const projects = await response.json();
 
         // Sort projects alphabetically by title
-        projects.sort((a, b) => a.title.localeCompare(b.title));
+        // Sort projects: Featured first, then alphabetically
+        projects.sort((a, b) => {
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            return a.title.localeCompare(b.title);
+        });
 
         renderProjects(projects);
         setupFilters(projects);
@@ -31,15 +36,23 @@ function renderProjects(projects) {
 
     projects.forEach(project => {
         const card = document.createElement('div');
-        card.className = 'project-card';
+        // Add featured class if applicable
+        const featuredClass = project.featured ? 'project-card featured-project' : 'project-card';
+        card.className = featuredClass;
+
         card.dataset.category = project.category; // For filtering
 
         // Use a placeholder if image is missing or just use the path provided
         // We'll assume the path in JSON is relative to root
         const imgPath = project.image || 'assets/placeholder.jpg';
 
+        // Featured Badge
+        const badgeHTML = project.featured ? '<span class="project-badge new">NEW</span>' : '';
+
         card.innerHTML = `
-            <div class="card-image" style="background-image: url('${imgPath}');"></div>
+            <div class="card-image" style="background-image: url('${imgPath}');">
+                ${badgeHTML}
+            </div>
             <div class="card-content">
                 <span class="card-category">${project.category}</span>
                 <h3 class="card-title">${project.title}</h3>

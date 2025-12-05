@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orygn Casino - The Future of Gaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.7">
+    <!-- Physics & Audio Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="main.js?v=1.17"></script>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <div class="logo">
+                    <span class="logo-icon">✦</span>
+                    <span class="logo-text">ORYGN<span class="highlight">CASINO</span></span>
+                </div>
+            </div>
+            <div class="nav-center">
+                <!-- Optional: Search or Quick Links could go here -->
+            </div>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-btn-back">
+                    <span class="icon">⌂</span> Back to OrygnsCode Home
+                </a>
+                <div class="balance-display">
+                    <span class="currency-label">ORY</span>
+                    <span class="balance-amount">10,000.00</span>
+                </div>
+                <button class="icon-btn profile-btn" aria-label="Profile">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- Featured Banner -->
+            <section class="featured-banner">
+                <div class="banner-content">
+                    <span class="badge">FEATURED</span>
+                    <h1>PLINKO <span class="gradient-text">X</span></h1>
+                    <p>Drop the ball and watch the multipliers climb. The classic reimagined.</p>
+                    <button class="play-btn-large">PLAY NOW</button>
+                </div>
+                <div class="banner-visual">
+                    <!-- Abstract visual handled by CSS -->
+                    <div class="floating-orb"></div>
+                    <div class="floating-orb secondary"></div>
+                </div>
+            </section>
+
+            <!-- Game Grid -->
+            <section class="game-grid-section">
+                <div class="section-header">
+                    <h2>Originals</h2>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+
+                <div class="game-grid">
+                    <!-- Crash -->
+                    <div class="game-card">
+                        <div class="card-visual crash-visual">
+                            <div class="graph-line"></div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Crash</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                    <!-- Plinko -->
+                    <div class="game-card">
+                        <div class="card-visual plinko-visual">
+                            <div class="pegs"></div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Plinko</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                    <!-- Mines -->
+                    <div class="game-card">
+                        <div class="card-visual mines-visual">
+                            <div class="grid-preview"></div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Mines</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Coming Soon Section -->
+                <div class="section-header" style="margin-top: 40px; opacity: 0.6;">
+                    <h2>Coming Soon</h2>
+                </div>
+
+                <div class="game-grid coming-soon-grid">
+                    <!-- Dice -->
+                    <div class="game-card disabled">
+                        <div class="card-visual dice-visual" style="filter: grayscale(100%);">
+                            <div class="dice-cube"></div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Dice</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                    <!-- Wheel -->
+                    <div class="game-card disabled">
+                        <div class="card-visual wheel-visual" style="filter: grayscale(100%);">
+                            <div class="wheel-circle"></div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Wheel</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                    <!-- Slots -->
+                    <div class="game-card disabled">
+                        <div class="card-visual slots-visual" style="filter: grayscale(100%);">
+                            <div class="slot-reel">777</div>
+                        </div>
+                        <div class="card-info">
+                            <h3>Slots</h3>
+                            <span class="provider">Orygn</span>
+                        </div>
+                    </div>
+
+                    <!-- More -->
+                    <div class="game-card coming-soon disabled">
+                        <div class="card-visual">
+                            <span>+</span>
+                        </div>
+                        <div class="card-info">
+                            <h3>More Coming Soon</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Game View Container (Hidden by default) -->
+            <div id="game-view" class="game-view hidden">
+                <div class="game-header">
+                    <button id="back-to-lobby" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2 id="current-game-title">Plinko X</h2>
+                </div>
+
+                <div class="plinko-container">
+                    <!-- Left: Controls -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="bet-input-wrapper">
+                                <input type="number" id="bet-amount" value="10" min="0.1" step="0.1">
+                                <div class="bet-actions">
+                                    <button class="bet-mod" data-action="half">½</button>
+                                    <button class="bet-mod" data-action="double">2×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Risk Level</label>
+                            <select id="risk-level">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Rows</label>
+                            <select id="row-count">
+                                <option value="8">8</option>
+                                <option value="10">10</option>
+                                <option value="12">12</option>
+                                <option value="14">14</option>
+                                <option value="16" selected>16</option>
+                            </select>
+                        </div>
+
+                        <button id="play-btn" class="play-btn-large action-btn">DROP BALL</button>
+                    </div>
+
+                    <!-- Center: The Board -->
+                    <div class="plinko-board-wrapper">
+                        <div class="canvas-container">
+                            <canvas id="plinko-canvas"></canvas>
+                        </div>
+                        <!-- Multiplier Notes (Visual only, logic handled by physics) -->
+                        <div id="plinko-multipliers" class="notes">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: History/Stats -->
+                    <div class="game-stats-panel">
+                        <h3>Session History</h3>
+                        <div id="plinko-history" class="plinko-history-list">
+                            <!-- History items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crash View Container -->
+            <div id="crash-view" class="game-view hidden">
+                <div class="game-header">
+                    <button id="back-to-lobby-crash" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2>Crash X</h2>
+                </div>
+
+                <div class="plinko-container">
+                    <!-- Left: Controls -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="bet-input-wrapper">
+                                <input type="number" id="crash-bet-amount" value="10" min="0.1" step="0.1">
+                                <div class="bet-actions">
+                                    <button class="bet-mod" data-game="crash" data-action="half">½</button>
+                                    <button class="bet-mod" data-game="crash" data-action="double">2×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="autobet-header" style="margin-bottom: 8px;">
+                                <label>Auto Cashout (x)</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="crash-auto-cashout-toggle" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="bet-input-wrapper" id="crash-auto-cashout-wrapper">
+                                <input type="number" id="crash-auto-cashout" value="2.00" min="1.01" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- Live Earnings Display -->
+                        <div id="crash-live-earnings" class="live-earnings hidden">
+                            <span class="label">Current Earnings</span>
+                            <span class="value" id="crash-earnings-value">0.00</span>
+                        </div>
+
+                        <!-- Autobet Controls -->
+                        <div class="control-group autobet-group">
+                            <div class="autobet-header">
+                                <label>Autobet</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="crash-autobet-toggle">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="autobet-settings hidden" id="crash-autobet-settings">
+                                <label class="sub-label">Stop after (rounds)</label>
+                                <input type="number" id="crash-autobet-stop" placeholder="∞" min="1">
+                            </div>
+                        </div>
+
+                        <button id="crash-action-btn" class="play-btn-large action-btn">PLACE BET</button>
+                        <div class="space-hint">Press SPACE to Bet</div>
+                    </div>
+
+                    <!-- Center: The Board -->
+                    <div class="plinko-board-wrapper crash-board-wrapper">
+                        <div class="crash-canvas-container">
+                            <canvas id="crash-canvas"></canvas>
+                            <div class="crash-overlay">
+                                <div id="crash-multiplier">1.00x</div>
+                                <div id="crash-status">NEXT ROUND IN 5s</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: History/Stats -->
+                    <div class="game-stats-panel">
+                        <h3>Crash History</h3>
+                        <div id="crash-history" class="plinko-history-list">
+                            <!-- History items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Mines View Container -->
+            <div id="mines-view" class="game-view hidden">
+                <div class="game-header">
+                    <button id="back-to-lobby-mines" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2>Mines X</h2>
+                </div>
+
+                <div class="plinko-container">
+                    <!-- Left: Controls -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="bet-input-wrapper">
+                                <input type="number" id="mines-bet-amount" value="10" min="0.1" step="0.1">
+                                <div class="bet-actions">
+                                    <button class="bet-mod" data-game="mines" data-action="half">½</button>
+                                    <button class="bet-mod" data-game="mines" data-action="double">2×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Mines</label>
+                            <select id="mines-count">
+                                <option value="1">1</option>
+                                <option value="3" selected>3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="24">24</option>
+                            </select>
+                        </div>
+
+                        <!-- Live Stats for Mines -->
+                        <div id="mines-status-panel" class="hidden">
+                            <div class="live-earnings">
+                                <span class="label">Current Multiplier</span>
+                                <span class="value" id="mines-multiplier-value">1.00x</span>
+                            </div>
+                            <div class="live-earnings">
+                                <span class="label">Next Tile Profit</span>
+                                <span class="value" id="mines-next-profit">+0.00</span>
+                            </div>
+                        </div>
+
+                        <button id="mines-action-btn" class="play-btn-large action-btn">BET</button>
+                        <button id="mines-cashout-btn" class="play-btn-large action-btn btn-cashout hidden"
+                            disabled>CASHOUT</button>
+                    </div>
+
+                    <!-- Center: The Board -->
+                    <div class="plinko-board-wrapper mines-board-wrapper">
+                        <div id="mines-grid" class="mines-grid">
+                            <!-- Tiles generated by JS -->
+                        </div>
+                        <div id="mines-overlay" class="crash-overlay hidden">
+                            <div id="mines-result-msg">BUSTED</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: History/Stats -->
+                    <div class="game-stats-panel">
+                        <h3>Mines History</h3>
+                        <div id="mines-history" class="plinko-history-list">
+                            <!-- History items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar / Footer Stats -->
+        <aside class="stats-sidebar">
+            <div class="stats-header">
+                <h3>Live Wins</h3>
+                <div class="live-indicator"></div>
+            </div>
+            <div class="wins-list" id="wins-list">
+                <!-- Populated by JS -->
+                <div class="win-item">
+                    <div class="game-icon">🚀</div>
+                    <div class="win-details">
+                        <span class="user">User123</span>
+                        <span class="game">Crash</span>
+                    </div>
+                    <div class="win-amount">+ 420.00</div>
+                </div>
+                <div class="win-item">
+                    <div class="game-icon">💣</div>
+                    <div class="win-details">
+                        <span class="user">LuckyD</span>
+                        <span class="game">Mines</span>
+                    </div>
+                    <div class="win-amount">+ 1,250.00</div>
+                </div>
+                <div class="win-item">
+                    <div class="game-icon">🎰</div>
+                    <div class="win-details">
+                        <span class="user">Spinner</span>
+                        <span class="game">Slots</span>
+                    </div>
+                    <div class="win-amount">+ 80.00</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="orientation-lock">
+        <div class="lock-content">
+            <svg viewBox="0 0 24 24" fill="none" class="rotate-icon">
+                <path d="M17 4v16M21 8l-4-4-4 4M3 8l4-4 4 4M7 4v16" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <h2>Please Rotate Device</h2>
+            <p>This game is optimized for landscape mode</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</body>
+
+</html>
