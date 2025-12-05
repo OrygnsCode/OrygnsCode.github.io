@@ -3,6 +3,123 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Orygn Casino Initialized');
 
+    // --- Banner Plinko Simulation ---
+    function initBannerPlinko() {
+        const bannerCanvas = document.getElementById('banner-plinko-canvas');
+        if (!bannerCanvas) return; // Not on the page (mobile / different view)
+
+        // Setup Matter.js
+        const Engine = Matter.Engine,
+            Render = Matter.Render,
+            World = Matter.World,
+            Bodies = Matter.Bodies,
+            Runner = Matter.Runner,
+            Events = Matter.Events;
+
+        const engine = Engine.create();
+        const world = engine.world;
+        engine.world.gravity.y = 1.0; // Standard gravity
+
+        // Scale canvas for high DPI
+        const width = 320;
+        const height = 240;
+        bannerCanvas.width = width * 2;
+        bannerCanvas.height = height * 2;
+        bannerCanvas.style.width = width + 'px';
+        bannerCanvas.style.height = height + 'px';
+
+        const ctx = bannerCanvas.getContext('2d');
+        ctx.scale(2, 2); // Internal coordinate system is 320x240
+
+        // Pegs Configuration
+        const pegRadius = 3;
+        const pegs = [];
+        const rows = 5;
+        const startY = 40;
+        const gap = 30;
+
+        for (let r = 0; r < rows; r++) {
+            const pegsInRow = 3 + r; // Pyramid
+            for (let c = 0; c < pegsInRow; c++) {
+                // Center alignment
+                const x = width / 2 + (c - (pegsInRow - 1) / 2) * gap;
+                const y = startY + r * gap;
+                const peg = Bodies.circle(x, y, pegRadius, {
+                    isStatic: true,
+                    render: { visible: false }, // We draw manually
+                    restitution: 0.8
+                });
+                pegs.push(peg);
+            }
+        }
+        World.add(world, pegs);
+
+        // Bumper walls to keep it contained-ish
+        const leftWall = Bodies.rectangle(width / 2 - 120, height / 2 + 50, 10, height, { isStatic: true, angle: 0.3, render: { visible: false } });
+        const rightWall = Bodies.rectangle(width / 2 + 120, height / 2 + 50, 10, height, { isStatic: true, angle: -0.3, render: { visible: false } });
+        // Don't add walls, let it fall free
+
+        // Ball Logic
+        let ball = null;
+
+        function spawnBall() {
+            if (ball) World.remove(world, ball);
+
+            const startX = width / 2 + (Math.random() - 0.5) * 10; // Slight random offset
+            ball = Bodies.circle(startX, -20, 6, {
+                restitution: 0.5,
+                friction: 0.001,
+                render: { visible: false },
+                label: 'ball'
+            });
+            World.add(world, ball);
+        }
+
+        spawnBall();
+
+        // Custom Render Loop
+        (function renderLoop() {
+            if (!document.getElementById('banner-plinko-canvas')) return; // Exit if unmounted
+
+            Engine.update(engine, 1000 / 60);
+
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Pegs (Glowing)
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+
+            pegs.forEach(peg => {
+                ctx.beginPath();
+                ctx.arc(peg.position.x, peg.position.y, pegRadius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw Ball (Neon)
+            if (ball) {
+                // Trail effect (optional, keep simple for now)
+
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00f3ff';
+                ctx.fillStyle = '#00f3ff';
+
+                ctx.beginPath();
+                ctx.arc(ball.position.x, ball.position.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Respawn if out of bounds
+                if (ball.position.y > height + 50) {
+                    spawnBall();
+                }
+            }
+
+            ctx.shadowBlur = 0; // Reset
+            requestAnimationFrame(renderLoop);
+        })();
+    }
+
     // --- Global State ---
     let userBalance = 10000.00;
     const balanceEl = document.querySelector('.balance-amount');
@@ -10,6 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBalanceDisplay() {
         balanceEl.textContent = userBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
+
+    // Init Banner Physics immediately
+    initBannerPlinko();
+
+
 
     // --- Navigation Logic ---
     const lobbySection = document.querySelector('.game-grid-section');
