@@ -1395,3 +1395,76 @@ canvas {
     color: var(--text-secondary) !important;
     cursor: wait !important;
 }
+/* --- Banner Visual (Plinko) --- */
+.banner-visual {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    transform: rotateY(-15deg) rotateX(5deg);
+}
+
+.mini-plinko {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.plinko-peg {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+/* Procedural Pegs Grid */
+.plinko-peg:nth-child(1) { top: 20%; left: 50%; }
+.plinko-peg:nth-child(2) { top: 40%; left: 45%; }
+.plinko-peg:nth-child(3) { top: 40%; left: 55%; }
+.plinko-peg:nth-child(4) { top: 60%; left: 40%; }
+.plinko-peg:nth-child(5) { top: 60%; left: 50%; }
+.plinko-peg:nth-child(6) { top: 60%; left: 60%; }
+
+.plinko-ball {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-color);
+    top: 10%;
+    left: 49%;
+    animation: plinkoDrop 3s infinite ease-in-out;
+}
+
+@keyframes plinkoDrop {
+    0% { top: 10%; left: 49%; opacity: 0; transform: scale(0.5); }
+    10% { opacity: 1; transform: scale(1); }
+    20% { top: 20%; left: 50%; }
+    35% { top: 40%; left: 42%; }
+    50% { top: 60%; left: 48%; }
+    65% { top: 80%; left: 35%; }
+    80% { top: 100%; left: 25%; opacity: 1; }
+    90% { opacity: 0; }
+    100% { top: 110%; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .featured-banner {
+        flex-direction: column;
+        text-align: center;
+        padding-bottom: 40px;
+    }
+    .banner-content {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+    .banner-visual {
+        display: none;
+    }
+}
