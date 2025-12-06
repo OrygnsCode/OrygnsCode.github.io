@@ -3,6 +3,37 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Orygn Casino Initialized');
 
+    // --- Notification System ---
+    function showNotification(message, type = 'info') {
+        let container = document.querySelector('.notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `notification-toast type-${type}`;
+
+        let icon = 'ℹ️';
+        if (type === 'success') icon = '✅';
+        if (type === 'error') icon = '⚠️';
+
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            toast.addEventListener('animationend', () => {
+                toast.remove();
+            });
+        }, 3000);
+    }
+
     // --- Banner Plinko Simulation ---
     function initBannerPlinko() {
         const bannerCanvas = document.getElementById('banner-plinko-canvas');
@@ -166,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('mines-view').classList.remove('hidden');
             initMines();
         } else {
-            alert(`${gameName} is coming soon!`);
+            showNotification(`${gameName} is coming soon!`, 'info');
         }
     }
 
@@ -453,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Natural Binomial SD = sqrt(rows) / 2. (e.g., 2.0 for 16 rows)
         // We widen this to make edges reachable.
         const naturalSD = Math.sqrt(rows) / 2;
-        const fatSD = naturalSD * 1.03; // 3% wider spread (was 5%)
+        const fatSD = naturalSD * 0.95; // 0.95 Tightens spread slightly (House Edge)
 
         let targetSlot;
         do {
@@ -588,11 +619,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bet = parseFloat(betInput.value);
         if (isNaN(bet) || bet <= 0) {
-            alert('Invalid bet amount');
+            showNotification('Invalid bet amount', 'error');
             return;
         }
         if (bet > userBalance) {
-            alert('Insufficient balance');
+            showNotification('Insufficient balance', 'error');
             return;
         }
 
