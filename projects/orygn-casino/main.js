@@ -1519,9 +1519,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateBalanceDisplay();
 
         // Visuals
-        minesResultMsg.textContent = `WON ${winAmount.toFixed(2)}`;
-        minesResultMsg.style.color = 'var(--success)';
-        minesOverlay.classList.remove('hidden');
+        // Remove old overlay text assignment
+        // minesResultMsg.textContent = `WON ${winAmount.toFixed(2)}`;
+        showNotification(`You won ${winAmount.toFixed(2)} ORY!`, 'success');
+        // minesResultMsg.style.color = 'var(--success)';
+        // minesOverlay.classList.remove('hidden'); // Don't show overlay on win anymore
 
         revealAllMines(true); // Reveal mines but dimmed
 
