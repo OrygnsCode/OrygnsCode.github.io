@@ -699,6 +699,157 @@ h3 {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- Game Card Visuals (Premium SVGs) --- */
+.game-icon-svg {
+    width: 100%;
+    height: 100%;
+    /* Subtle ambient light behind SVG */
+    filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.15));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.game-card:hover .game-icon-svg {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.4));
+}
+
+/* Crash - Simple Line */
+.crash-graph-line {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: drawGraph 3s ease-in-out infinite;
+}
+
+.crash-dot {
+    animation: followGraph 3s ease-in-out infinite;
+    opacity: 0;
+}
+
+@keyframes drawGraph {
+    0% {
+        stroke-dashoffset: 200;
+    }
+
+    30% {
+        stroke-dashoffset: 0;
+    }
+
+    80% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes followGraph {
+    0% {
+        transform: translate(-150px, 100px);
+        opacity: 0;
+    }
+
+    30% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    80% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0, 0);
+        opacity: 0;
+    }
+}
+
+/* Dice - Isometric Float */
+.dice-group {
+    animation: floatRotate 5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes floatRotate {
+
+    0%,
+    100% {
+        transform: translate(100px, 80px) rotate(0deg) translateY(0);
+    }
+
+    50% {
+        transform: translate(100px, 80px) rotate(3deg) translateY(-8px);
+    }
+}
+
+/* Plinko */
+.plinko-ball {
+    animation: dropBall 2.5s infinite linear;
+}
+
+@keyframes dropBall {
+    0% {
+        cy: 20;
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    10% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Bouncing path simulation */
+    25% {
+        cx: 95;
+    }
+
+    50% {
+        cx: 105;
+    }
+
+    75% {
+        cx: 95;
+    }
+
+    90% {
+        cy: 130;
+        opacity: 1;
+    }
+
+    100% {
+        cy: 140;
+        opacity: 0;
+    }
+}
+
+/* Mines - Holographic Pulse */
+.mines-gem {
+    animation: holoPulse 4s infinite ease-in-out;
+    transform-origin: 110px 80px;
+}
+
+@keyframes holoPulse {
+
+    0%,
+    100% {
+        transform: scale(0.95);
+        opacity: 0.6;
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+        filter: brightness(1.3);
+    }
 }
 
 .autobet-header {

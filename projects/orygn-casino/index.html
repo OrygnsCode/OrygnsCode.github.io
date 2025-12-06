@@ -10,7 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=fix.10">
+    <link rel="stylesheet" href="style.css?v=fix.15">
     <!-- Physics & Audio Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -50,6 +50,49 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
+            <!-- Global SVG Filters & Definitions (Visible to DOM but hidden layout) -->
+            <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+                <defs>
+                    <!-- Glass Gradient -->
+                    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.15)" />
+                        <stop offset="50%" stop-color="rgba(255,255,255,0.05)" />
+                        <stop offset="100%" stop-color="rgba(255,255,255,0.01)" />
+                    </linearGradient>
+                    <!-- Neon Blue Glow -->
+                    <filter id="neonBlue" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                        <feColorMatrix in="blur" type="matrix" values="
+                            0 0 0 0 0
+                            0 0 0 0 0.8
+                            0 0 0 0 1
+                            0 0 0 1 0" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    <!-- Neon Purple Glow -->
+                    <filter id="neonPurple" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                        <feColorMatrix in="blur" type="matrix" values="
+                            0 0 0 0 0.8
+                            0 0 0 0 0.2
+                            0 0 0 0 1
+                            0 0 0 1 0" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    <!-- Metallic Rocket Body -->
+                    <linearGradient id="rocketMetal" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#e0e0e0" />
+                        <stop offset="50%" stop-color="#ffffff" />
+                        <stop offset="100%" stop-color="#bdc3c7" />
+                    </linearGradient>
+                </defs>
+            </svg>
 
             <!-- Featured Banner -->
             <section class="featured-banner">
@@ -76,27 +119,98 @@
                     <!-- Crash -->
                     <div class="game-card">
                         <div class="card-visual crash-visual">
-                            <div class="graph-line"></div>
+                            <!-- Simplistic Graph -->
+                            <svg viewBox="0 0 200 160" class="game-icon-svg" style="overflow:visible;">
+                                <!-- Axes -->
+                                <line x1="20" y1="140" x2="180" y2="140" stroke="rgba(255,255,255,0.2)"
+                                    stroke-width="2" />
+                                <line x1="20" y1="140" x2="20" y2="20" stroke="rgba(255,255,255,0.2)"
+                                    stroke-width="2" />
+                                <!-- Growing Line -->
+                                <path d="M20,140 Q100,120 170,40" fill="none" stroke="#fff" stroke-width="4"
+                                    stroke-linecap="round" class="crash-graph-line" />
+                                <!-- Endpoint Dot -->
+                                <circle cx="170" cy="40" r="4" fill="#fff" class="crash-dot" />
+                            </svg>
                         </div>
                         <div class="card-info">
                             <h3>Crash</h3>
                         </div>
                     </div>
 
-                    <!-- Plinko -->
+                    <!-- Dice (High Fidelity -> Simplistic) -->
+                    <div class="game-card">
+                        <div class="card-visual dice-visual">
+                            <svg viewBox="0 0 200 160" class="game-icon-svg">
+                                <g class="dice-group" transform="translate(100,80)">
+                                    <!-- White Wireframe/Solid Cube -->
+                                    <path d="M-30,-20 L0,-35 L30,-20 L0,-5 Z" fill="rgba(255,255,255,0.1)" stroke="#fff"
+                                        stroke-width="2" />
+                                    <path d="M-30,-20 L0,-5 L0,30 L-30,15 Z" fill="rgba(255,255,255,0.05)" stroke="#fff"
+                                        stroke-width="2" />
+                                    <path d="M0,-5 L30,-20 L30,15 L0,30 Z" fill="rgba(255,255,255,0.05)" stroke="#fff"
+                                        stroke-width="2" />
+                                    <!-- Simple Dot -->
+                                    <circle cx="0" cy="10" r="4" fill="#fff" />
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <h3>Dice</h3>
+                        </div>
+                    </div>
+
+                    <!-- Plinko (High Fidelity) -->
                     <div class="game-card">
                         <div class="card-visual plinko-visual">
-                            <div class="pegs"></div>
+                            <svg viewBox="0 0 200 160" class="game-icon-svg">
+                                <g class="plinko-pyramid">
+                                    <!-- Glowing Pins -->
+                                    <g fill="#fdcb6e" filter="url(#neonPurple)">
+                                        <circle cx="100" cy="40" r="2.5" />
+                                        <circle cx="90" cy="60" r="2.5" />
+                                        <circle cx="110" cy="60" r="2.5" />
+                                        <circle cx="80" cy="80" r="2.5" />
+                                        <circle cx="100" cy="80" r="2.5" />
+                                        <circle cx="120" cy="80" r="2.5" />
+                                        <circle cx="70" cy="100" r="2.5" />
+                                        <circle cx="90" cy="100" r="2.5" />
+                                        <circle cx="110" cy="100" r="2.5" />
+                                        <circle cx="130" cy="100" r="2.5" />
+                                    </g>
+                                </g>
+                                <!-- Falling Ball with Gradient -->
+                                <circle cx="100" cy="20" r="5" fill="#e17055" class="plinko-ball" stroke="white"
+                                    stroke-width="0.5" />
+                            </svg>
                         </div>
                         <div class="card-info">
                             <h3>Plinko</h3>
                         </div>
                     </div>
 
-                    <!-- Mines -->
+                    <!-- Mines (High Fidelity -> Simplistic) -->
                     <div class="game-card">
                         <div class="card-visual mines-visual">
-                            <div class="grid-preview"></div>
+                            <svg viewBox="0 0 200 160" class="game-icon-svg">
+                                <g transform="translate(100, 80)">
+                                    <!-- Bomb Icon -->
+                                    <g transform="translate(-30, 0)">
+                                        <circle cx="0" cy="0" r="20" fill="#333" stroke="#fff" stroke-width="1.5" />
+                                        <path d="M0,-20 L0,-28 M-5,-28 L5,-28" stroke="#fff" stroke-width="2" />
+                                        <!-- Fuse -->
+                                        <path d="M0,-28 Q10,-35 15,-25" fill="none" stroke="#e17055" stroke-width="2" />
+                                        <circle cx="15" cy="-25" r="2" fill="#e17055" />
+                                    </g>
+
+                                    <!-- Gem Icon -->
+                                    <g transform="translate(30, 0)">
+                                        <path d="M0,-15 L15,0 L0,15 L-15,0 Z" fill="#00f3ff" stroke="#fff"
+                                            stroke-width="1" />
+                                        <path d="M-8,-5 L8,-5 L0,10 Z" fill="rgba(255,255,255,0.4)" />
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
                         <div class="card-info">
                             <h3>Mines</h3>
@@ -111,15 +225,7 @@
                 </div>
 
                 <div class="game-grid coming-soon-grid">
-                    <!-- Dice -->
-                    <div class="game-card">
-                        <div class="card-visual dice-visual">
-                            <div class="dice-cube"></div>
-                        </div>
-                        <div class="card-info">
-                            <h3>Dice</h3>
-                        </div>
-                    </div>
+                    <!-- Dice Moved to Originals -->
 
                     <!-- Wheel -->
                     <div class="game-card disabled">
