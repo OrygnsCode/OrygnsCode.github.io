@@ -1041,7 +1041,10 @@ canvas {
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
+    overflow-y: auto;
     max-height: 500px;
+    min-height: 50px;
+    /* Ensure visibility */
     padding-right: 4px;
     /* Space for scrollbar */
 }
@@ -1093,12 +1096,44 @@ canvas {
 /* Responsive Game */
 @media (max-width: 1100px) {
     .plinko-container {
-        grid-template-columns: 250px 1fr;
+        grid-template-columns: 250px 1fr 200px;
+        /* Keep 3 columns but tighter */
     }
 
     .game-stats-panel {
-        display: none;
-        /* Hide history on smaller screens for now */
+        /* display: none;  <-- REMOVED: Do not hide history */
+        padding-left: 16px;
+    }
+}
+
+@media (max-width: 950px) {
+    .plinko-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        /* Stack them */
+    }
+
+    .game-controls-panel {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-right: 0;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+    }
+
+    .game-stats-panel {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-left: 0;
+        padding-top: 24px;
+        margin-top: 24px;
+        max-height: 300px;
+        /* Limit height when stacked */
+        overflow-y: auto;
+    }
+
+    .plinko-history-list {
+        max-height: 200px;
     }
 }
 
@@ -1450,37 +1485,86 @@ canvas {
     color: var(--text-main);
     padding: 16px 20px;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     min-width: 320px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
     animation: slideInDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     pointer-events: auto;
-    border-left: 4px solid var(--primary-blue);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left-width: 4px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.notification-toast.type-info {
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(15, 23, 42, 0.9));
 }
 
 .notification-toast.type-error {
-    border-left-color: var(--danger);
+    border-left: 3px solid var(--danger);
+    background: linear-gradient(90deg, rgba(255, 46, 99, 0.1), rgba(15, 23, 42, 0.9));
 }
 
 .notification-toast.type-success {
-    border-left-color: var(--success);
+    border-left: 3px solid var(--success);
+    background: linear-gradient(90deg, rgba(46, 204, 113, 0.1), rgba(15, 23, 42, 0.9));
 }
 
 .notification-toast.fade-out {
     animation: fadeOutUp 0.3s ease-in forwards;
 }
 
-.toast-icon {
-    font-size: 1.2rem;
+.toast-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.notification-toast.type-success .toast-icon-wrapper {
+    color: var(--success);
+}
+
+.notification-toast.type-error .toast-icon-wrapper {
+    color: var(--danger);
+}
+
+.notification-toast.type-info .toast-icon-wrapper {
+    color: var(--accent);
 }
 
 .toast-message {
     font-size: 0.9rem;
     font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Enhanced Dice Result */
+.dice-result-display.win {
+    color: var(--success) !important;
+    text-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+    transform: scale(1.1);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-result-display.loss {
+    color: var(--error) !important;
+    opacity: 0.8;
+}
+
+.dice-result-display.rolling {
+    color: var(--text-secondary);
+    opacity: 0.7;
+    transform: scale(0.95);
 }
 
 @keyframes slideInDown {
@@ -1505,4 +1589,155 @@ canvas {
         transform: translateY(-20px);
         opacity: 0;
     }
+}
+
+/* --- Dice X Specific Styles --- */
+.dice-board-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: radial-gradient(circle at center, #1a212d 0%, #0b0f17 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(0, 0, 0, 0.3);
+    min-height: 420px;
+}
+
+.dice-result-display {
+    font-size: 6rem;
+    /* Larger */
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-main);
+    text-shadow: 0 0 25px rgba(255, 255, 255, 0.15), 0 0 10px rgba(0, 0, 0, 0.5);
+    /* Stronger glow + shadow for depth */
+    margin-bottom: 40px;
+    position: relative;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-result-display.win {
+    color: #2ecc71 !important;
+    /* Green */
+    text-shadow: 0 0 40px rgba(46, 204, 113, 0.8), 0 0 10px rgba(46, 204, 113, 1);
+    transform: scale(1.15);
+}
+
+.dice-result-display.loss {
+    color: #e74c3c !important;
+    /* Red */
+    text-shadow: 0 0 40px rgba(231, 76, 60, 0.8), 0 0 10px rgba(231, 76, 60, 1);
+    transform: scale(0.95);
+}
+
+@keyframes pulseWin {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Custom Slider */
+/* --- Slider Styling --- */
+.dice-slider-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: 16px;
+    /* Taller */
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+    overflow: visible;
+    /* Handle sticks out */
+    cursor: pointer;
+    /* Custom interaction */
+}
+
+/* Track Marks */
+.dice-slider-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg,
+            rgba(255, 255, 255, 0.1) 0px,
+            rgba(255, 255, 255, 0.1) 1px,
+            transparent 1px,
+            transparent 10px);
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Removed .slider-input styles (Custom JS implementation) */
+
+.slider-fill {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    height: calc(100% - 4px);
+    background: linear-gradient(90deg, rgba(46, 204, 113, 0.6), rgba(46, 204, 113, 0.9));
+    border-radius: 6px;
+    width: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+    transition: width 0.05s linear;
+    z-index: 5;
+}
+
+/* Inverted mode (Roll Over) could flip the color, 
+   but for now we assume Roll Under: Left side is win, Right side is loss? 
+   Wait, standard is usually Roll Under -> Win is 0 to Target. So Left.
+*/
+
+.slider-handle-visual {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    background: var(--bg-dark);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: left 0.05s linear;
+    z-index: 15;
+}
+
+.handle-icon {
+    font-size: 14px;
+    color: var(--accent);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-family: 'Roboto Mono', monospace;
 }

@@ -10,7 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=6.1">
+    <link rel="stylesheet" href="style.css?v=fix.10">
     <!-- Physics & Audio Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -112,8 +112,8 @@
 
                 <div class="game-grid coming-soon-grid">
                     <!-- Dice -->
-                    <div class="game-card disabled">
-                        <div class="card-visual dice-visual" style="filter: grayscale(100%);">
+                    <div class="game-card">
+                        <div class="card-visual dice-visual">
                             <div class="dice-cube"></div>
                         </div>
                         <div class="card-info">
@@ -308,6 +308,90 @@
                     </div>
                 </div>
             </div>
+            <!-- Dice View Container -->
+            <div id="dice-view" class="game-view hidden">
+                <div class="game-header">
+                    <button id="back-to-lobby-dice" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2>Dice X</h2>
+                </div>
+
+                <div class="plinko-container">
+                    <!-- Left: Controls -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="bet-input-wrapper">
+                                <input type="number" id="dice-bet-amount" value="10" min="0.1" step="0.1">
+                                <div class="bet-actions">
+                                    <button class="bet-mod" data-game="dice" data-action="half">½</button>
+                                    <button class="bet-mod" data-game="dice" data-action="double">2×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Stats for Dice -->
+                        <div id="dice-status-panel">
+                            <div class="live-earnings">
+                                <span class="label">Target (Under)</span>
+                                <span class="value" id="dice-target-value">50.00</span>
+                            </div>
+                            <div class="live-earnings">
+                                <span class="label">Payout Multiplier</span>
+                                <span class="value" id="dice-multiplier-value">1.98x</span>
+                            </div>
+                            <div class="live-earnings">
+                                <span class="label">Win Chance</span>
+                                <span class="value" id="dice-chance-value">50.00%</span>
+                            </div>
+                            <div class="live-earnings" id="dice-profit-box"
+                                style="margin-top: 10px; border-color: var(--primary-blue); background: rgba(58, 130, 247, 0.1);">
+                                <span class="label" style="color: var(--primary-blue);">Profit on Win</span>
+                                <span class="value" id="dice-profit-value">+10.00</span>
+                            </div>
+                        </div>
+
+                        <button id="dice-action-btn" class="play-btn-large action-btn">ROLL DICE</button>
+                    </div>
+
+                    <!-- Center: The Board -->
+                    <div class="plinko-board-wrapper dice-board-wrapper">
+                        <!-- Simplified Dice Visual -->
+                        <div class="dice-result-display">
+                            <span id="dice-result-number">50.00</span>
+                        </div>
+
+                        <!-- Slider Container -->
+                        <div class="dice-slider-container" id="dice-slider-container">
+                            <div class="slider-fill" id="dice-slider-fill"></div>
+                            <div class="slider-handle-visual" id="dice-slider-handle">
+                                <div class="handle-icon">⬢</div>
+                            </div>
+                        </div>
+
+                        <div class="slider-labels">
+                            <span>0</span>
+                            <span>25</span>
+                            <span>50</span>
+                            <span>75</span>
+                            <span>100</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: History/Stats -->
+                    <div class="game-stats-panel">
+                        <h3>Dice History</h3>
+                        <div id="dice-history" class="plinko-history-list">
+                            <!-- History items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Mines View Container -->
             <div id="mines-view" class="game-view hidden">
                 <div class="game-header">
@@ -494,6 +578,7 @@
                 </div>
             `;
         }
+
     </script>
 </body>
 

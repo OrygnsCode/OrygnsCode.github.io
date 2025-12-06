@@ -15,12 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const toast = document.createElement('div');
         toast.className = `notification-toast type-${type}`;
 
-        let icon = 'ℹ️';
-        if (type === 'success') icon = '✅';
-        if (type === 'error') icon = '⚠️';
+        // Premium Icon Mapping
+        let iconHtml = '';
+        if (type === 'success') iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        else if (type === 'error') iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+        else iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
 
         toast.innerHTML = `
-            <span class="toast-icon">${icon}</span>
+            <div class="toast-icon-wrapper">${iconHtml}</div>
             <span class="toast-message">${message}</span>
         `;
 
@@ -178,33 +180,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const rowSelect = document.getElementById('row-count');
     const historyList = document.getElementById('plinko-history');
 
-    // Navigation Handlers
-    function openGame(gameName) {
-        if (gameName === 'Plinko') {
-            lobbySection.classList.add('hidden');
-            featuredBanner.classList.add('hidden');
-            gameView.classList.remove('hidden');
-            gameTitle.textContent = 'Plinko X';
-            initPlinko();
-        } else if (gameName === 'Crash') {
-            lobbySection.classList.add('hidden');
-            featuredBanner.classList.add('hidden');
-            document.getElementById('crash-view').classList.remove('hidden');
-            initCrash();
-        } else if (gameName === 'Mines') {
-            lobbySection.classList.add('hidden');
-            featuredBanner.classList.add('hidden');
-            document.getElementById('mines-view').classList.remove('hidden');
-            initMines();
-        } else {
-            showNotification(`${gameName} is coming soon!`, 'info');
-        }
-    }
+    // Game Card Click Handlers
+    document.querySelectorAll('.game-card').forEach((card, index) => {
+        card.addEventListener('click', () => {
+            // Index 0: Crash, 1: Plinko, 2: Mines, 3: Dice
+            const gameName = card.querySelector('h3').textContent;
 
-    function closeGame() {
-        gameView.classList.add('hidden');
+            if (gameName === 'Plinko') {
+                lobbySection.classList.add('hidden');
+                featuredBanner.classList.add('hidden');
+                gameView.classList.remove('hidden');
+                gameTitle.textContent = 'Plinko X';
+                initPlinko();
+            } else if (gameName === 'Crash') {
+                // Show Crash View
+                lobbySection.classList.add('hidden');
+                featuredBanner.classList.add('hidden');
+                document.getElementById('crash-view').classList.remove('hidden');
+                initCrash(); // Start Crash Logic
+            } else if (gameName === 'Mines') {
+                lobbySection.classList.add('hidden');
+                featuredBanner.classList.add('hidden');
+                document.getElementById('mines-view').classList.remove('hidden');
+                initMines();
+            } else if (gameName === 'Dice') {
+                lobbySection.classList.add('hidden');
+                featuredBanner.classList.add('hidden');
+                document.getElementById('dice-view').classList.remove('hidden');
+                initDice();
+            } else {
+                showNotification(`${gameName} is coming soon!`, 'info');
+            }
+        });
+    });
+
+    // Back to Lobby Handlers
+    document.getElementById('back-to-lobby').addEventListener('click', returnToLobby);
+    document.getElementById('back-to-lobby-crash').addEventListener('click', returnToLobby);
+    document.getElementById('back-to-lobby-mines').addEventListener('click', returnToLobby);
+    document.getElementById('back-to-lobby-dice').addEventListener('click', returnToLobby);
+
+    function returnToLobby() {
+        gameView.classList.add('hidden'); // Plinko
         document.getElementById('crash-view').classList.add('hidden');
         document.getElementById('mines-view').classList.add('hidden');
+        document.getElementById('dice-view').classList.add('hidden');
+
         lobbySection.classList.remove('hidden');
         featuredBanner.classList.remove('hidden');
         stopPlinko();
@@ -212,23 +233,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // stopMines(); // No loop to stop, but good practice if animation exists
     }
 
-    // Event Listeners for Nav
-    document.querySelectorAll('.game-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const gameName = card.querySelector('h3').textContent;
-            if (gameName !== 'More Coming Soon') {
-                openGame(gameName);
-            }
-        });
-    });
-
+    // Banner Play Button
     document.querySelector('.play-btn-large').addEventListener('click', () => {
-        openGame('Plinko'); // Banner button
+        // Open Plinko by default from banner
+        lobbySection.classList.add('hidden');
+        featuredBanner.classList.add('hidden');
+        gameView.classList.remove('hidden');
+        gameTitle.textContent = 'Plinko X';
+        initPlinko();
     });
-
-    backBtn.addEventListener('click', closeGame);
-    document.getElementById('back-to-lobby-crash').addEventListener('click', closeGame);
-    document.getElementById('back-to-lobby-mines').addEventListener('click', closeGame);
 
 
 
@@ -1633,4 +1646,364 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+
+
+    // --- Dice X Logic ---
+    let diceTarget = 50.00;
+    let dicePayout = 1.98;
+    let diceChance = 50.00;
+    let isRollingDice = false;
+
+    // Elements - Selected lazily
+    let diceSliderContainer, diceSliderFill, diceSliderHandle; // Refactored variables
+    let diceTargetVal, diceMultVal, diceChanceVal, diceProfitVal;
+    let diceResultDisplay, diceActionBtn, diceBetInput, diceHistoryList;
+    let diceInitDone = false;
+
+    function initDice() {
+        console.log('initDice: Initializing...');
+        // Always ensuring elements are fresh or just use delegation for actions
+        diceSliderContainer = document.getElementById('dice-slider-container');
+        // diceSlider = document.getElementById('dice-slider'); // REMOVED: Native input
+        diceSliderFill = document.getElementById('dice-slider-fill');
+        diceSliderHandle = document.getElementById('dice-slider-handle');
+
+        diceTargetVal = document.getElementById('dice-target-value');
+        diceMultVal = document.getElementById('dice-multiplier-value');
+        diceChanceVal = document.getElementById('dice-chance-value');
+        diceProfitVal = document.getElementById('dice-profit-value');
+
+        diceResultDisplay = document.getElementById('dice-result-number');
+        diceActionBtn = document.getElementById('dice-action-btn'); // FIXED: Was missing!
+        diceBetInput = document.getElementById('dice-bet-amount');
+        diceHistoryList = document.getElementById('dice-history');
+
+        // Check for critical missing elements
+        if (!diceActionBtn) console.error('CRITICAL: diceActionBtn not found!');
+
+        if (!diceInitDone) {
+            // Event Delegation for Dice Actions
+            const diceView = document.getElementById('dice-view');
+            if (diceView) {
+                diceView.addEventListener('click', (e) => {
+                    const target = e.target;
+
+                    // Roll Button
+                    if (target.id === 'dice-action-btn' || target.closest('#dice-action-btn')) {
+                        console.log('Delegate: Roll Dice clicked');
+                        rollDice();
+                    }
+
+                    // Bet Modifiers
+                    if (target.classList.contains('bet-mod') && target.dataset.game === 'dice') {
+                        const action = target.dataset.action;
+                        let current = parseFloat(diceBetInput.value) || 0;
+                        if (action === 'half') diceBetInput.value = (current / 2).toFixed(2);
+                        if (action === 'double') diceBetInput.value = (current * 2).toFixed(2);
+                        updateDiceCalculations();
+                    }
+                });
+            }
+
+            // Custom Slider Logic
+            if (diceSliderContainer) {
+                initCustomSlider();
+            }
+
+            // Bet Input
+            if (diceBetInput) {
+                diceBetInput.addEventListener('input', updateDiceCalculations);
+            }
+
+            diceInitDone = true;
+        }
+
+        updateDiceUI();
+        updateDiceCalculations();
+    }
+
+
+    // --- Custom Slider Implementation ---
+    function initCustomSlider() {
+        let isDragging = false;
+
+        const updateSliderFromEvent = (clientX) => {
+            const rect = diceSliderContainer.getBoundingClientRect();
+            let rawX = clientX - rect.left;
+            let width = rect.width;
+
+            // Clamp
+            if (rawX < 0) rawX = 0;
+            if (rawX > width) rawX = width;
+
+            const percentage = (rawX / width) * 100;
+
+            // Map percentage (0-100) to value (min-max)
+            // min=2, max=98
+            const min = 2;
+            const max = 98;
+            const value = min + ((percentage / 100) * (max - min));
+
+            // Snap to integer
+            diceTarget = Math.round(value);
+
+            // Re-Clamp value
+            if (diceTarget < min) diceTarget = min;
+            if (diceTarget > max) diceTarget = max;
+
+            updateDiceUI();
+            updateDiceCalculations();
+        };
+
+        // Mouse Events
+        diceSliderContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateSliderFromEvent(e.clientX);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent text selection
+            updateSliderFromEvent(e.clientX);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Touch Events
+        diceSliderContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            updateSliderFromEvent(e.touches[0].clientX);
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent scrolling
+            updateSliderFromEvent(e.touches[0].clientX);
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    }
+
+    function updateDiceUI() {
+        const min = 2;
+        const max = 98;
+        const val = diceTarget;
+
+        const percentage = ((val - min) / (max - min)) * 100;
+
+        if (diceSliderFill) diceSliderFill.style.width = percentage + '%';
+        if (diceSliderHandle) diceSliderHandle.style.left = percentage + '%';
+
+        if (diceTargetVal) diceTargetVal.textContent = val.toFixed(2);
+    }
+
+    function updateDiceCalculations() {
+        // Safety check + Re-select if null (defensive coding)
+        if (!diceMultVal || !diceChanceVal || !diceProfitVal || !diceBetInput) {
+            diceMultVal = document.getElementById('dice-multiplier-value');
+            diceChanceVal = document.getElementById('dice-chance-value');
+            diceProfitVal = document.getElementById('dice-profit-value');
+            diceBetInput = document.getElementById('dice-bet-amount');
+
+            // If still null, we cannot proceed
+            if (!diceMultVal || !diceChanceVal || !diceProfitVal || !diceBetInput) {
+                console.warn('Dice elements missing in updateDiceCalculations');
+                return;
+            }
+        }
+
+        // Roll Under Logic
+        // Chance = Target (since 0 to 100)
+        // e.g. Target 50 -> Chance 50%
+
+        diceChance = diceTarget;
+
+        // House Edge 1%
+        // Payout = (100 - Edge) / Chance
+        // Edge = 1.0
+        const edge = 1.0;
+        dicePayout = (100 - edge) / diceChance;
+
+        // Clamp logic to avoid infinity
+        if (dicePayout < 1.0102) dicePayout = 1.0102;
+
+        diceMultVal.textContent = dicePayout.toFixed(4) + 'x';
+        diceChanceVal.textContent = diceChance.toFixed(2) + '%';
+
+        // Profit Calc
+        const bet = parseFloat(diceBetInput.value) || 0;
+        const profit = (bet * dicePayout) - bet;
+        diceProfitVal.textContent = '+' + profit.toFixed(2);
+    }
+
+
+    function rollDice() {
+        if (isRollingDice) return;
+
+        const bet = parseFloat(diceBetInput.value);
+        if (isNaN(bet) || bet <= 0) {
+            showNotification('Invalid bet amount', 'error');
+            return;
+        }
+        if (bet > userBalance) {
+            showNotification('Insufficient balance', 'error');
+            return;
+        }
+
+        // Deduct Balance
+        userBalance -= bet;
+        updateBalanceDisplay();
+
+        isRollingDice = true;
+        diceActionBtn.disabled = true;
+
+        // Reset Visuals
+        diceResultDisplay.classList.remove('win', 'loss');
+        diceResultDisplay.classList.add('rolling');
+
+        // Animation: "Data Decrypt" Effect
+        let frameCount = 0;
+        const maxFrames = 25;
+        const chars = '0123456789';
+
+        const interval = setInterval(() => {
+            try {
+                // Random scramble effect
+                let scrambled = '';
+                scrambled += chars[Math.floor(Math.random() * 10)];
+                scrambled += chars[Math.floor(Math.random() * 10)];
+                scrambled += '.';
+                scrambled += chars[Math.floor(Math.random() * 10)];
+                scrambled += chars[Math.floor(Math.random() * 10)];
+
+                diceResultDisplay.textContent = scrambled;
+
+                frameCount++;
+                if (frameCount >= maxFrames) {
+                    clearInterval(interval);
+                    finalizeDiceRoll(bet);
+                }
+            } catch (e) {
+                console.error("Anim error", e);
+                clearInterval(interval);
+                isRollingDice = false;
+                diceActionBtn.disabled = false;
+            }
+        }, 20); // Faster updates
+    }
+
+    function playDiceSound(type) {
+        if (!window.Tone || Tone.context.state !== 'running') return;
+        try {
+            const synth = new Tone.Synth().toDestination();
+            if (type === 'win') {
+                // Happy high ping
+                const now = Tone.now();
+                synth.triggerAttackRelease("E5", "16n", now);
+                synth.triggerAttackRelease("G5", "16n", now + 0.1);
+            } else if (type === 'loss') {
+                // Low thud
+                synth.triggerAttackRelease("C2", "8n");
+            }
+        } catch (e) {
+            console.warn("Audio error", e);
+        }
+    }
+
+    function finalizeDiceRoll(betAmount) {
+        try {
+            // Generate Result
+            const result = (Math.random() * 100);
+            const resultFormatted = result.toFixed(2);
+
+            diceResultDisplay.textContent = resultFormatted;
+            diceResultDisplay.classList.remove('rolling');
+
+            // Win Condition: Roll UNDER Target
+            const currentTarget = parseFloat(diceTarget.toFixed(2));
+            const isWin = result < currentTarget;
+
+            // Ensure history list is available
+            const list = document.getElementById('dice-history') || diceHistoryList;
+
+            if (isWin) {
+                const winAmount = betAmount * dicePayout;
+                const profit = winAmount - betAmount;
+
+                userBalance += winAmount;
+                updateBalanceDisplay();
+
+                // Win Visuals
+                diceResultDisplay.classList.add('win');
+                showNotification(`You won ${winAmount.toFixed(2)} ORY!`, 'success');
+
+                // Play Win Sound
+                playDiceSound('win');
+
+                if (list) addDiceHistory(resultFormatted, currentTarget.toFixed(2), dicePayout.toFixed(4), profit, true);
+
+                // Temporary Flash Logic (Reset to neutral)
+                setTimeout(() => {
+                    diceResultDisplay.classList.remove('win');
+                }, 2000);
+
+            } else {
+                // Loss Visuals
+                diceResultDisplay.classList.add('loss');
+                playDiceSound('loss');
+                if (list) addDiceHistory(resultFormatted, currentTarget.toFixed(2), dicePayout.toFixed(4), -betAmount, false);
+
+                // Temporary Flash Logic (Reset to neutral)
+                setTimeout(() => {
+                    diceResultDisplay.classList.remove('loss');
+                }, 2000);
+            }
+
+        } catch (err) {
+            console.error("Dice Finalize Error", err);
+        } finally {
+            isRollingDice = false;
+            diceActionBtn.disabled = false;
+        }
+    }
+
+    function addDiceHistory(result, target, payout, profit, isWin) {
+        // Robust selector
+        const list = document.getElementById('dice-history') || diceHistoryList;
+        if (!list) return;
+
+        const item = document.createElement('div');
+        item.className = 'history-item';
+
+        const profitClass = isWin ? 'profit-pos' : 'profit-neg';
+        const profitSign = isWin ? '+' : '';
+
+        item.innerHTML = `
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span style="font-weight:700; color: ${isWin ? 'var(--success)' : 'var(--text-secondary)'}">${result}</span>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">&lt; ${target}</span>
+            </div>
+            <div style="text-align:right;">
+                <span class="history-mult" style="font-size:0.75rem; display:block;">${payout}x</span>
+                <span class="history-profit ${profitClass}">${profitSign}${profit.toFixed(2)}</span>
+            </div>
+        `;
+
+        if (diceHistoryList && diceHistoryList.parentNode) {
+            list.insertBefore(item, list.firstChild);
+            if (list.children.length > 20) {
+                list.lastElementChild.remove();
+            }
+        } else if (list) {
+            // Fallback if the variable was stale but we found 'list' via getElementById
+            list.insertBefore(item, list.firstChild);
+            if (list.children.length > 20) {
+                list.lastElementChild.remove();
+            }
+        }
+    }
 });
