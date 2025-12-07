@@ -768,6 +768,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset UI
         updateCrashUI();
+
+        // Force Autobet OFF
+        if (crashAutobetToggle) crashAutobetToggle.checked = false;
+        isAutobetActive = false;
+        if (crashAutobetSettings) crashAutobetSettings.classList.add('hidden');
+
+        // Force Auto Cashout OFF
+        if (crashAutoCashoutToggle) crashAutoCashoutToggle.checked = false;
+        isAutoCashoutEnabled = false;
+        if (crashAutoCashoutWrapper) crashAutoCashoutWrapper.classList.add('hidden');
+
         startCrashLoop();
     }
 
@@ -1298,6 +1309,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 placeCrashBet();
+            } else if (crashState === 'FLYING') {
+                cashOutCrash();
             }
         }
     });
