@@ -1,0 +1,361 @@
+/* Slots Specific Styles - Integrated */
+
+/* Ensure the slots board fits in the plinko-board-wrapper */
+.slots-board-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 20px;
+}
+
+.slots-header-overlay {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    /* Let clicks pass through */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Reels Frame - Responsive sizing */
+.reels-frame {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid var(--bg-hover);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.reels-window {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    height: 350px;
+    background: #0e1219;
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
+.reel-col {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+}
+
+.reel-symbol {
+    height: 116.66px;
+    /* 350px / 3 */
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.reel-symbol svg {
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+}
+
+.reel-symbol.winner {
+    animation: symbolPulse 1s infinite alternate;
+}
+
+@keyframes symbolPulse {
+    from {
+        transform: scale(1);
+        filter: drop-shadow(0 0 5px var(--success));
+    }
+
+    to {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 15px var(--success));
+    }
+}
+
+.reel-col.spinning .reel-symbol svg {
+    filter: blur(4px);
+    transform: scaleY(1.3);
+}
+
+/* Winning Payline */
+.paylines-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Controls */
+.slots-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-dark);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auto-turbo-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 20px;
+    row-gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.control-group label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Stepper */
+.stepper {
+    display: flex;
+    align-items: center;
+    background: var(--bg-hover);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.stepper button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.stepper button:hover {
+    color: var(--primary-blue);
+}
+
+.stepper input {
+    width: 80px;
+    background: transparent;
+    border: none;
+    text-align: center;
+    color: var(--text-main);
+    font-family: 'Roboto Mono';
+    font-weight: 700;
+}
+
+/* Spin Button */
+.spin-button {
+    width: 120px;
+    height: 60px;
+    /* Rectangular/Pill */
+    border-radius: 30px;
+    background: rgba(0, 231, 1, 0.1);
+    /* Subtle Tint */
+    border: 1px solid var(--success);
+    color: var(--success);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.spin-button:hover {
+    background: var(--success);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 231, 1, 0.3);
+    transform: translateY(-2px);
+}
+
+.spin-button:active {
+    transform: translateY(0);
+}
+
+@keyframes bounceStop {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(10px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.confetti {
+    position: absolute;
+    width: 8px;
+    height: 14px;
+    top: -20px;
+    z-index: 100;
+    opacity: 0;
+}
+
+/* Keyframes for Falling + Swaying */
+@keyframes confetti-drop {
+    0% {
+        transform: translateY(0) rotate(0deg) translateX(0);
+        opacity: 1;
+    }
+
+    25% {
+        transform: translateY(150px) rotate(90deg) translateX(15px);
+    }
+
+    50% {
+        transform: translateY(300px) rotate(180deg) translateX(-15px);
+    }
+
+    75% {
+        transform: translateY(450px) rotate(270deg) translateX(15px);
+    }
+
+    100% {
+        transform: translateY(600px) rotate(360deg) translateX(0);
+        opacity: 0;
+    }
+}
+
+.confetti.circle {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+}
+
+.confetti.slow {
+    animation-duration: 2.5s;
+}
+
+.confetti.medium {
+    animation-duration: 2s;
+}
+
+.confetti.fast {
+    animation-duration: 1.5s;
+}
+
+.spin-text {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.spin-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Auto Button */
+.auto-button {
+    padding: 0.5rem 1.5rem;
+    background: var(--bg-hover);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-family: 'Outfit';
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auto-button.active {
+    background: var(--primary-blue);
+    color: #fff;
+    border-color: var(--primary-blue);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reels-window {
+        height: 300px;
+    }
+
+    .reel-symbol {
+        height: 100px;
+    }
+
+    .reel-symbol svg {
+        width: 50px;
+        height: 50px;
+    }
+
+    .slots-controls {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .spin-button {
+        width: 80px;
+        height: 80px;
+    }
+
+    .spin-button {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* History Styles */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+}
+
+.history-item .timestamp {
+    color: var(--text-secondary);
+}
+
+.history-value.win {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.history-value.loss {
+    color: var(--text-secondary);
+}
+
+/* Last Win Display */
+#lastWin {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Animation class for Win Update */
+#lastWin.pop {
+    transform: scale(1.4);
+    text-shadow: 0 0 20px var(--success);
+}

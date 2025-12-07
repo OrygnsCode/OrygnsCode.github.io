@@ -14,6 +14,7 @@
     <!-- Physics & Audio Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="balance-manager.js?v=1.0"></script>
     <script src="main.js?v=1.19"></script>
 </head>
 
@@ -217,6 +218,29 @@
                         </div>
                     </div>
 
+                    <!-- Methods of Slots -->
+                    <div class="game-card" onclick="window.location.href='slots.html'" style="cursor: pointer;">
+                        <div class="card-visual slots-visual">
+                            <svg viewBox="0 0 200 160" class="game-icon-svg">
+                                <g transform="translate(100,80)">
+                                    <!-- 777 Icon -->
+                                    <path d="M-40,-20 L0,-20 L-20,20" stroke="#FF0055" stroke-width="4" fill="none"
+                                        class="slot-seven-1" />
+                                    <path d="M-10,-20 L30,-20 L10,20" stroke="#FF0055" stroke-width="4" fill="none"
+                                        class="slot-seven-2" />
+                                    <path d="M20,-20 L60,-20 L40,20" stroke="#FF0055" stroke-width="4" fill="none"
+                                        class="slot-seven-3" />
+
+                                    <!-- Glow Effect -->
+                                    <circle cx="10" cy="0" r="50" fill="url(#neonPurple)" opacity="0.2" />
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="card-info">
+                            <h3>Slots</h3>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Coming Soon Section -->
@@ -237,15 +261,7 @@
                         </div>
                     </div>
 
-                    <!-- Slots -->
-                    <div class="game-card disabled">
-                        <div class="card-visual slots-visual" style="filter: grayscale(100%);">
-                            <div class="slot-reel">777</div>
-                        </div>
-                        <div class="card-info">
-                            <h3>Slots</h3>
-                        </div>
-                    </div>
+
 
                     <!-- More -->
                     <div class="game-card coming-soon disabled">

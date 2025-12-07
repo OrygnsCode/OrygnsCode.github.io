@@ -154,11 +154,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Global State ---
-    let userBalance = 10000.00;
     const balanceEl = document.querySelector('.balance-amount');
 
+    // Subscribe to updates
+    BalanceManager.subscribe(newBal => {
+        balanceEl.textContent = newBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    });
+
+    // Initial Sync
+    balanceEl.textContent = BalanceManager.get().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     function updateBalanceDisplay() {
-        balanceEl.textContent = userBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // Redundant with listener but kept for function calls
+        // No-op or fetch fresh
     }
 
     // Init Banner Physics immediately
@@ -316,9 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Note frequencies for sound
+    // Note frequencies for sound (Lower Octaves for softer sound)
     const NOTE_FREQS = [
-        "C#5", "C5", "B5", "A#5", "A5", "G#4", "G4", "F#4",
-        "F4", "F#4", "G4", "G#4", "A5", "A#5", "B5", "C5", "C#5"
+        "C#3", "C3", "B3", "A#3", "A3", "G#2", "G2", "F#2",
+        "F2", "F#2", "G2", "G#2", "A3", "A#3", "B3", "C3", "C#3"
     ];
 
     function initPlinko() {
@@ -334,10 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize Audio
         if (!clickSynth) {
-            clickSynth = new Tone.NoiseSynth({ volume: -20 }).toDestination();
+            clickSynth = new Tone.NoiseSynth({ volume: -25 }).toDestination();
             notes = NOTE_FREQS.map(freq => {
                 const synth = new Tone.PolySynth().toDestination();
-                synth.set({ volume: -10 });
+                synth.set({ volume: -20 });
                 return { synth, freq };
             });
         }
@@ -559,10 +568,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const table = PAYOUTS[rows] || PAYOUTS[16];
         const mults = table[risk];
         const multiplier = mults[slotIndex];
-
         const winAmount = ball.betAmount * multiplier;
-        userBalance += winAmount;
-        updateBalanceDisplay();
+
+        BalanceManager.update(winAmount);
+        // updateBalanceDisplay handled by listener
 
         // Visual Feedback
         const el = document.getElementById(`note-${slotIndex}`);
@@ -635,13 +644,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Invalid bet amount', 'error');
             return;
         }
-        if (bet > userBalance) {
+        if (bet > BalanceManager.get()) {
             showNotification('Insufficient balance', 'error');
             return;
         }
 
-        userBalance -= bet;
-        updateBalanceDisplay();
+        BalanceManager.update(-bet);
+        // updateBalanceDisplay handled by listener
         dropBall(bet);
     });
 
@@ -978,14 +987,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function cashOutCrash() {
-        if (!isCrashBetPlaced || hasCashedOut) return;
+        if (!isCrashBetPlaced || hasCashedOut || crashState === 'CRASHED') return;
 
         hasCashedOut = true;
         const winAmount = crashBet * crashMultiplier;
         const profit = winAmount - crashBet;
 
-        userBalance += winAmount;
-        updateBalanceDisplay();
+        BalanceManager.update(winAmount);
+        // updateBalanceDisplay handled by listener
 
         // Visual feedback
         crashStatusEl.textContent = `CASHED OUT @ ${crashMultiplier.toFixed(2)}x`;
@@ -1216,10 +1225,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bet = parseFloat(crashBetInput.value);
         if (isNaN(bet) || bet <= 0) { alert('Invalid bet amount'); return; }
-        if (bet > userBalance) { alert('Insufficient funds'); return; }
+        if (bet > BalanceManager.get()) { alert('Insufficient funds'); return; }
 
-        userBalance -= bet;
-        updateBalanceDisplay();
+        BalanceManager.update(-bet);
+        // updateBalanceDisplay handled by listener
         crashBet = bet;
         isCrashBetPlaced = true;
         updateCrashUI();
@@ -1366,13 +1375,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate
         const bet = parseFloat(minesBetInput.value);
         if (isNaN(bet) || bet <= 0) { alert('Invalid bet amount'); return; }
-        if (bet > userBalance) { alert('Insufficient funds'); return; }
+        if (bet > BalanceManager.get()) { alert('Insufficient funds'); return; }
 
         minesCount = parseInt(minesCountSelect.value);
 
         // Deduct Balance
-        userBalance -= bet;
-        updateBalanceDisplay();
+        BalanceManager.update(-bet);
+        // updateBalanceDisplay handled by listener
 
         // Setup State
         minesBet = bet;
@@ -1515,8 +1524,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const winAmount = minesBet * minesMultiplier;
         const profit = winAmount - minesBet;
 
-        userBalance += winAmount;
-        updateBalanceDisplay();
+        BalanceManager.update(winAmount);
+        // updateBalanceDisplay handled by listener
 
         // Visuals
         // Remove old overlay text assignment
@@ -1851,14 +1860,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Invalid bet amount', 'error');
             return;
         }
-        if (bet > userBalance) {
+        if (bet > BalanceManager.get()) {
             showNotification('Insufficient balance', 'error');
             return;
         }
 
         // Deduct Balance
-        userBalance -= bet;
-        updateBalanceDisplay();
+        BalanceManager.update(-bet);
+        // updateBalanceDisplay handled by listener
 
         isRollingDice = true;
         diceActionBtn.disabled = true;
@@ -1936,8 +1945,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const winAmount = betAmount * dicePayout;
                 const profit = winAmount - betAmount;
 
-                userBalance += winAmount;
-                updateBalanceDisplay();
+
+
+                BalanceManager.update(winAmount);
+                // updateBalanceDisplay handled by listener
 
                 // Win Visuals
                 diceResultDisplay.classList.add('win');

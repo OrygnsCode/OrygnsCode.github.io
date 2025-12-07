@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slots - Orygn Casino</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css?v=fix.15">
+    <link rel="stylesheet" href="slots.css?v=2.0">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Top Navigation (Identical to index.html) -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <div class="logo">
+                    <span class="logo-icon">✦</span>
+                    <span class="logo-text">ORYGN<span class="highlight">CASINO</span></span>
+                </div>
+            </div>
+            <div class="nav-center">
+            </div>
+            <div class="nav-right">
+                <a href="index.html" class="nav-btn-back">
+                    <span class="icon">⌂</span> Back to Lobby
+                </a>
+                <div class="balance-display">
+                    <span class="currency-label">ORY</span>
+                    <span class="balance-amount" id="userBalance">1000.00</span>
+                </div>
+                <button class="icon-btn profile-btn" aria-label="Profile">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Slots Game View -->
+            <div id="slots-view" class="game-view">
+                <div class="game-header">
+                    <button onclick="window.location.href='index.html'" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2>Slots X</h2>
+                </div>
+
+                <div class="plinko-container slots-layout-integration">
+                    <!-- Left: Standard Controls Panel -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="stepper">
+                                <button id="btnBetDecrease">-</button>
+                                <input type="number" id="betInput" value="1.00" step="0.5" min="0.1">
+                                <button id="btnBetIncrease">+</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="auto-turbo-grid">
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    <label>Auto Spin</label>
+                                    <input type="number" id="autoSpinCount" placeholder="#" value="50" min="1"
+                                        style="display:none; width:50px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; border-radius:4px; padding:2px; font-size:0.8rem; text-align:center;">
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="btnAutoSpin">
+                                    <span class="slider round"></span>
+                                </label>
+
+                                <label>Turbo</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="btnTurbo">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Spin Button -->
+                        <button id="btnSpin" class="play-btn-large action-btn">SPIN</button>
+                    </div>
+
+                    <!-- Center: The Reels Board -->
+                    <div class="plinko-board-wrapper slots-board-wrapper">
+                        <!-- Header / Win Display inside Board -->
+                        <div class="slots-header-overlay">
+                            <div class="win-display">
+                                <span class="label">LAST WIN</span>
+                                <span class="value" id="lastWin">0.00 ORY</span>
+                            </div>
+                        </div>
+
+                        <div class="reels-frame">
+                            <div class="reels-window" id="reelsContainer">
+                                <!-- Reel Columns injected by JS -->
+                            </div>
+                            <div class="paylines-overlay" id="paylinesOverlay"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: History/Stats -->
+                    <div class="game-stats-panel">
+                        <h3>Session History</h3>
+                        <div id="slots-history" class="plinko-history-list">
+                            <!-- History items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar / Live Wins (Identical to index.html) -->
+        <aside class="stats-sidebar">
+            <div class="stats-header">
+                <h3>Live Wins</h3>
+                <div class="live-indicator"></div>
+            </div>
+            <div class="wins-list" id="wins-list">
+                <!-- Static Initial Data -->
+                <div class="win-item">
+                    <div class="game-icon">🎰</div>
+                    <div class="win-details">
+                        <span class="user">Spinner</span>
+                        <span class="game">Slots</span>
+                    </div>
+                    <div class="win-amount">+ 80.00</div>
+                </div>
+                <div class="win-item">
+                    <div class="game-icon">🚀</div>
+                    <div class="win-details">
+                        <span class="user">User123</span>
+                        <span class="game">Crash</span>
+                    </div>
+                    <div class="win-amount">+ 420.00</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- SVG Definitions -->
+    <svg style="display: none;">
+        <defs>
+            <!-- 777 (White Outline) -->
+            <symbol id="icon-seven" viewBox="0 0 60 60">
+                <path d="M10,10 L50,10 L25,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M15,20 L40,20" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2,2" />
+            </symbol>
+
+            <!-- Diamond (Cyan Wireframe) -->
+            <symbol id="icon-diamond" viewBox="0 0 60 60">
+                <path d="M30,5 L55,20 L30,55 L5,20 Z" fill="none" stroke="#00F3FF" stroke-width="2"
+                    stroke-linejoin="round" />
+                <path d="M5,20 L55,20" stroke="#00F3FF" stroke-width="1" />
+                <path d="M15,20 L30,55 L45,20" stroke="#00F3FF" stroke-width="1" />
+                <path d="M30,5 L30,20" stroke="#00F3FF" stroke-width="1" />
+            </symbol>
+
+            <!-- Crown (Gold Wireframe) -->
+            <symbol id="icon-crown" viewBox="0 0 60 60">
+                <path d="M10,45 L10,25 L20,35 L30,15 L40,35 L50,25 L50,45 Z" fill="none" stroke="#FFD700"
+                    stroke-width="2" stroke-linejoin="round" />
+                <circle cx="10" cy="20" r="2" fill="#FFD700" />
+                <circle cx="30" cy="10" r="2" fill="#FFD700" />
+                <circle cx="50" cy="20" r="2" fill="#FFD700" />
+            </symbol>
+
+            <!-- Cherry (Simple Red) -->
+            <symbol id="icon-cherry" viewBox="0 0 60 60">
+                <circle cx="20" cy="40" r="8" fill="none" stroke="#FF4D4D" stroke-width="2" />
+                <circle cx="40" cy="40" r="8" fill="none" stroke="#FF4D4D" stroke-width="2" />
+                <path d="M20,32 Q30,10 40,32" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M30,10 L35,5" stroke="#FFFFFF" stroke-width="1.5" />
+            </symbol>
+
+            <!-- Star (Simple Grey) -->
+            <symbol id="icon-star" viewBox="0 0 60 60">
+                <path d="M30,10 L36,25 L52,25 L40,35 L45,50 L30,42 L15,50 L20,35 L8,25 L24,25 Z" fill="none"
+                    stroke="#BAC4D1" stroke-width="1.5" stroke-linejoin="round" />
+            </symbol>
+
+            <!-- Wild (Clean Text) -->
+            <symbol id="icon-wild" viewBox="0 0 60 60">
+                <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" fill="#A020F0"
+                    font-family="'Outfit', sans-serif" font-weight="700" font-size="14" stroke="none">WILD</text>
+                <rect x="5" y="15" width="50" height="30" rx="4" stroke="#A020F0" stroke-width="1" fill="none" />
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- Scripts -->
+    <script src="balance-manager.js?v=1.0"></script>
+    <script src="slots.js?v=10.0"></script>
+    <script>
+        // Fake Live Wins ticker
+        setInterval(() => {
+            const users = ['User888', 'ProPlayer', 'CryptoKing', 'LuckyMe'];
+            const games = ['Slots', 'Crash', 'Mines', 'Plinko'];
+            const amounts = [50, 120, 1000, 25, 300];
+
+            const user = users[Math.floor(Math.random() * users.length)];
+            const game = games[Math.floor(Math.random() * games.length)];
+            const amount = amounts[Math.floor(Math.random() * amounts.length)];
+
+            const list = document.getElementById('wins-list');
+            const item = document.createElement('div');
+            item.className = 'win-item';
+            item.innerHTML = `
+                <div class="game-icon">🎰</div>
+                <div class="win-details">
+                    <span class="user">${user}</span>
+                    <span class="game">${game}</span>
+                </div>
+                <div class="win-amount">+ ${amount.toFixed(2)}</div>
+            `;
+            list.insertBefore(item, list.firstChild);
+            if (list.children.length > 10) list.lastChild.remove();
+        }, 5000);
+    </script>
+</body>
+
+</html>
