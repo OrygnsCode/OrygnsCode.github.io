@@ -194,6 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Index 0: Crash, 1: Plinko, 2: Mines, 3: Dice
             const gameName = card.querySelector('h3').textContent;
 
+            if (gameName === 'Slots') return; // Handled by inline onclick
+
             if (gameName === 'Plinko') {
                 lobbySection.classList.add('hidden');
                 featuredBanner.classList.add('hidden');
@@ -216,6 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 featuredBanner.classList.add('hidden');
                 document.getElementById('dice-view').classList.remove('hidden');
                 initDice();
+                initDice();
+            } else if (gameName === 'Wheel') {
+                lobbySection.classList.add('hidden');
+                featuredBanner.classList.add('hidden');
+                document.getElementById('wheel-view').classList.remove('hidden');
+                initWheel();
             } else {
                 showNotification(`${gameName} is coming soon!`, 'info');
             }
@@ -226,20 +234,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('back-to-lobby').addEventListener('click', returnToLobby);
     document.getElementById('back-to-lobby-crash').addEventListener('click', returnToLobby);
     document.getElementById('back-to-lobby-mines').addEventListener('click', returnToLobby);
+    document.getElementById('back-to-lobby-mines').addEventListener('click', returnToLobby);
     document.getElementById('back-to-lobby-dice').addEventListener('click', returnToLobby);
+    document.getElementById('back-to-lobby-wheel').addEventListener('click', returnToLobby);
 
     function returnToLobby() {
         gameView.classList.add('hidden'); // Plinko
         document.getElementById('crash-view').classList.add('hidden');
         document.getElementById('mines-view').classList.add('hidden');
         document.getElementById('dice-view').classList.add('hidden');
+        document.getElementById('wheel-view').classList.add('hidden');
 
         lobbySection.classList.remove('hidden');
         featuredBanner.classList.remove('hidden');
         stopPlinko();
         stopCrash();
-        // stopMines(); // No loop to stop, but good practice if animation exists
-    }
+        if (typeof stopWheel === 'function') stopWheel();
+    }    // stopMines(); // No loop to stop, but good practice if animation exists
+
 
     // Banner Play Button
     document.querySelector('.play-btn-large').addEventListener('click', () => {
@@ -2031,5 +2043,497 @@ document.addEventListener('DOMContentLoaded', () => {
                 list.lastElementChild.remove();
             }
         }
+    }
+
+
+    /**
+     * ==========================================
+     * WHEEL X GAME LOGIC
+     * ==========================================
+     */
+
+    // Wheel Configuration
+    const WHEEL_CONFIG = {
+        radius: 280,
+        centerX: 300,
+        centerY: 300,
+        colors: {
+            low: ['#34495e', '#a0a0a0'],
+            medium: '#bc13fe',
+            high: '#ff4d4d',
+            text: '#ffffff',
+            border: '#13152c'
+        },
+        payouts: {
+            low: [1.5, 1.2, 1.2, 1.2, 0.0, 1.2, 1.2, 1.2, 1.5, 0.0],
+            medium: [2.0, 3.0, 0.0, 5.0, 0.0, 2.0, 0.0, 1.5, 0.0, 3.0],
+            high: [0.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 0.0, 10.0]
+        }
+    };
+
+    // Wheel State
+    let wheelSegments = [];
+    let wheelAngle = 0;
+    let wheelVelocity = 0;
+    let isWheelSpinning = false;
+    let wheelCanvas = null;
+    let wheelCtx = null;
+    let wheelSpinBtn = null;
+    let lastWheelClickAngle = 0;
+    let wheelAnimId = null;
+
+    // Wheel UI Elements (in initWheel)
+    let wheelRiskSelect;
+    let wheelSegmentsSelect;
+    let wheelBetInput;
+    let wheelHistoryList;
+
+    // Audio
+    let spinSynth, winSynth;
+
+    function initWheel() {
+        if (wheelCanvas) return; // Already init
+
+        console.log('Wheel X: Init');
+        wheelCanvas = document.getElementById('wheel-canvas');
+        wheelCtx = wheelCanvas.getContext('2d');
+
+        wheelSpinBtn = document.getElementById('wheel-spin-btn');
+        wheelRiskSelect = document.getElementById('wheel-risk');
+        wheelSegmentsSelect = document.getElementById('wheel-segments');
+        wheelBetInput = document.getElementById('wheel-bet-amount');
+        wheelHistoryList = document.getElementById('wheel-history');
+
+        // Audio
+        if (window.Tone) {
+            // Use a short, clicky envelope
+            spinSynth = new Tone.MembraneSynth({
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.05,
+                    sustain: 0,
+                    release: 0.05
+                },
+                volume: -15
+            }).toDestination();
+
+            winSynth = new Tone.PolySynth(Tone.Synth, {
+                volume: -8,
+                oscillator: { type: "triangle" }
+            }).toDestination();
+        }
+
+        // Listeners
+        wheelSpinBtn.addEventListener('click', spinWheel);
+        wheelRiskSelect.addEventListener('change', generateWheelSegments);
+        wheelSegmentsSelect.addEventListener('change', generateWheelSegments);
+
+        // Initial Draw
+        generateWheelSegments();
+        startWheelAnimLoop();
+    }
+
+    // --- RTP & Distribution Logic ---
+    function getWheelDistribution(risk, count) {
+        // Target EV = 0.96 * count
+        const targetTotal = 0.96 * count;
+        let distribution = []; // Array of multipliers
+
+        if (risk === 'low') {
+            // Low Risk: High Hit Rate (~70%), Low Volatility
+            // Pattern: mostly 1.2x and 1.5x
+            // Approx: 30% 1.5x, 40% 1.2x, 30% 0x
+            const n15 = Math.floor(count * 0.3);
+            const n12 = Math.floor(count * 0.4);
+            const n0 = count - n15 - n12;
+
+            // Fill
+            for (let i = 0; i < n15; i++) distribution.push(1.5);
+            for (let i = 0; i < n12; i++) distribution.push(1.2);
+            for (let i = 0; i < n0; i++) distribution.push(0.0);
+
+        } else if (risk === 'medium') {
+            // Med Risk: Balanced
+            // Pattern: Some 3x, 2x, 1.5x. rest 0x.
+            // Try to construct approx 96%
+            // Let's use specific counts for stability
+
+            // Base Unit Multipliers
+            const mHigh = 3.0;
+            const mMed = 2.0;
+            const mLow = 1.5;
+
+            // How many of each?
+            // 10% High, 10% Med, 10% Low? => .3 + .2 + .15 = .65 EV (Too low)
+            // 10% High (3x) + 20% Med (2x) + 10% Low (1.5x) => .3 + .4 + .15 = .85 (Too low)
+
+            // Let's go: 10% of 5x, 10% of 3x, 10% of 1.6x?
+            // .5 + .3 + .16 = .96! Perfect.
+
+            const n5 = Math.round(count * 0.1) || 1; // At least 1
+            const n3 = Math.round(count * 0.1) || 1;
+            const n16 = Math.round(count * 0.1) || 1;
+            const n0 = count - n5 - n3 - n16;
+
+            for (let i = 0; i < n5; i++) distribution.push(5.0);
+            for (let i = 0; i < n3; i++) distribution.push(3.0);
+            for (let i = 0; i < n16; i++) distribution.push(1.6);
+            for (let i = 0; i < n0; i++) distribution.push(0.0);
+
+        } else if (risk === 'high') {
+            // High Risk: One or Two big segments.
+            // EV = 0.96.
+            // If 1 winning segment: Mult = 0.96 * count.
+            // E.g. 10 segments -> 9.6x. 50 segments -> 48x.
+
+            let winMult = 0.96 * count;
+            // Round to nice number
+            if (winMult > 10) winMult = Math.floor(winMult);
+            else winMult = parseFloat(winMult.toFixed(1));
+
+            // Add 1 Winner
+            distribution.push(winMult);
+            // Rest Losers
+            for (let i = 1; i < count; i++) distribution.push(0.0);
+        }
+
+        // Shuffle for randomness looks? No, usually interlaced.
+        // We will interlace them in the generation loop for better visuals?
+        // Or just shuffle array.
+        return shuffleArray(distribution);
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generateWheelSegments() {
+        if (isWheelSpinning) return;
+
+        const risk = wheelRiskSelect.value;
+        const count = parseInt(wheelSegmentsSelect.value);
+
+        wheelSegments = [];
+
+        // Get mathematically verified distribution
+        const multipliers = getWheelDistribution(risk, count);
+
+        // Calculate actual RTP for verification
+        const totalMult = multipliers.reduce((a, b) => a + b, 0);
+        const ev = totalMult / count;
+        console.log(`Wheel RTP Check: Risk=${risk} Count=${count} EV=${ev.toFixed(4)} (Target ~0.96)`);
+
+        // Map to Segment Objects with Colors
+        const COLORS = {
+            LOSS: '#252735',       // Deep Charcoal
+            LOW: '#34495e',        // Slate (1.2x - 1.6x)
+            MED: '#00b4d8',        // Cyan (2x - 3x)
+            HIGH: '#9b59b6',       // Purple (4x - 9x)
+            JACKPOT: '#f1c40f',    // Gold (10x+)
+            SUPER: '#e74c3c'       // Red (40x+)
+        };
+
+        multipliers.forEach(mult => {
+            let color = COLORS.LOSS;
+            let textColor = '#ffffff';
+
+            if (mult === 0) color = COLORS.LOSS;
+            else if (mult < 2) color = COLORS.LOW;
+            else if (mult < 4) color = COLORS.MED;
+            else if (mult < 10) color = COLORS.HIGH;
+            else if (mult < 40) { color = COLORS.JACKPOT; textColor = '#000'; }
+            else { color = COLORS.SUPER; }
+
+            wheelSegments.push({ multiplier: mult, color, textColor });
+        });
+
+        drawWheel();
+    }
+    function spinWheel() {
+        if (isWheelSpinning) return;
+
+        // Validate Bet
+        const bet = parseFloat(wheelBetInput.value);
+        const balance = BalanceManager.get();
+
+        if (isNaN(bet) || bet <= 0) { showNotification('Invalid Bet', 'error'); return; }
+        if (bet > balance) { showNotification('Insufficient Funds', 'error'); return; }
+
+        BalanceManager.update(-bet);
+        updateBalanceDisplay(); // Immediate update
+
+        if (window.Tone && Tone.context.state !== 'running') Tone.start();
+
+        isWheelSpinning = true;
+        wheelSpinBtn.disabled = true;
+        wheelVelocity = 15 + Math.random() * 15; // 15-30 rad/s
+    }
+
+    function startWheelAnimLoop() {
+        function loop() {
+            if (isWheelSpinning) {
+                wheelVelocity *= 0.985;
+                wheelAngle += wheelVelocity;
+
+                // Click Sound
+                const count = wheelSegments.length;
+                const segAngle = (Math.PI * 2) / count;
+                const currentIdx = Math.floor(wheelAngle / segAngle);
+                const lastIdx = Math.floor(lastWheelClickAngle / segAngle);
+
+                if (currentIdx > lastIdx) {
+                    // Calculate time since last click to prevent glitching
+                    const now = performance.now();
+                    if (!this.lastClickTime || (now - this.lastClickTime > 40)) {
+                        if (wheelVelocity > 0.5 && spinSynth) {
+                            // Varies pitch slightly for realism
+                            const pitch = "C2";
+                            spinSynth.triggerAttackRelease(pitch, "32n", undefined, Math.min(0.5, wheelVelocity / 20));
+                            this.lastClickTime = now;
+                        }
+                    }
+                }
+                lastWheelClickAngle = wheelAngle;
+
+                if (wheelVelocity < 0.01) {
+                    isWheelSpinning = false;
+                    wheelVelocity = 0;
+                    finalizeWheelSpin();
+                }
+                drawWheel();
+            }
+            wheelAnimId = requestAnimationFrame(loop);
+        }
+        loop();
+    }
+
+    function stopWheel() {
+        isWheelSpinning = false;
+        wheelVelocity = 0;
+        if (wheelAnimId) cancelAnimationFrame(wheelAnimId);
+        if (wheelSpinBtn) wheelSpinBtn.disabled = false;
+    }
+
+    function finalizeWheelSpin() {
+        wheelSpinBtn.disabled = false;
+
+        // Result Logic
+        // Pointer is Top (3PI/2 = 270deg)
+        // Wheel rotated 'wheelAngle'
+        // Which segment is at 270deg?
+        // Relative, pointer acts like it rotated -wheelAngle from 270.
+
+        let normAngle = wheelAngle % (Math.PI * 2);
+        let pointerTheta = (1.5 * Math.PI) - normAngle;
+        if (pointerTheta < 0) pointerTheta += (Math.PI * 2);
+
+        const count = wheelSegments.length;
+        const segSize = (Math.PI * 2) / count;
+        const winningIndex = Math.floor(pointerTheta / segSize) % count;
+
+        const winSeg = wheelSegments[winningIndex];
+        const bet = parseFloat(wheelBetInput.value);
+        const winAmount = bet * winSeg.multiplier;
+        const profit = winAmount - bet;
+
+        if (winAmount > 0) {
+            BalanceManager.update(winAmount);
+            updateBalanceDisplay();
+            showNotification(`Won ${winAmount.toFixed(2)} ORY!`, 'success');
+            if (winSynth) winSynth.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+        } else {
+            if (spinSynth) spinSynth.triggerAttackRelease("G2", "8n");
+        }
+
+        addWheelHistory(winSeg.multiplier, profit);
+    }
+
+    function drawWheel() {
+        if (!wheelCtx) return;
+        wheelCtx.clearRect(0, 0, 600, 600);
+
+        const cx = 300, cy = 300;
+        const r = 280; // Main Radius
+        const count = wheelSegments.length;
+        const segSize = (Math.PI * 2) / count;
+
+        wheelCtx.save();
+        wheelCtx.translate(cx, cy);
+        wheelCtx.rotate(wheelAngle);
+
+        // 1. Draw Segments with Gradients
+        for (let i = 0; i < count; i++) {
+            const seg = wheelSegments[i];
+
+            wheelCtx.beginPath();
+            wheelCtx.moveTo(0, 0);
+            wheelCtx.arc(0, 0, r, i * segSize, (i + 1) * segSize);
+            wheelCtx.closePath();
+
+            // Gradient for depth
+            // We simulate light hitting from top-left
+            const midAngle = (i + 0.5) * segSize;
+            const gradX = Math.cos(midAngle) * r;
+            const gradY = Math.sin(midAngle) * r;
+
+            // Simple radial variant for "metallic" look on segments
+            const gradient = wheelCtx.createRadialGradient(0, 0, 0, 0, 0, r);
+            gradient.addColorStop(0, seg.color);
+            gradient.addColorStop(0.8, seg.color);
+            gradient.addColorStop(1, shadeColor(seg.color, -40)); // Darker edge
+
+            wheelCtx.fillStyle = gradient;
+            wheelCtx.fill();
+
+            // Stroke
+            wheelCtx.strokeStyle = 'rgba(19, 21, 44, 0.5)';
+            wheelCtx.lineWidth = 1;
+            wheelCtx.stroke();
+        }
+
+        // 2. Inner Shadow Ring (Overlay)
+        // Create a subtle vignette on the outer edge of segments
+        const shadowGrad = wheelCtx.createRadialGradient(0, 0, r - 50, 0, 0, r);
+        shadowGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        shadowGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, r, 0, Math.PI * 2);
+        wheelCtx.fillStyle = shadowGrad;
+        wheelCtx.fill();
+
+
+        // 3. Draw Text/Icons
+        for (let i = 0; i < count; i++) {
+            const seg = wheelSegments[i];
+            wheelCtx.save();
+            wheelCtx.rotate((i + 0.5) * segSize);
+            wheelCtx.textAlign = 'right';
+            wheelCtx.textBaseline = 'middle';
+            wheelCtx.fillStyle = seg.textColor;
+
+            // Font size scales slightly with segment count
+            const fontSize = count > 30 ? 14 : 18;
+            wheelCtx.font = `bold ${fontSize}px "Outfit", sans-serif`;
+
+            // Add glow to text
+            wheelCtx.shadowColor = 'rgba(0,0,0,0.8)';
+            wheelCtx.shadowBlur = 4;
+            wheelCtx.fillText(seg.multiplier.toFixed(2) + 'x', r - 30, 0);
+
+            // Dots/Decorations near rim
+            wheelCtx.beginPath();
+            wheelCtx.arc(r - 12, 0, 3, 0, Math.PI * 2);
+            wheelCtx.fillStyle = 'rgba(255,255,255,0.5)';
+            wheelCtx.fill();
+
+            wheelCtx.restore();
+        }
+
+        // 4. Outer Rim (Metallic/Neon)
+        wheelCtx.restore(); // Undo rotation for stationary rim? NO, Rim rotates? Usually rim is stationary or part of wheel.
+        // If we want "Stake" style, the whole disc rotates.
+        // Let's add a thick rim outside the segments.
+
+        wheelCtx.save();
+        wheelCtx.translate(cx, cy);
+        wheelCtx.rotate(wheelAngle); // Rotate rim with wheel
+
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, r, 0, Math.PI * 2);
+        wheelCtx.lineWidth = 15;
+        // Rim Gradient
+        const rimGrad = wheelCtx.createLinearGradient(-r, -r, r, r);
+        rimGrad.addColorStop(0, '#1a1d3a');
+        rimGrad.addColorStop(0.5, '#2a2d4a');
+        rimGrad.addColorStop(1, '#1a1d3a');
+        wheelCtx.strokeStyle = rimGrad;
+        wheelCtx.stroke();
+
+        // Thin Neon Line on Rim
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, r, 0, Math.PI * 2);
+        wheelCtx.lineWidth = 2;
+        wheelCtx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
+        wheelCtx.stroke();
+
+        wheelCtx.restore();
+
+        // 5. Center Cap (Stationary? Or Rotating?)
+        // Usually stationary hub helps visuals.
+        wheelCtx.save();
+        wheelCtx.translate(cx, cy);
+
+        // Hub Base
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, 50, 0, Math.PI * 2);
+        wheelCtx.fillStyle = '#13152c';
+        wheelCtx.shadowColor = 'rgba(0,0,0,0.5)';
+        wheelCtx.shadowBlur = 20;
+        wheelCtx.fill();
+        wheelCtx.shadowBlur = 0;
+
+        // Neon Ring on Hub
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, 45, 0, Math.PI * 2);
+        wheelCtx.lineWidth = 4;
+        wheelCtx.strokeStyle = '#bc13fe'; // Secondary Purple
+        wheelCtx.stroke();
+
+        // Center Logo/Orb
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, 20, 0, Math.PI * 2);
+        wheelCtx.fillStyle = '#00f3ff';
+        wheelCtx.fill();
+
+        // Glow
+        wheelCtx.shadowColor = '#00f3ff';
+        wheelCtx.shadowBlur = 15;
+        wheelCtx.fill();
+
+        wheelCtx.restore();
+    }
+
+    // Helper for color darkening
+    function shadeColor(color, percent) {
+        let R = parseInt(color.substring(1, 3), 16);
+        let G = parseInt(color.substring(3, 5), 16);
+        let B = parseInt(color.substring(5, 7), 16);
+
+        R = parseInt(R * (100 + percent) / 100);
+        G = parseInt(G * (100 + percent) / 100);
+        B = parseInt(B * (100 + percent) / 100);
+
+        R = (R < 255) ? R : 255;
+        G = (G < 255) ? G : 255;
+        B = (B < 255) ? B : 255;
+
+        let RR = ((R.toString(16).length == 1) ? "0" + R.toString(16) : R.toString(16));
+        let GG = ((G.toString(16).length == 1) ? "0" + G.toString(16) : G.toString(16));
+        let BB = ((B.toString(16).length == 1) ? "0" + B.toString(16) : B.toString(16));
+
+        return "#" + RR + GG + BB;
+    }
+
+    function addWheelHistory(mult, profit) {
+        const isWin = profit >= 0;
+        const item = document.createElement('div');
+        item.className = 'history-item ' + (isWin ? 'win' : 'loss');
+
+        let color = '#bdc3c7';
+        if (mult >= 2) color = '#00f3ff';
+        if (mult >= 10) color = '#bc13fe';
+        if (mult >= 50) color = '#ff4d4d';
+
+        item.innerHTML = `
+        <span class="mult-badge" style="background:${color}; color:#000;">${mult.toFixed(2)}x</span>
+        <span class="${isWin ? 'profit-pos' : 'profit-neg'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</span>
+    `;
+
+        wheelHistoryList.insertBefore(item, wheelHistoryList.firstChild);
+        if (wheelHistoryList.children.length > 20) wheelHistoryList.lastElementChild.remove();
     }
 });

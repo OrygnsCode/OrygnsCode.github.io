@@ -241,6 +241,34 @@
                         </div>
                     </div>
 
+                    <!-- Wheel X -->
+                    <div class="game-card">
+                        <div class="card-visual wheel-visual">
+                            <div class="wheel-circle-icon"></div>
+                            <style>
+                                /* Mini Wheel Icon for Lobby */
+                                .wheel-circle-icon {
+                                    width: 80px;
+                                    height: 80px;
+                                    border-radius: 50%;
+                                    border: 4px solid #bc13fe;
+                                    background: conic-gradient(#00f3ff 0deg 90deg, #bc13fe 90deg 180deg, #13152c 180deg 270deg, #ff4d4d 270deg 360deg);
+                                    box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+                                    animation: spinSlow 10s linear infinite;
+                                }
+
+                                @keyframes spinSlow {
+                                    to {
+                                        transform: rotate(360deg);
+                                    }
+                                }
+                            </style>
+                        </div>
+                        <div class="card-info">
+                            <h3>Wheel</h3>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Coming Soon Section -->
@@ -251,15 +279,7 @@
                 <div class="game-grid coming-soon-grid">
                     <!-- Dice Moved to Originals -->
 
-                    <!-- Wheel -->
-                    <div class="game-card disabled">
-                        <div class="card-visual wheel-visual" style="filter: grayscale(100%);">
-                            <div class="wheel-circle"></div>
-                        </div>
-                        <div class="card-info">
-                            <h3>Wheel</h3>
-                        </div>
-                    </div>
+
 
 
 
@@ -581,12 +601,78 @@
                         </div>
                     </div>
 
-                    <!-- Right: History/Stats -->
+                    <!-- Right: History -->
                     <div class="game-stats-panel">
                         <h3>Mines History</h3>
-                        <div id="mines-history" class="plinko-history-list">
-                            <!-- History items -->
+                        <div id="mines-history" class="plinko-history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wheel View Container -->
+            <div id="wheel-view" class="game-view hidden">
+                <div class="game-header">
+                    <button id="back-to-lobby-wheel" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Lobby
+                    </button>
+                    <h2>Wheel X</h2>
+                </div>
+
+                <div class="plinko-container wheel-layout">
+                    <!-- Left: Standard Controls Panel -->
+                    <div class="game-controls-panel">
+                        <div class="control-group">
+                            <label>Bet Amount</label>
+                            <div class="bet-input-wrapper">
+                                <input type="number" id="wheel-bet-amount" value="10" min="0.1" step="0.1">
+                                <div class="bet-actions">
+                                    <button class="bet-mod" data-game="wheel" data-action="half">½</button>
+                                    <button class="bet-mod" data-game="wheel" data-action="double">2×</button>
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="control-group">
+                            <label>Risk</label>
+                            <select id="wheel-risk">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Segments</label>
+                            <select id="wheel-segments">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+
+                        <button id="wheel-spin-btn" class="play-btn-large action-btn">SPIN</button>
+                    </div>
+
+                    <!-- Center: The Wheel -->
+                    <div class="plinko-board-wrapper wheel-board-wrapper">
+                        <!-- Wheel Canvas -->
+                        <div class="canvas-container relative"
+                            style="display:flex; justify-content:center; align-items:center; height:100%;">
+                            <div class="wheel-tick"></div>
+                            <canvas id="wheel-canvas" width="600" height="600"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: History -->
+                    <div class="game-stats-panel">
+                        <h3>Wheel History</h3>
+                        <div id="wheel-history" class="plinko-history-list"></div>
                     </div>
                 </div>
             </div>
