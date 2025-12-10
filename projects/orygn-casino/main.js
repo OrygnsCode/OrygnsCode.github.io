@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let iconHtml = '';
         if (type === 'success') iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
         else if (type === 'error') iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+        else if (type === 'wealth') iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>'; // Dollar sign roughly
         else iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
 
         toast.innerHTML = `
@@ -40,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function initBannerPlinko() {
         const bannerCanvas = document.getElementById('banner-plinko-canvas');
         if (!bannerCanvas) return; // Not on the page (mobile / different view)
+        if (typeof Matter === 'undefined') {
+            console.warn('Matter.js not loaded. Skipping banner simulation.');
+            return;
+        }
 
         // Setup Matter.js
         const Engine = Matter.Engine,
@@ -153,16 +158,89 @@ document.addEventListener('DOMContentLoaded', () => {
         })();
     }
 
+    let isBettingProcessing = false;
     // --- Global State ---
     const balanceEl = document.querySelector('.balance-amount');
+    const addFundsBtn = document.getElementById('add-funds-btn');
 
-    // Subscribe to updates
-    BalanceManager.subscribe(newBal => {
-        balanceEl.textContent = newBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    });
+    function isAnyGameActive() {
+        // Processing Bet (Prevent Flash)
+        if (typeof isBettingProcessing !== 'undefined' && isBettingProcessing) return true;
+        // Plinko
+        if (typeof isGameActive !== 'undefined' && isGameActive && activeBalls.length > 0) return true;
+        // Crash
+        if (typeof crashState !== 'undefined' && crashState !== 'IDLE') return true;
+        // Mines
+        if (typeof minesState !== 'undefined' && minesState === 'ACTIVE') return true;
+        // Dice
+        if (typeof isRollingDice !== 'undefined' && isRollingDice) return true;
+        // Wheel
+        if (typeof isWheelSpinning !== 'undefined' && isWheelSpinning) return true;
 
-    // Initial Sync
-    balanceEl.textContent = BalanceManager.get().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return false;
+    }
+
+    function checkAddFundsVisibility(balance) {
+        if (!addFundsBtn) return;
+
+        // Hide if ANY game is active, regardless of balance
+        if (isAnyGameActive()) {
+            if (addFundsBtn.classList.contains('visible')) {
+                addFundsBtn.classList.remove('visible');
+                setTimeout(() => {
+                    if (!addFundsBtn.classList.contains('visible')) {
+                        addFundsBtn.classList.add('hidden');
+                    }
+                }, 400);
+            }
+            return;
+        }
+
+        if (balance < 100) {
+            // Show button
+            if (addFundsBtn.classList.contains('hidden')) {
+                addFundsBtn.classList.remove('hidden');
+                // Force reflow
+                void addFundsBtn.offsetWidth;
+                addFundsBtn.classList.add('visible');
+            }
+        } else {
+            // Hide button
+            if (addFundsBtn.classList.contains('visible')) {
+                addFundsBtn.classList.remove('visible');
+                // Wait for transition before hiding layout
+                setTimeout(() => {
+                    if (!addFundsBtn.classList.contains('visible')) {
+                        addFundsBtn.classList.add('hidden');
+                    }
+                }, 400); // 0.4s match css transition
+            }
+        }
+    }
+
+    if (addFundsBtn) {
+        addFundsBtn.addEventListener('click', () => {
+            // Prevent spam logic
+            if (addFundsBtn.dataset.processing === 'true') return;
+            addFundsBtn.dataset.processing = 'true';
+            addFundsBtn.style.pointerEvents = 'none'; // Visual disable
+
+            const addedAmount = 10000;
+            BalanceManager.update(addedAmount);
+            showNotification('10,000 ORY added to your balance!', 'wealth');
+
+            // Re-check immediately to hide it
+            checkAddFundsVisibility(BalanceManager.get());
+
+            // Reset processing flag after transition (though it should be hidden by then)
+            setTimeout(() => {
+                delete addFundsBtn.dataset.processing;
+                addFundsBtn.style.pointerEvents = '';
+            }, 500);
+        });
+    }
+
+
 
     function updateBalanceDisplay() {
         // Redundant with listener but kept for function calls
@@ -170,7 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Init Banner Physics immediately
-    initBannerPlinko();
+    try {
+        initBannerPlinko();
+    } catch (err) {
+        console.error('Failed to init banner:', err);
+    }
 
 
 
@@ -376,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelAnimationFrame(animationId);
         activeBalls = [];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        checkAddFundsVisibility(BalanceManager.get()); // Check when stopped manually
     }
 
     function startAnimationLoop() {
@@ -601,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         addToHistory(multiplier, winAmount - ball.betAmount);
+
+        // If this was the last ball, check visibility
+        if (activeBalls.length === 0) {
+            checkAddFundsVisibility(BalanceManager.get());
+        }
     }
 
     function renderMultipliers() {
@@ -661,23 +749,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        isBettingProcessing = true;
         BalanceManager.update(-bet);
         // updateBalanceDisplay handled by listener
         dropBall(bet);
+        // dropBall adds to activeBalls synchronously, so we can unset now
+        setTimeout(() => isBettingProcessing = false, 50);
     });
 
     // Controls
     document.querySelectorAll('.bet-mod').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const action = e.target.dataset.action;
-            const game = e.target.dataset.game; // 'crash' or undefined (plinko)
+            const game = e.target.dataset.game; // 'crash', 'mines', 'dice', 'wheel' or undefined (plinko)
 
             let input = betInput; // Default to Plinko
             if (game === 'crash') input = document.getElementById('crash-bet-amount');
+            if (game === 'mines') input = document.getElementById('mines-bet-amount');
+            if (game === 'dice') input = document.getElementById('dice-bet-amount');
+            if (game === 'wheel') input = document.getElementById('wheel-bet-amount');
 
-            let current = parseFloat(input.value) || 0;
-            if (action === 'half') input.value = (current / 2).toFixed(2);
-            if (action === 'double') input.value = (current * 2).toFixed(2);
+            if (input) {
+                let current = parseFloat(input.value) || 0;
+                if (action === 'half') input.value = (current / 2).toFixed(2);
+                if (action === 'double') input.value = (current * 2).toFixed(2);
+
+                // Trigger input event to update any dependent calculations (like Dice)
+                input.dispatchEvent(new Event('input'));
+            }
         });
     });
 
@@ -726,13 +825,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="win-amount">+ ${randomAmount}</div>
             `;
 
-            winsList.insertBefore(winItem, winsList.firstChild);
-            if (winsList.children.length > 5) {
+            winsList.prepend(winItem);
+            if (winsList.children.length > 8) {
                 winsList.lastElementChild.remove();
             }
         }
-        setInterval(addRandomWin, 4000);
+
+        // Start random wins
+        setInterval(addRandomWin, 3000 + Math.random() * 4000);
     }
+
+    // --- Wheel X Spin Logic Fix ---
+    // We need to override the spinWheel function if it exists or ensure the timing is correct.
+    // Since spinWheel is likely defined further down, we will edit it directly via view_file/replace check.
+
+
     // --- Crash X Logic ---
     let crashCanvas, crashCtx;
     let crashAnimationId;
@@ -936,6 +1043,7 @@ document.addEventListener('DOMContentLoaded', () => {
             crashMultiplierEl.textContent = '1.00x';
             crashCanvas.width = crashCanvas.width; // Clear canvas
             startCrashLoop();
+            checkAddFundsVisibility(BalanceManager.get()); // Check when loop restarts/goes IDLE
         }, 3000);
     }
 
@@ -1250,10 +1358,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNaN(bet) || bet <= 0) { alert('Invalid bet amount'); return; }
         if (bet > BalanceManager.get()) { alert('Insufficient funds'); return; }
 
+        isBettingProcessing = true;
         BalanceManager.update(-bet);
         // updateBalanceDisplay handled by listener
         crashBet = bet;
         isCrashBetPlaced = true;
+        isBettingProcessing = false;
         updateCrashUI();
     }
 
@@ -1405,12 +1515,14 @@ document.addEventListener('DOMContentLoaded', () => {
         minesCount = parseInt(minesCountSelect.value);
 
         // Deduct Balance
+        isBettingProcessing = true;
         BalanceManager.update(-bet);
         // updateBalanceDisplay handled by listener
 
         // Setup State
         minesBet = bet;
         minesState = 'ACTIVE';
+        isBettingProcessing = false;
         minesSafePicks = 0;
         minesMultiplier = 1.00;
         minesGrid = new Array(MINES_GRID_SIZE).fill(null).map(() => ({ isMine: false, revealed: false }));
@@ -1467,6 +1579,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Enable Restart immediately
             enableMinesRestart();
+            checkAddFundsVisibility(BalanceManager.get()); // Check on Bust
 
         } else {
             // SAFE
@@ -1569,6 +1682,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Enable Restart immediately
         enableMinesRestart();
+        checkAddFundsVisibility(BalanceManager.get()); // Check on Win
     }
 
     function enableMinesRestart() {
@@ -1891,10 +2005,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Deduct Balance
+        isBettingProcessing = true;
         BalanceManager.update(-bet);
         // updateBalanceDisplay handled by listener
 
         isRollingDice = true;
+        isBettingProcessing = false;
         diceActionBtn.disabled = true;
 
         // Reset Visuals
@@ -2006,6 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             isRollingDice = false;
             diceActionBtn.disabled = false;
+            checkAddFundsVisibility(BalanceManager.get()); // Check after roll
         }
     }
 
@@ -2263,12 +2380,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNaN(bet) || bet <= 0) { showNotification('Invalid Bet', 'error'); return; }
         if (bet > balance) { showNotification('Insufficient Funds', 'error'); return; }
 
+        isBettingProcessing = true;
         BalanceManager.update(-bet);
         updateBalanceDisplay(); // Immediate update
 
         if (window.Tone && Tone.context.state !== 'running') Tone.start();
 
         isWheelSpinning = true;
+        isBettingProcessing = false;
         wheelSpinBtn.disabled = true;
         wheelVelocity = 15 + Math.random() * 15; // 15-30 rad/s
     }
@@ -2350,6 +2469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         addWheelHistory(winSeg.multiplier, profit);
+        checkAddFundsVisibility(BalanceManager.get()); // Check after spin
     }
 
     function drawWheel() {
@@ -2536,4 +2656,15 @@ document.addEventListener('DOMContentLoaded', () => {
         wheelHistoryList.insertBefore(item, wheelHistoryList.firstChild);
         if (wheelHistoryList.children.length > 20) wheelHistoryList.lastElementChild.remove();
     }
+
+    // --- Final Initialization & Balance Sync ---
+    // Moved to end to ensure all game state variables are defined
+    BalanceManager.subscribe(newBal => {
+        balanceEl.textContent = newBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        checkAddFundsVisibility(newBal);
+    });
+
+    const currentBal = BalanceManager.get();
+    balanceEl.textContent = currentBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    checkAddFundsVisibility(currentBal);
 });
